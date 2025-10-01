@@ -1,37 +1,39 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
+
 public class playermov : MonoBehaviour
 {
     private Rigidbody rb;
-    
-    private float movementX;
-    private float movementY;
-    public float speed = 1;
+
+    private Vector2 moveInput; // <-- guardamos el input completo
+    public float speed = 5f;
     public float jumpForce = 5f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    private float defaultSpeed;
+    private Coroutine boostCoroutine;
+
+    public float lerpFactor = 0.1f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        defaultSpeed = speed;
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        Vector3 movement = new Vector3(movementX, 0.0f, movementY);
-        rb.AddForce(movement * speed);
-
+        Vector3 targetVelocity = new Vector3(moveInput.x * speed, rb.linearVelocity.y, moveInput.y * speed);
+        rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, targetVelocity, lerpFactor);
     }
+
     private void OnMove(InputValue movementValue)
     {
-        Vector2 movementVector = movementValue.Get<Vector2>();
-
-        movementX = movementVector.x;
-        movementY = movementVector.y;
+        moveInput = movementValue.Get<Vector2>(); // <-- siempre guarda el input mÃ¡s reciente
     }
 
     private void OnJump(InputValue value)
     {
-        // Solo saltar si se presiona el botón y está en el suelo
         if (value.isPressed && IsGrounded())
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
@@ -40,8 +42,23 @@ public class playermov : MonoBehaviour
 
     private bool IsGrounded()
     {
-        // Usamos un raycast hacia abajo para detectar si estamos tocando el suelo
         return Physics.Raycast(transform.position, Vector3.down, 1.1f);
     }
 
+    // ðŸ‘‰ llamado desde el MaizPicante
+    public void ActivarBoost(float boostAmount, float duration)
+    {
+        if (boostCoroutine != null)
+            StopCoroutine(boostCoroutine);
+
+        boostCoroutine = StartCoroutine(BoostCoroutine(boostAmount, duration));
+    }
+
+    private IEnumerator BoostCoroutine(float boostAmount, float duration)
+    {
+        speed = defaultSpeed * boostAmount;
+        yield return new WaitForSeconds(duration);
+        speed = defaultSpeed;
+        boostCoroutine = null;
+    }
 }
