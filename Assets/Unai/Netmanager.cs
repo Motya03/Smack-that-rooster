@@ -1,13 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
-
-public class NetworkManager : MonoBehaviour
+public class Netmanager : MonoBehaviour
 {
     public Button serverBtn;
     public Button hostBtn;
     public Button clientBtn;
-
 
     private void Awake()
     {
@@ -24,6 +22,4 @@ public class NetworkManager : MonoBehaviour
             NetworkManager.Singleton.StartClient();
         });
     }
-
-
 }
