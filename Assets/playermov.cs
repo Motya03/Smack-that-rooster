@@ -1,8 +1,10 @@
+using System.Collections;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections;
+using Unity.Netcode;
 
-public class playermov : MonoBehaviour
+public class playermov : NetworkBehaviour
 {
     private Rigidbody rb;
 
@@ -23,6 +25,7 @@ public class playermov : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!IsOwner) return;
         Vector3 targetVelocity = new Vector3(moveInput.x * speed, rb.linearVelocity.y, moveInput.y * speed);
         rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, targetVelocity, lerpFactor);
     }
