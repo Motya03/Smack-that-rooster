@@ -9,6 +9,7 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float smoothTime = 0.05f;
     private float _currentVelocity;
+    private float _gravity = -9.81f;
 
 
     private void Awake()
