@@ -75,7 +75,7 @@ public class PlayerScriptExample : NetworkBehaviour
     }
     private void AttackPatada()
     {
-        //transicion a idle 
+        //transicion a idle al terminar la animacion
     }
     private void DashFront()
     {
