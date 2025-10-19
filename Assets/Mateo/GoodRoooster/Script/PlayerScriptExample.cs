@@ -140,7 +140,7 @@ public class PlayerScriptExample : NetworkBehaviour
     private void Idle()
     {
         myAnimator.SetBool("RUN", false);
-        myAnimator.SetBool("JUMP", false);
+       
 
         if (isAttacking) SetState(States.AttackPatada);
         else if (isJumpPressed && isGrounded) SetState(States.Jump);
@@ -169,15 +169,16 @@ public class PlayerScriptExample : NetworkBehaviour
         if (isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-            myAnimator.SetBool("JUMP", true);
+            myAnimator.SetTrigger("JUMP1");
+
+            SetState(States.Idle);
+            ResetInputs();
         }
 
-        if (isGrounded && velocity.y < 0)
-        {
-            myAnimator.SetBool("JUMP", false);
-            SetState(States.Idle);
-        }
+      
+       
     }
+
 
     private void AttackPatada()
     {
