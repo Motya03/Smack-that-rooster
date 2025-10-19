@@ -17,7 +17,7 @@ public class PlayerScriptExample : NetworkBehaviour
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float gravity = -9.81f;
-    public float jumpForce = 5f;
+    public float jumpForce = 0.1f;
     public float airControl = 0.2f;
     public float smoothTime = 0.1f;
 
