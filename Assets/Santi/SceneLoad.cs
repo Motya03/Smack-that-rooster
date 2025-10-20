@@ -1,18 +1,11 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneLoad : MonoBehaviour
+public class MainMenuController : MonoBehaviour
 {
-    public void LoadScene(string SceneLocal)
+    public void CambiarEscena(string nombreS)
     {
-        SceneManager.LoadScene(SceneLocal);
-        Debug.Log("Cargando escena: " + SceneLocal);
-    }
-
-    // Este método cierra el juego
-    public void QuitGame()
-    {
-        Application.Quit();
-        Debug.Log("Saliendo del juego...");
+        Debug.Log("Se llamó a CambiarEscena con: " + nombreS);
+        SceneManager.LoadScene(nombreS);
     }
 }
