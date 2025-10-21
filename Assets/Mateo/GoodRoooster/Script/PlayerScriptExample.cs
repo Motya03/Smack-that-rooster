@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
+using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerScriptExample : NetworkBehaviour
 {
@@ -12,7 +13,7 @@ public class PlayerScriptExample : NetworkBehaviour
     private Vector3 direction;
     private Vector3 velocity;
     private Vector3 airMomentum;
-    private bool isGrounded;
+   [SerializeField] private bool isGrounded;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -30,7 +31,7 @@ public class PlayerScriptExample : NetworkBehaviour
     private bool isJumpPressed;
     private bool dashFrontPressed;
     private bool dashBackPressed;
-
+    private bool canReceiveInput = true;
     public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead }
     public States mystate;
 
@@ -108,30 +109,35 @@ public class PlayerScriptExample : NetworkBehaviour
     // --- INPUTS DEL NEW INPUT SYSTEM ---
     private void OnMove(InputValue value)
     {
+        if (!canReceiveInput) return;
         moveInput = value.Get<Vector2>();
         isMoving = moveInput.magnitude > 0.1f;
     }
 
     private void OnJump(InputValue value)
     {
+        if (!canReceiveInput) return;
         if (value.isPressed)
             isJumpPressed = true;
     }
 
     private void OnAttack(InputValue value)
     {
+        if (!canReceiveInput) return;
         if (value.isPressed)
             isAttacking = true;
     }
 
     private void OnDashFront(InputValue value)
     {
+        if (!canReceiveInput) return;
         if (value.isPressed)
             dashFrontPressed = true;
     }
 
     private void OnDashBack(InputValue value)
     {
+        if (!canReceiveInput) return;
         if (value.isPressed)
             dashBackPressed = true;
     }
@@ -139,10 +145,17 @@ public class PlayerScriptExample : NetworkBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
+        
         myAnimator.SetBool("RUN", false);
+        myAnimator.SetTrigger("JumpEnded");
        
 
-        if (isAttacking) SetState(States.AttackPatada);
+        if (isAttacking)
+        {
+            SetState(States.AttackPatada);
+            
+        }
+            
         else if (isJumpPressed && isGrounded) SetState(States.Jump);
         else if (isMoving) SetState(States.Run);
         else if (dashFrontPressed) SetState(States.DashFront);
@@ -168,8 +181,9 @@ public class PlayerScriptExample : NetworkBehaviour
     {
         if (isGrounded)
         {
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             myAnimator.SetTrigger("JUMP1");
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+            
 
             SetState(States.Idle);
             ResetInputs();
@@ -182,8 +196,20 @@ public class PlayerScriptExample : NetworkBehaviour
 
     private void AttackPatada()
     {
-        myAnimator.SetTrigger("Attack");
-        StartCoroutine(ReturnToIdleAfterAnimation("Attack"));
+        
+        myAnimator.SetTrigger("ATTACK");
+        
+        StartCoroutine(MoveNull());
+        ResetInputs();
+        SetState(States.Idle); 
+        
+    }
+    IEnumerator MoveNull()
+    {
+        moveSpeed *= 0f;
+        direction = Vector3.zero;
+        yield return new WaitForSeconds(0.2f);
+        moveSpeed = defaultSpeed;
     }
 
     private void DashFront()
@@ -255,4 +281,5 @@ public class PlayerScriptExample : NetworkBehaviour
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
     }
+    
 }
