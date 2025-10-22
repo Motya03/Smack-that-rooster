@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1091511924055895398}
   - component: {fileID: -8519208909735370980}
   m_Layer: 0
-  m_Name: PowerMaizPicante
+  m_Name: PowerMaizMultiplayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

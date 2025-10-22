@@ -1788,11 +1788,10 @@ GameObject:
   - component: {fileID: -1661343873495578123}
   - component: {fileID: -2456176779140336203}
   - component: {fileID: 3556604994011322551}
-  - component: {fileID: -5808693415177507383}
   - component: {fileID: 138450085535888484}
   - component: {fileID: 3608453763287471967}
   m_Layer: 0
-  m_Name: GalloDone2
+  m_Name: GalloMultiplayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1903,7 +1902,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 659007011
+  GlobalObjectIdHash: 2053977852
   InScenePlacedSourceGlobalObjectIdHash: 2053977852
   DeferredDespawnTick: 0
   Ownership: 1
@@ -2000,26 +1999,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1.08, z: 0.04}
---- !u!114 &-5808693415177507383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7525558617848232785}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d8e96dd6fbec434781acd0c2ef837a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed: 4.5
-  jumpForce: 8
-  gravity: -20
-  smoothTime: 0.15
-  airControl: 0.7
-  controller: {fileID: 3556604994011322551}
-  model: {fileID: 0}
 --- !u!114 &138450085535888484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2033,7 +2012,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed: 1.13
+  isGrounded: 0
+  moveSpeed: 3
   gravity: -9.81
   jumpForce: 1
   airControl: 0.71

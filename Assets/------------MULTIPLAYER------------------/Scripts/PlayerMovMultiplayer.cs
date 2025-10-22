@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using Unity.Netcode;
 using static UnityEngine.Rendering.DebugUI;
 
-public class PlayerScriptExample : NetworkBehaviour
+public class PlayerMovMultiplayer : NetworkBehaviour
 {
     private CharacterController controller;
     private Animator myAnimator;
