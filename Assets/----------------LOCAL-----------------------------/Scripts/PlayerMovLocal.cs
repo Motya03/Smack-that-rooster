@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.Rendering.DebugUI;
 
 
 public class PlayerMovLocal : MonoBehaviour
@@ -8,6 +9,7 @@ public class PlayerMovLocal : MonoBehaviour
     private CharacterController controller;
     private Animator myAnimator;
 
+    private Vector2 lastMoveInput;
     private Vector2 moveInput;
     private Vector3 direction;
     private Vector3 velocity;
@@ -31,6 +33,9 @@ public class PlayerMovLocal : MonoBehaviour
     private bool dashFrontPressed;
     private bool dashBackPressed;
     private bool canReceiveInput = true;
+
+
+    
     public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead }
     public States mystate;
 
@@ -108,8 +113,12 @@ public class PlayerMovLocal : MonoBehaviour
     // --- INPUTS DEL NEW INPUT SYSTEM ---
     private void OnMove(InputValue value)
     {
+        Vector2 currentInput = value.Get<Vector2>();
+        lastMoveInput = currentInput;
+
         if (!canReceiveInput) return;
-        moveInput = value.Get<Vector2>();
+
+        moveInput = currentInput;
         isMoving = moveInput.magnitude > 0.1f;
     }
 
@@ -144,13 +153,14 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-
+        
         myAnimator.SetBool("RUN", false);
+        
         // myAnimator.SetTrigger("JumpEnded");
         // myAnimator.CrossFade("IDLE", 0.1f);
         //myAnimator.Play("IDLE");
 
-        
+
 
 
         if (isAttacking)
@@ -165,6 +175,7 @@ public class PlayerMovLocal : MonoBehaviour
         else if (dashBackPressed) SetState(States.DashBack);
 
         ResetInputs();
+        
     }
 
     private void Run()
@@ -184,21 +195,30 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Jump()
     {
-        if (isGrounded)
+        if (isGrounded )
         {
-            // myAnimator.SetTrigger("JUMP1");
-            
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-            StartCoroutine(PlayAndWaitForAnimation(myAnimator, "Jump"));
-
-
-
-           
+            // myAnimator.SetTrigger("JUMP1");    
+            myAnimator.Play("Jump");
             ResetInputs();
+            canReceiveInput = false;
+            isMoving = false;
+            moveInput = Vector2.zero;
+            direction = Vector3.zero;
+
+            SetState(States.Idle);
+
         }
+      
 
       
        
+    }
+    private void CanReceive()
+    {
+        canReceiveInput = true;
+        moveInput = lastMoveInput;
+        isMoving = moveInput.magnitude > 0.1f;
     }
 
 
@@ -207,21 +227,22 @@ public class PlayerMovLocal : MonoBehaviour
 
         //myAnimator.SetTrigger("ATTACK");
         //myAnimator.Play("AttackPatada");
-        StartCoroutine(PlayAndWaitForAnimation(myAnimator, "AttackPatada"));
-
-
-        StartCoroutine(MoveNull());
-        ResetInputs();
-         
-        
-    }
-    IEnumerator MoveNull()
-    {
-        moveSpeed *= 0f;
+        myAnimator.Play("AttackPatada");
+        //ResetInputs();
+        Debug.Log("Loh");
+        canReceiveInput = false;
+        isMoving = false;
+        moveInput = Vector2.zero;
         direction = Vector3.zero;
-        yield return new WaitForSeconds(2f);
-        moveSpeed = defaultSpeed;
+        
+        //ReturnToIdleAfterAnimation("AttackPatada");
+        SetState(States.Idle);
+
+
+
+
     }
+
 
     private void DashFront()
     {
@@ -251,6 +272,7 @@ public class PlayerMovLocal : MonoBehaviour
     private void SetState(States newState)
     {
         mystate = newState;
+        Debug.Log("Estado cambiado a: " + mystate);
     }
 
     private void ResetInputs()
@@ -266,6 +288,7 @@ public class PlayerMovLocal : MonoBehaviour
         yield return new WaitForSeconds(GetAnimationLength(animName));
         SetState(States.Idle);
     }
+   
     private IEnumerator PlayAndWaitForAnimation(Animator animator, string clipName)
     {
         // Play the animation
@@ -277,7 +300,9 @@ public class PlayerMovLocal : MonoBehaviour
             yield return null;
 
         Debug.Log($"{clipName} animation finished!");
+      
         SetState(States.Idle);
+        ResetInputs();
     }
 
 
