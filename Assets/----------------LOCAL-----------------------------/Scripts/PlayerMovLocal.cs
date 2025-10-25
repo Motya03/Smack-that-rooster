@@ -144,10 +144,14 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-        
+
         myAnimator.SetBool("RUN", false);
-        myAnimator.SetTrigger("JumpEnded");
-       
+        // myAnimator.SetTrigger("JumpEnded");
+        // myAnimator.CrossFade("IDLE", 0.1f);
+        //myAnimator.Play("IDLE");
+
+        
+
 
         if (isAttacking)
         {
@@ -166,6 +170,8 @@ public class PlayerMovLocal : MonoBehaviour
     private void Run()
     {
         myAnimator.SetBool("RUN", true);
+        
+        myAnimator.Play("RUN");
 
         if (!isMoving) SetState(States.Idle);
         else if (isAttacking) SetState(States.AttackPatada);
@@ -180,11 +186,14 @@ public class PlayerMovLocal : MonoBehaviour
     {
         if (isGrounded)
         {
-            myAnimator.SetTrigger("JUMP1");
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+            // myAnimator.SetTrigger("JUMP1");
             
+            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+            StartCoroutine(PlayAndWaitForAnimation(myAnimator, "Jump"));
 
-            SetState(States.Idle);
+
+
+           
             ResetInputs();
         }
 
@@ -195,31 +204,36 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void AttackPatada()
     {
-        
-        myAnimator.SetTrigger("ATTACK");
-        
+
+        //myAnimator.SetTrigger("ATTACK");
+        //myAnimator.Play("AttackPatada");
+        StartCoroutine(PlayAndWaitForAnimation(myAnimator, "AttackPatada"));
+
+
         StartCoroutine(MoveNull());
         ResetInputs();
-        SetState(States.Idle); 
+         
         
     }
     IEnumerator MoveNull()
     {
         moveSpeed *= 0f;
         direction = Vector3.zero;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(2f);
         moveSpeed = defaultSpeed;
     }
 
     private void DashFront()
     {
-        myAnimator.SetTrigger("DashFront");
+       // myAnimator.SetTrigger("DashFront");
+        myAnimator.Play("DashFront");
         StartCoroutine(ReturnToIdleAfterAnimation("DashFront"));
     }
 
     private void DashBack()
     {
-        myAnimator.SetTrigger("DashBack");
+        //myAnimator.SetTrigger("DashBack");
+        myAnimator.Play("DashBack");
         StartCoroutine(ReturnToIdleAfterAnimation("DashBack"));
     }
 
@@ -246,12 +260,27 @@ public class PlayerMovLocal : MonoBehaviour
         dashFrontPressed = false;
         dashBackPressed = false;
     }
-
+  
     private IEnumerator ReturnToIdleAfterAnimation(string animName)
     {
         yield return new WaitForSeconds(GetAnimationLength(animName));
         SetState(States.Idle);
     }
+    private IEnumerator PlayAndWaitForAnimation(Animator animator, string clipName)
+    {
+        // Play the animation
+        animator.Play(clipName);
+
+
+        // Wait until the animation has finished
+        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f)
+            yield return null;
+
+        Debug.Log($"{clipName} animation finished!");
+        SetState(States.Idle);
+    }
+
+
 
     private float GetAnimationLength(string animName)
     {

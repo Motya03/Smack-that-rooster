@@ -2073,7 +2073,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1.08, z: 0.04}
+  m_Center: {x: 0, y: 0.84, z: 0.04}
 --- !u!95 &-1943637221246495598
 Animator:
   serializedVersion: 7
@@ -2109,9 +2109,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isGrounded: 0
-  moveSpeed: 3
+  moveSpeed: 1.5
   gravity: -9.81
-  jumpForce: 1
+  jumpForce: 0.5
   airControl: 0.71
   smoothTime: 0.15
   mystate: 0
