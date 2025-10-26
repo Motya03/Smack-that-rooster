@@ -30,13 +30,14 @@ public class PlayerMovLocal : MonoBehaviour
     private bool isMoving;
     private bool isAttacking;
     private bool isJumpPressed;
+    private bool isCrouchPressed;
     private bool dashFrontPressed;
     private bool dashBackPressed;
     private bool canReceiveInput = true;
 
 
     
-    public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead }
+    public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow }
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
@@ -102,11 +103,14 @@ public class PlayerMovLocal : MonoBehaviour
             case States.Idle: Idle(); break;
             case States.Run: Run(); break;
             case States.AttackPatada: AttackPatada(); break;
+            case States.AttackLow: AttackLow(); break;
             case States.Jump: Jump(); break;
             case States.DashFront: DashFront(); break;
             case States.DashBack: DashBack(); break;
             case States.Stunned: Stunned(); break;
             case States.Dead: Dead(); break;
+            case States.Crouch: Crouch(); break;
+
         }
     }
 
@@ -121,6 +125,12 @@ public class PlayerMovLocal : MonoBehaviour
         moveInput = currentInput;
         isMoving = moveInput.magnitude > 0.1f;
     }
+    private void OnCrouch(InputValue value)
+    {
+        if (!canReceiveInput) return;
+        if (value.isPressed)
+            isCrouchPressed = true;
+    }
 
     private void OnJump(InputValue value)
     {
@@ -130,6 +140,12 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
     private void OnAttack(InputValue value)
+    {
+        if (!canReceiveInput) return;
+        if (value.isPressed)
+            isAttacking = true;
+    }
+    private void OnAttackLow(InputValue value)
     {
         if (!canReceiveInput) return;
         if (value.isPressed)
@@ -173,8 +189,9 @@ public class PlayerMovLocal : MonoBehaviour
         else if (isMoving) SetState(States.Run);
         else if (dashFrontPressed) SetState(States.DashFront);
         else if (dashBackPressed) SetState(States.DashBack);
+        else if (isCrouchPressed) SetState(States.Crouch);
 
-        ResetInputs();
+            ResetInputs();
         
     }
 
@@ -189,6 +206,7 @@ public class PlayerMovLocal : MonoBehaviour
         else if (isJumpPressed && isGrounded) SetState(States.Jump);
         else if (dashFrontPressed) SetState(States.DashFront);
         else if (dashBackPressed) SetState(States.DashBack);
+        else if (isCrouchPressed) SetState(States.Crouch);
 
         ResetInputs();
     }
@@ -214,6 +232,25 @@ public class PlayerMovLocal : MonoBehaviour
       
        
     }
+    private void Crouch ()
+    {
+        Debug.Log("nyam");
+        if (isGrounded)
+        {
+                
+            myAnimator.Play("Crouch");
+            ResetInputs();
+            canReceiveInput = false;
+            isMoving = false;
+            moveInput = Vector2.zero;
+            direction = Vector3.zero;
+
+            SetState(States.Idle);
+            ResetInputs();
+
+        }
+    }
+  
     private void CanReceive()
     {
         canReceiveInput = true;
@@ -277,6 +314,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void ResetInputs()
     {
+        isCrouchPressed = false;
         isAttacking = false;
         isJumpPressed = false;
         dashFrontPressed = false;
