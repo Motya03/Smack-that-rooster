@@ -62,5 +62,6 @@ public class PlayerSpawn : MonoBehaviour
         usedIndexes.Add(randomIndex);
         return randomIndex;
     }
+
 }
 
