@@ -95,6 +95,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DashFront",
+                    "type": "Button",
+                    "id": "5125730a-a35c-474c-8576-e2365eca4846",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DashBack",
+                    "type": "Button",
+                    "id": "42e0b463-4765-4f93-bcfd-a611d00c76bd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -447,6 +465,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "AttackLow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "97a7b51a-6d01-4856-93f8-2c8c440694af",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DashFront",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1d74c806-fc01-4b74-8426-f4dbb2167ba3",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DashBack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -89,11 +89,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: Jump
+      name: DashFront
       takeName: rig|rigAction
       internalID: 3374748389425109202
-      firstFrame: 611
-      lastFrame: 665
+      firstFrame: 560
+      lastFrame: 591
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

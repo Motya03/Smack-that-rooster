@@ -23,12 +23,21 @@ public class PlayerMovLocal : MonoBehaviour
     public float airControl = 0.2f;
     public float smoothTime = 0.1f;
 
+    [Header("Dash Settings")]
+    public float dashSpeed = 2f;
+    public float dashDuration = 0.3f;
+    public float dashCooldown = 1f;
+    private bool isDashing = false;
+    private bool canDash = true;
+
+
     private float currentVelocity;
     private float defaultSpeed;
     private Coroutine boostCoroutine;
 
     private bool isMoving;
     private bool isAttacking;
+    private bool isAttackingLow;
     private bool isJumpPressed;
     private bool isCrouchPressed;
     private bool dashFrontPressed;
@@ -149,7 +158,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
         if (!canReceiveInput) return;
         if (value.isPressed)
-            isAttacking = true;
+            isAttackingLow = true;
     }
 
     private void OnDashFront(InputValue value)
@@ -190,6 +199,8 @@ public class PlayerMovLocal : MonoBehaviour
         else if (dashFrontPressed) SetState(States.DashFront);
         else if (dashBackPressed) SetState(States.DashBack);
         else if (isCrouchPressed) SetState(States.Crouch);
+        else if (isAttackingLow) SetState(States.AttackLow);
+        
 
             ResetInputs();
         
@@ -203,6 +214,7 @@ public class PlayerMovLocal : MonoBehaviour
 
         if (!isMoving) SetState(States.Idle);
         else if (isAttacking) SetState(States.AttackPatada);
+        else if (isAttackingLow) SetState(States.AttackLow);
         else if (isJumpPressed && isGrounded) SetState(States.Jump);
         else if (dashFrontPressed) SetState(States.DashFront);
         else if (dashBackPressed) SetState(States.DashBack);
@@ -219,11 +231,7 @@ public class PlayerMovLocal : MonoBehaviour
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
             ResetInputs();
-            canReceiveInput = false;
-            isMoving = false;
-            moveInput = Vector2.zero;
-            direction = Vector3.zero;
-
+            StopMove();
             SetState(States.Idle);
 
         }
@@ -239,12 +247,7 @@ public class PlayerMovLocal : MonoBehaviour
         {
                 
             myAnimator.Play("Crouch");
-            ResetInputs();
-            canReceiveInput = false;
-            isMoving = false;
-            moveInput = Vector2.zero;
-            direction = Vector3.zero;
-
+            StopMove();
             SetState(States.Idle);
             ResetInputs();
 
@@ -261,39 +264,48 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void AttackPatada()
     {
-
-        //myAnimator.SetTrigger("ATTACK");
-        //myAnimator.Play("AttackPatada");
         myAnimator.Play("AttackPatada");
-        //ResetInputs();
         Debug.Log("Loh");
+        StopMove();
+        SetState(States.Idle);
+
+    }
+    private void AttackLow()
+    {
+        myAnimator.Play("AttackLow");
+        Debug.Log("Loh");
+        StopMove();
+        SetState(States.Idle);
+    }
+
+    private void StopMove()
+    {
         canReceiveInput = false;
         isMoving = false;
         moveInput = Vector2.zero;
         direction = Vector3.zero;
-        
-        //ReturnToIdleAfterAnimation("AttackPatada");
-        SetState(States.Idle);
-
-
-
-
     }
-
 
     private void DashFront()
     {
-       // myAnimator.SetTrigger("DashFront");
-        myAnimator.Play("DashFront");
-        StartCoroutine(ReturnToIdleAfterAnimation("DashFront"));
+        if (!isDashing && canDash)
+        {
+            StopMove();
+            StartCoroutine(PerformDash(transform.forward, "DashFront"));
+        }
+            
     }
 
     private void DashBack()
     {
-        //myAnimator.SetTrigger("DashBack");
-        myAnimator.Play("DashBack");
-        StartCoroutine(ReturnToIdleAfterAnimation("DashBack"));
+        if (!isDashing && canDash)
+        {
+            StopMove();
+            StartCoroutine(PerformDash(-transform.forward, "DashBack"));
+        }
+            
     }
+
 
     private void Stunned()
     {
@@ -319,8 +331,56 @@ public class PlayerMovLocal : MonoBehaviour
         isJumpPressed = false;
         dashFrontPressed = false;
         dashBackPressed = false;
+        isAttackingLow = false;
     }
-  
+
+    private IEnumerator PerformDash(Vector3 dashDirection, string animName)
+    {
+        isDashing = true;
+        canDash = false;
+
+        myAnimator.Play(animName);
+
+        float dashDistance = 1f;        // Distancia total en metros
+        float dashTime = 0.35f;         // Duración total del dash
+        float elapsedTime = 0f;
+
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + dashDirection.normalized * dashDistance;
+
+        // Desactivamos gravedad durante el dash
+        float originalGravity = gravity;
+        gravity = 0f;
+
+        while (elapsedTime < dashTime)
+        {
+            float t = elapsedTime / dashTime;
+
+            // Curva de suavizado (ease-in / ease-out)
+            float speedFactor = Mathf.SmoothStep(0f, 1f, t);
+
+            // Mover de forma progresiva
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, speedFactor);
+            controller.Move(newPos - transform.position);
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Restaurar gravedad
+        gravity = originalGravity;
+
+        // Pequeño cooldown
+      //  yield return new WaitForSeconds(dashCooldown);
+
+        isDashing = false;
+        canDash = true;
+
+        SetState(States.Idle);
+        ResetInputs();
+    }
+
+
     private IEnumerator ReturnToIdleAfterAnimation(string animName)
     {
         yield return new WaitForSeconds(GetAnimationLength(animName));
