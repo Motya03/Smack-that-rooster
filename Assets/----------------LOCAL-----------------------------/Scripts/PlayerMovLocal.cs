@@ -14,7 +14,7 @@ public class PlayerMovLocal : MonoBehaviour
     private Vector3 direction;
     private Vector3 velocity;
     private Vector3 airMomentum;
-   [SerializeField] private bool isGrounded;
+    [SerializeField] private bool isGrounded;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -45,23 +45,40 @@ public class PlayerMovLocal : MonoBehaviour
     private bool canReceiveInput = true;
 
 
-    
+
     public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow }
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
 
+    [Header("Vida y Daño")]
+    public int vidas = 3;
+    private bool puedeSerGolpeado = true;
+
+    [Header("Hitbox de Ataque")]
+    public GameObject kickHitbox; // Asignar el objeto hijo con collider
+    private Hitbox hitboxScript;
     void Start()
     {
         controller = GetComponent<CharacterController>();
         myAnimator = GetComponent<Animator>();
         defaultSpeed = moveSpeed;
         mystate = States.Idle;
+
+        if (kickHitbox != null)
+        {
+            hitboxScript = kickHitbox.GetComponent<Hitbox>();
+            if (hitboxScript != null) hitboxScript.owner = gameObject; // <-- aquí ya es la instancia
+            kickHitbox.SetActive(false);
+        }
+
+
     }
+
 
     private void Update()
     {
-        
+
 
         // --- Verificar si está tocando el suelo ---
         isGrounded = controller.isGrounded;
@@ -178,9 +195,9 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-        
+
         myAnimator.SetBool("RUN", false);
-        
+
         // myAnimator.SetTrigger("JumpEnded");
         // myAnimator.CrossFade("IDLE", 0.1f);
         //myAnimator.Play("IDLE");
@@ -191,25 +208,25 @@ public class PlayerMovLocal : MonoBehaviour
         if (isAttacking)
         {
             SetState(States.AttackPatada);
-            
+
         }
-            
+
         else if (isJumpPressed && isGrounded) SetState(States.Jump);
         else if (isMoving) SetState(States.Run);
         else if (dashFrontPressed) SetState(States.DashFront);
         else if (dashBackPressed) SetState(States.DashBack);
         else if (isCrouchPressed) SetState(States.Crouch);
         else if (isAttackingLow) SetState(States.AttackLow);
-        
 
-            ResetInputs();
-        
+
+        ResetInputs();
+
     }
 
     private void Run()
     {
         myAnimator.SetBool("RUN", true);
-        
+
         myAnimator.Play("RUN");
 
         if (!isMoving) SetState(States.Idle);
@@ -225,7 +242,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Jump()
     {
-        if (isGrounded )
+        if (isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             // myAnimator.SetTrigger("JUMP1");    
@@ -235,17 +252,17 @@ public class PlayerMovLocal : MonoBehaviour
             SetState(States.Idle);
 
         }
-      
 
-      
-       
+
+
+
     }
-    private void Crouch ()
+    private void Crouch()
     {
         Debug.Log("nyam");
         if (isGrounded)
         {
-                
+
             myAnimator.Play("Crouch");
             StopMove();
             SetState(States.Idle);
@@ -253,7 +270,7 @@ public class PlayerMovLocal : MonoBehaviour
 
         }
     }
-  
+
     private void CanReceive()
     {
         canReceiveInput = true;
@@ -265,11 +282,17 @@ public class PlayerMovLocal : MonoBehaviour
     private void AttackPatada()
     {
         myAnimator.Play("AttackPatada");
-        Debug.Log("Loh");
         StopMove();
         SetState(States.Idle);
 
+        Collider[] hits = Physics.OverlapBox(kickHitbox.transform.position, new Vector3(1, 1, 1) / 2f);
+        foreach (Collider hit in hits)
+        {
+            if (hit.CompareTag("Player") && hit.gameObject != this.gameObject)
+                hit.GetComponent<PlayerMovLocal>()?.TakeHit();
+        }
     }
+
     private void AttackLow()
     {
         myAnimator.Play("AttackLow");
@@ -293,7 +316,7 @@ public class PlayerMovLocal : MonoBehaviour
             StopMove();
             StartCoroutine(PerformDash(transform.forward, "DashFront"));
         }
-            
+
     }
 
     private void DashBack()
@@ -303,18 +326,27 @@ public class PlayerMovLocal : MonoBehaviour
             StopMove();
             StartCoroutine(PerformDash(-transform.forward, "DashBack"));
         }
-            
+
     }
 
-
+    public void TakeStun()
+    {
+        
+        SetState(States.Stunned);
+    }
     private void Stunned()
     {
-        myAnimator.Play("Stun");
+        myAnimator.Play("Stunned");
+        Debug.Log("Bot");
+        StopMove();
+        SetState(States.Idle);
     }
 
     private void Dead()
     {
-        myAnimator.Play("Die");
+        myAnimator.Play("Dead");
+        Debug.Log("Bot");
+        StopMove();
     }
 
     // --- UTILIDADES ---
@@ -371,7 +403,7 @@ public class PlayerMovLocal : MonoBehaviour
         gravity = originalGravity;
 
         // Pequeño cooldown
-      //  yield return new WaitForSeconds(dashCooldown);
+        //  yield return new WaitForSeconds(dashCooldown);
 
         isDashing = false;
         canDash = true;
@@ -386,7 +418,7 @@ public class PlayerMovLocal : MonoBehaviour
         yield return new WaitForSeconds(GetAnimationLength(animName));
         SetState(States.Idle);
     }
-   
+
     private IEnumerator PlayAndWaitForAnimation(Animator animator, string clipName)
     {
         // Play the animation
@@ -398,7 +430,7 @@ public class PlayerMovLocal : MonoBehaviour
             yield return null;
 
         Debug.Log($"{clipName} animation finished!");
-      
+
         SetState(States.Idle);
         ResetInputs();
     }
@@ -414,6 +446,44 @@ public class PlayerMovLocal : MonoBehaviour
                 return clip.length;
         }
         return 0.5f; // fallback
+    }
+
+    // Activa el hitbox de la patada
+    public void EnableKickHitbox()
+    {
+        if (kickHitbox != null)
+            kickHitbox.SetActive(true);
+    }
+
+    // Desactiva el hitbox de la patada
+    public void DisableKickHitbox()
+    {
+        if (kickHitbox != null)
+            kickHitbox.SetActive(false);
+    }
+
+    public void TakeHit()
+    {
+        
+
+        // Quitar vida
+        vidas--;
+        Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
+
+
+        // Revisar si murió
+        if (vidas <= 0)
+        {
+            SetState(States.Dead); // Ejecuta animación de muerte y desactiva el jugador
+        }
+
+        
+    }
+
+   
+    private void OnDestroy()
+    {
+        Destroy(gameObject);
     }
 
     // --- BOOST TEMPORAL ---
@@ -432,5 +502,8 @@ public class PlayerMovLocal : MonoBehaviour
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
     }
-    
+
 }
+
+
+
