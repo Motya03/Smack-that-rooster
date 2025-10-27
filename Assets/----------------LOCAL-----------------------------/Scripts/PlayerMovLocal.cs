@@ -329,15 +329,24 @@ public class PlayerMovLocal : MonoBehaviour
 
     }
 
-
+    public void TakeStun()
+    {
+        
+        SetState(States.Stunned);
+    }
     private void Stunned()
     {
-        myAnimator.Play("Stun");
+        myAnimator.Play("Stunned");
+        Debug.Log("Bot");
+        StopMove();
+        SetState(States.Idle);
     }
 
     private void Dead()
     {
-        myAnimator.Play("Die");
+        myAnimator.Play("Dead");
+        Debug.Log("Bot");
+        StopMove();
     }
 
     // --- UTILIDADES ---
@@ -455,25 +464,26 @@ public class PlayerMovLocal : MonoBehaviour
 
     public void TakeHit()
     {
-        if (!puedeSerGolpeado) return;
+        
 
         // Quitar vida
         vidas--;
         Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
 
+
         // Revisar si murió
         if (vidas <= 0)
         {
-            Die(); // Ejecuta animación de muerte y desactiva el jugador
+            SetState(States.Dead); // Ejecuta animación de muerte y desactiva el jugador
         }
 
         
     }
 
-    private void Die()
+   
+    private void OnDestroy()
     {
-        myAnimator.Play("Die");
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 
     // --- BOOST TEMPORAL ---

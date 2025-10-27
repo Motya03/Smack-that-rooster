@@ -470,6 +470,17 @@
                 },
                 {
                     "name": "",
+                    "id": "41e7a2fe-1a7a-474d-a48a-29ec627b9744",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AttackLow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "97a7b51a-6d01-4856-93f8-2c8c440694af",
                     "path": "<Keyboard>/e",
                     "interactions": "",
@@ -481,8 +492,30 @@
                 },
                 {
                     "name": "",
+                    "id": "cd20ffa6-96d1-4a42-8a05-0dff5da30124",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DashFront",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "1d74c806-fc01-4b74-8426-f4dbb2167ba3",
                     "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DashBack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cf674d2f-8319-4f55-9754-d3308121d047",
+                    "path": "",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

@@ -11,10 +11,18 @@ public class Hitbox : MonoBehaviour
         if (other.gameObject == owner || other.transform.IsChildOf(owner.transform)) return;
 
         PlayerMovLocal player = other.GetComponent<PlayerMovLocal>();
-        if (player != null)
+        
+        if  ( other.gameObject.CompareTag("Culo"))
         {
             Debug.Log($"{other.name} recibió daño!");
+
             player.TakeHit();
+        }
+         if (other.gameObject.CompareTag("Pecho"))
+        {
+            Debug.Log($"{other.name} recibió daño!");
+
+            player.TakeStun();
         }
     }
 
