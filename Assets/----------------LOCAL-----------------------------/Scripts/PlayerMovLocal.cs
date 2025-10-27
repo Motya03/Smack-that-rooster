@@ -53,7 +53,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     [Header("Vida y Daño")]
     public int vidas = 3;
-    private bool puedeSerGolpeado = true;
+    
 
     [Header("Hitbox de Ataque")]
     public GameObject kickHitbox; // Asignar el objeto hijo con collider
@@ -285,12 +285,7 @@ public class PlayerMovLocal : MonoBehaviour
         StopMove();
         SetState(States.Idle);
 
-        Collider[] hits = Physics.OverlapBox(kickHitbox.transform.position, new Vector3(1, 1, 1) / 2f);
-        foreach (Collider hit in hits)
-        {
-            if (hit.CompareTag("Player") && hit.gameObject != this.gameObject)
-                hit.GetComponent<PlayerMovLocal>()?.TakeHit();
-        }
+    
     }
 
     private void AttackLow()
@@ -345,7 +340,7 @@ public class PlayerMovLocal : MonoBehaviour
     private void Dead()
     {
         myAnimator.Play("Dead");
-        Debug.Log("Bot");
+       
         StopMove();
     }
 
@@ -413,71 +408,17 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
 
-    private IEnumerator ReturnToIdleAfterAnimation(string animName)
-    {
-        yield return new WaitForSeconds(GetAnimationLength(animName));
-        SetState(States.Idle);
-    }
+   
 
-    private IEnumerator PlayAndWaitForAnimation(Animator animator, string clipName)
-    {
-        // Play the animation
-        animator.Play(clipName);
-
-
-        // Wait until the animation has finished
-        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f)
-            yield return null;
-
-        Debug.Log($"{clipName} animation finished!");
-
-        SetState(States.Idle);
-        ResetInputs();
-    }
-
-
-
-    private float GetAnimationLength(string animName)
-    {
-        RuntimeAnimatorController ac = myAnimator.runtimeAnimatorController;
-        foreach (var clip in ac.animationClips)
-        {
-            if (clip.name == animName)
-                return clip.length;
-        }
-        return 0.5f; // fallback
-    }
-
-    // Activa el hitbox de la patada
-    public void EnableKickHitbox()
-    {
-        if (kickHitbox != null)
-            kickHitbox.SetActive(true);
-    }
-
-    // Desactiva el hitbox de la patada
-    public void DisableKickHitbox()
-    {
-        if (kickHitbox != null)
-            kickHitbox.SetActive(false);
-    }
 
     public void TakeHit()
-    {
-        
-
-        // Quitar vida
+    { 
         vidas--;
         Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
-
-
-        // Revisar si murió
         if (vidas <= 0)
         {
-            SetState(States.Dead); // Ejecuta animación de muerte y desactiva el jugador
-        }
-
-        
+            SetState(States.Dead); 
+        }  
     }
 
    

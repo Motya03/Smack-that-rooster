@@ -6,11 +6,12 @@ public class Hitbox : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("noo");
         Debug.Log($"KickHitbox tocó: {other.name}");
 
         if (other.gameObject == owner || other.transform.IsChildOf(owner.transform)) return;
 
-        PlayerMovLocal player = other.GetComponent<PlayerMovLocal>();
+        PlayerMovLocal player = other.GetComponentInParent<PlayerMovLocal>();
         
         if  ( other.gameObject.CompareTag("Culo"))
         {
@@ -20,7 +21,7 @@ public class Hitbox : MonoBehaviour
         }
          if (other.gameObject.CompareTag("Pecho"))
         {
-            Debug.Log($"{other.name} recibió daño!");
+            Debug.Log("Stunned");
 
             player.TakeStun();
         }
