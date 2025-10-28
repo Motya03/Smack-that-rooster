@@ -1,8 +1,7 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
-using TMPro;
+using UnityEngine.UI;
 
 public class TimerLocal : MonoBehaviour
 {
@@ -10,89 +9,51 @@ public class TimerLocal : MonoBehaviour
     [SerializeField] private Text timerText;
 
     [Header("Configuración")]
-    [SerializeField] private float duration = 60f; // segundos
+    [SerializeField] private float duration = 60f;
     [SerializeField] private bool startOnAwake = true;
 
     [Header("Eventos")]
-    [SerializeField] private UnityEvent onFinished;
+    public UnityEvent onFinished;
 
     private float remaining;
-    private Coroutine countdownCoroutine;
     private bool isRunning;
 
-    private void Awake()
+    void Start()
     {
-        remaining = Mathf.Max(0f, duration);
+        remaining = duration;
+        UpdateDisplay();
+        if (startOnAwake) StartCoroutine(Countdown());
     }
 
-    private void Start()
+    private IEnumerator Countdown()
     {
-        UpdateDisplay(remaining);
-        if (startOnAwake) StartTimer();
-    }
-
-    public void StartTimer()
-    {
-        if (isRunning) return;
         isRunning = true;
-        if (countdownCoroutine != null) StopCoroutine(countdownCoroutine);
-        countdownCoroutine = StartCoroutine(CountdownRoutine());
-    }
-
-    public void StopTimer()
-    {
-        if (!isRunning) return;
-        isRunning = false;
-        if (countdownCoroutine != null)
-        {
-            StopCoroutine(countdownCoroutine);
-            countdownCoroutine = null;
-        }
-    }
-
-    public void ResetTimer()
-    {
-        StopTimer();
-        remaining = Mathf.Max(0f, duration);
-        UpdateDisplay(remaining);
-    }
-
-    public void SetDuration(float seconds, bool reset = true)
-    {
-        duration = Mathf.Max(0f, seconds);
-        if (reset) ResetTimer();
-    }
-
-    public bool IsRunning => isRunning;
-    public float RemainingTime => remaining;
-
-    private IEnumerator CountdownRoutine()
-    {
-        while (remaining > 0f && isRunning)
+        while (remaining > 0f)
         {
             remaining -= Time.deltaTime;
-            UpdateDisplay(Mathf.Max(0f, remaining));
+            UpdateDisplay();
             yield return null;
         }
 
         isRunning = false;
-        countdownCoroutine = null;
-        UpdateDisplay(0f);
+        remaining = 0f;
+        UpdateDisplay();
         onFinished?.Invoke();
     }
 
-    private void UpdateDisplay(float seconds)
+    public void ResetTimer()
     {
-        if (timerText == null)
-        {
-            Debug.LogWarning("TimerLocal: timerText no está asignado en el Inspector.");
-            return;
-        }
-        else
-        {
-            int minutes = (int)(seconds / 60f);
-            int secs = (int)(seconds % 60f);
-            timerText.text = string.Format("{0:00}:{1:00}", minutes, secs);
-        }
+        StopAllCoroutines();
+        remaining = duration;
+        UpdateDisplay();
+    }
+
+    private void UpdateDisplay()
+    {
+        if (!timerText) return;
+        int minutes = Mathf.FloorToInt(remaining / 60f);
+        int seconds = Mathf.FloorToInt(remaining % 60f);
+        timerText.text = $"{minutes:00}:{seconds:00}";
     }
 }
+
