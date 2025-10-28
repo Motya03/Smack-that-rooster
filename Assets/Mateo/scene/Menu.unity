@@ -227,10 +227,22 @@ PrefabInstance:
       propertyPath: menuButtonController
       value: 
       objectReference: {fileID: 727743066}
+    - target: {fileID: 8687559332595861083, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: cb5f9ce7b09c0a44497cda2c5c6f9b1f, type: 2}
     - target: {fileID: 8726610833462051959, guid: ab0a09288065a2940ae57dd906555453, type: 3}
       propertyPath: nombreEscena
       value: MultiplayerScene
       objectReference: {fileID: 0}
+    - target: {fileID: 8726610833462051959, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: imagenAnimator1
+      value: 
+      objectReference: {fileID: 8017624306108333280}
+    - target: {fileID: 8726610833462051959, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: imagenAnimator2
+      value: 
+      objectReference: {fileID: 8017624306108333280}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -585,6 +597,7 @@ RectTransform:
   - {fileID: 517305556}
   - {fileID: 8017624306108333275}
   - {fileID: 368571054}
+  - {fileID: 766163262}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -705,6 +718,85 @@ MonoBehaviour:
   keyDown: 0
   maxIndex: 1
   audioSource: {fileID: 727743065}
+--- !u!1 &766163261
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 766163262}
+  - component: {fileID: 766163264}
+  - component: {fileID: 766163263}
+  m_Layer: 5
+  m_Name: Titol
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &766163262
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766163261}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.5397607, y: 0.5397607, z: 0.5397607}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 727743064}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 220, y: 173}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &766163263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766163261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 12800000, guid: 5dd49b3eacc540408c98eee0de38e0f1, type: 3}
+    m_FontSize: 300
+    m_FontStyle: 1
+    m_BestFit: 0
+    m_MinSize: 0
+    m_MaxSize: 300
+    m_Alignment: 1
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: SMack That rooster
+--- !u!222 &766163264
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 766163261}
+  m_CullTransparentMesh: 1
 --- !u!1 &1239755029
 GameObject:
   m_ObjectHideFlags: 0
@@ -837,7 +929,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7bf72881dbfb2be4abd374e6dbfe8668, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 56529771ac34a2b46a55cf4fcdce5eb1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1067,6 +1159,22 @@ PrefabInstance:
       propertyPath: menuButtonController
       value: 
       objectReference: {fileID: 727743066}
+    - target: {fileID: 2593730903610623991, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: m_Size.x
+      value: 25.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2593730903610623991, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: m_Size.y
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 2593730903610623991, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0ca6c38ea198eb2458ec179873a720ac, type: 3}
+    - target: {fileID: 2593730903610623991, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3307011191228393155, guid: ab0a09288065a2940ae57dd906555453, type: 3}
       propertyPath: m_Text
       value: Local
@@ -1159,6 +1267,10 @@ PrefabInstance:
       propertyPath: menuButtonController
       value: 
       objectReference: {fileID: 727743066}
+    - target: {fileID: 8687559332595861083, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: cb5f9ce7b09c0a44497cda2c5c6f9b1f, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1167,6 +1279,11 @@ PrefabInstance:
 --- !u!224 &8017624306108333275 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3353822336558256463, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+  m_PrefabInstance: {fileID: 5015174413083728864}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &8017624306108333280 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 8687559332595861083, guid: ab0a09288065a2940ae57dd906555453, type: 3}
   m_PrefabInstance: {fileID: 5015174413083728864}
   m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807

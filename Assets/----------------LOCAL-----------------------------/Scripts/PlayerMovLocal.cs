@@ -8,13 +8,15 @@ public class PlayerMovLocal : MonoBehaviour
 {
     private CharacterController controller;
     private Animator myAnimator;
-
+    
     private Vector2 lastMoveInput;
     private Vector2 moveInput;
     private Vector3 direction;
     private Vector3 velocity;
     private Vector3 airMomentum;
     [SerializeField] private bool isGrounded;
+    public GameObject stunEffectPrefab;
+    public Transform transformGood;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -331,6 +333,9 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void Stunned()
     {
+        GameObject stunInstance = Instantiate(stunEffectPrefab, transformGood, false);
+
+
         myAnimator.Play("Stunned");
         Debug.Log("Bot");
         StopMove();
