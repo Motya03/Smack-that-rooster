@@ -333,8 +333,9 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void Stunned()
     {
-        GameObject stunInstance = Instantiate(stunEffectPrefab, transformGood, false);
-
+        Vector3 spawnPos = transform.position + Vector3.up * 0.8f;
+        GameObject stunInstance = Instantiate(stunEffectPrefab, spawnPos, Quaternion.identity);
+        
 
         myAnimator.Play("Stunned");
         Debug.Log("Bot");
@@ -366,6 +367,7 @@ public class PlayerMovLocal : MonoBehaviour
         isAttackingLow = false;
     }
 
+   
     private IEnumerator PerformDash(Vector3 dashDirection, string animName)
     {
         isDashing = true;
