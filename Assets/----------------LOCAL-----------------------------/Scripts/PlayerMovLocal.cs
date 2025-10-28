@@ -8,7 +8,9 @@ public class PlayerMovLocal : MonoBehaviour
 {
     private CharacterController controller;
     private Animator myAnimator;
-    
+
+    private GameObject currentStunEffect;
+
     private Vector2 lastMoveInput;
     private Vector2 moveInput;
     private Vector3 direction;
@@ -333,13 +335,32 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void Stunned()
     {
-        Vector3 spawnPos = transform.position + Vector3.up * 0.8f;
-        GameObject stunInstance = Instantiate(stunEffectPrefab, spawnPos, Quaternion.identity);
-        
+        // Si ya hay un efecto activo, no crear otro
+        if (currentStunEffect == null)
+        {
+            Vector3 spawnPos = transform.position + Vector3.up * 0.7f;
+            currentStunEffect = Instantiate(stunEffectPrefab, spawnPos, Quaternion.identity, transform);
+            currentStunEffect.transform.localRotation = Quaternion.identity;
+        }
 
         myAnimator.Play("Stunned");
-        Debug.Log("Bot");
         StopMove();
+
+        // Simula que luego sale del estado (por ejemplo, después de 2 segundos)
+        StartCoroutine(ExitStunAfterSeconds(4f));
+    }
+
+    private IEnumerator ExitStunAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+
+        // Aquí "sale del stun"
+        if (currentStunEffect != null)
+        {
+            Destroy(currentStunEffect);
+            currentStunEffect = null;
+        }
+
         SetState(States.Idle);
     }
 
