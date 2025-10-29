@@ -161,6 +161,37 @@ Transform:
   - {fileID: 2242613562773796610}
   m_Father: {fileID: 1232190237859215749}
   m_LocalEulerAnglesHint: {x: -14.675077, y: -4.9587464, z: 22.271076}
+--- !u!1 &950038007965745703
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4188236843394335455}
+  m_Layer: 0
+  m_Name: dashPointFront
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4188236843394335455
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950038007965745703}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.08549571, y: 1.013, z: 2.34}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8726905420527405097}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &979618927041062412
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +449,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3745014481789584624}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2437787000646404231
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8454006998476921829}
+  m_Layer: 0
+  m_Name: dashPointBack
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8454006998476921829
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2437787000646404231}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.08549571, y: 1.013, z: -1.64}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8726905420527405097}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2515202960122621383
 GameObject:
@@ -2181,6 +2243,8 @@ Transform:
   - {fileID: 4157152892369648213}
   - {fileID: 2810542682848231562}
   - {fileID: 3858468739893725746}
+  - {fileID: 4188236843394335455}
+  - {fileID: 8454006998476921829}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &-8389807999619602992
@@ -2319,6 +2383,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isGrounded: 0
   stunEffectPrefab: {fileID: 2360192096358823000, guid: 7911b2aecf6b9884993d7797158f133a, type: 3}
+  dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: 12772a34ba0f2a84c8fe6acc6ac1e57e, type: 3}
+  dashBackEffectPrefab: {fileID: 7304561259499901744, guid: 2513ef303eece7e4ea2dea51910bb7ab, type: 3}
+  dashPointFront: {fileID: 4188236843394335455}
+  dashPointBack: {fileID: 8454006998476921829}
   kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
   footTrigger: {fileID: 4157152892369648213}
   moveSpeed: 1.5

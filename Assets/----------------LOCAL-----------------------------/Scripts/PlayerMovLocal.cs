@@ -18,6 +18,10 @@ public class PlayerMovLocal : MonoBehaviour
     private Vector3 airMomentum;
     [SerializeField] private bool isGrounded;
     public GameObject stunEffectPrefab;
+    public GameObject dashFrontEffectPrefab;
+    public GameObject dashBackEffectPrefab;
+    public Transform dashPointFront;
+    public Transform dashPointBack;
 
 
     public GameObject kickWindPrefab;
@@ -311,13 +315,16 @@ public class PlayerMovLocal : MonoBehaviour
         moveInput = Vector2.zero;
         direction = Vector3.zero;
     }
-
+    
     private void DashFront()
     {
         if (!isDashing && canDash)
         {
+            SpawnDashFrontFX();
             StopMove();
             StartCoroutine(PerformDash(transform.forward, "DashFront"));
+            
+
         }
 
     }
@@ -326,6 +333,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
         if (!isDashing && canDash)
         {
+            SpawnDashBackFX();
             StopMove();
             StartCoroutine(PerformDash(-transform.forward, "DashBack"));
             
@@ -374,6 +382,28 @@ public class PlayerMovLocal : MonoBehaviour
         // Destruir automáticamente después de un tiempo (para limpiar)
         Destroy(fx, 1f);
     }
+
+    public void SpawnDashFrontFX()
+    {
+        Vector3 spawnPos = dashPointFront != null ? dashPointFront.position : transform.position + Vector3.up * 0.5f;
+        Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 180, 0);
+
+        GameObject fx = Instantiate(dashFrontEffectPrefab, spawnPos, spawnRot);
+        Destroy(fx, 1f);
+    }
+
+    public void SpawnDashBackFX()
+    {
+        Vector3 spawnPos = dashPointBack != null ? dashPointBack.position : transform.position + Vector3.up * 0.5f;
+        Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 0, 0);
+
+        GameObject fx = Instantiate(dashBackEffectPrefab, spawnPos, spawnRot);
+        Destroy(fx, 1f);
+    }
+
+
+
+
 
     /* private IEnumerator ExitStunAfterSeconds(float seconds)
      {
