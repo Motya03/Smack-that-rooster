@@ -2319,7 +2319,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isGrounded: 0
   stunEffectPrefab: {fileID: 2360192096358823000, guid: 7911b2aecf6b9884993d7797158f133a, type: 3}
-  transformGood: {fileID: 5815138505080408326}
+  kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
+  footTrigger: {fileID: 4157152892369648213}
   moveSpeed: 1.5
   gravity: -9.81
   jumpForce: 0.5

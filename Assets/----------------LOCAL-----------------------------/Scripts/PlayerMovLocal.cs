@@ -18,7 +18,10 @@ public class PlayerMovLocal : MonoBehaviour
     private Vector3 airMomentum;
     [SerializeField] private bool isGrounded;
     public GameObject stunEffectPrefab;
-    public Transform transformGood;
+
+
+    public GameObject kickWindPrefab;
+    public Transform footTrigger;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -287,6 +290,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
         myAnimator.Play("AttackPatada");
         StopMove();
+        SpawnKickFX();
         SetState(States.Idle);
 
     
@@ -324,6 +328,7 @@ public class PlayerMovLocal : MonoBehaviour
         {
             StopMove();
             StartCoroutine(PerformDash(-transform.forward, "DashBack"));
+            
         }
 
     }
@@ -345,25 +350,45 @@ public class PlayerMovLocal : MonoBehaviour
 
         myAnimator.Play("Stunned");
         StopMove();
+        SetState(States.Idle);
 
-        // Simula que luego sale del estado (por ejemplo, después de 2 segundos)
-        StartCoroutine(ExitStunAfterSeconds(4f));
+
     }
 
-    private IEnumerator ExitStunAfterSeconds(float seconds)
+    public void AnimStunStop()
     {
-        yield return new WaitForSeconds(seconds);
-
-        // Aquí "sale del stun"
         if (currentStunEffect != null)
         {
+            Debug.Log("You");
             Destroy(currentStunEffect);
             currentStunEffect = null;
+            
         }
-
-        SetState(States.Idle);
     }
 
+    public void SpawnKickFX()
+    {
+        // Instanciar en la posición y rotación del pie
+        GameObject fx = Instantiate(kickWindPrefab, footTrigger.position, footTrigger.rotation);
+
+        // Destruir automáticamente después de un tiempo (para limpiar)
+        Destroy(fx, 1f);
+    }
+
+    /* private IEnumerator ExitStunAfterSeconds(float seconds)
+     {
+         yield return new WaitForSeconds(seconds);
+
+         // Aquí "sale del stun"
+         if (currentStunEffect != null)
+         {
+             Destroy(currentStunEffect);
+             currentStunEffect = null;
+         }
+
+         SetState(States.Idle);
+     }
+    */
     private void Dead()
     {
         myAnimator.Play("Dead");
@@ -446,7 +471,14 @@ public class PlayerMovLocal : MonoBehaviour
         if (vidas <= 0)
         {
             SetState(States.Dead); 
-        }  
+        }
+        else
+        {
+            myAnimator.SetTrigger("Hit");
+            StartCoroutine(PerformDash(transform.forward, "DashFront"));
+           
+
+        }
     }
 
    
