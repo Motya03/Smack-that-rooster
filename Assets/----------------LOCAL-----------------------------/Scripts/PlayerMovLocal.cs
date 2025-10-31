@@ -1,7 +1,10 @@
 ﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms.Impl;
 using static UnityEngine.Rendering.DebugUI;
+using UnityEngine.UI;
 
 
 public class PlayerMovLocal : MonoBehaviour
@@ -23,7 +26,7 @@ public class PlayerMovLocal : MonoBehaviour
     public Transform dashPointFront;
     public Transform dashPointBack;
 
-
+    public Text contadorVida;
     public GameObject kickWindPrefab;
     public Transform footTrigger;
 
@@ -71,6 +74,7 @@ public class PlayerMovLocal : MonoBehaviour
     private Hitbox hitboxScript;
     void Start()
     {
+        
         controller = GetComponent<CharacterController>();
         myAnimator = GetComponent<Animator>();
         defaultSpeed = moveSpeed;
@@ -294,7 +298,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
         myAnimator.Play("AttackPatada");
         StopMove();
-        SpawnKickFX();
+       // SpawnKickFX();
         SetState(States.Idle);
 
     
@@ -495,7 +499,8 @@ public class PlayerMovLocal : MonoBehaviour
 
 
     public void TakeHit()
-    { 
+    {
+        //contadorVida.text = "P1 = " + vidas.ToString();
         vidas--;
         Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
         if (vidas <= 0)
