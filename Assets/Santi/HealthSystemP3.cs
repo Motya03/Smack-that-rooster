@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthSystem : MonoBehaviour
+public class HealthSystemP3 : MonoBehaviour
 {
     public int health = 3;           // Vida actual
     public int maxHealth = 3;        // Vida máxima
@@ -23,10 +23,8 @@ public class HealthSystem : MonoBehaviour
             else
                 hearts[i].sprite = emptyHeart;
         }
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.O))
             TakeDamage(1);
-        if (Input.GetKeyDown(KeyCode.H))
-            Heal(1);
     }
 
     // Funciones para probar
@@ -34,11 +32,6 @@ public class HealthSystem : MonoBehaviour
     {
         health -= amount;
         heartFlash.FlashHearts();
-    }
-
-    public void Heal(int amount)
-    {
-        health += amount;
     }
     public HeartFlash heartFlash;
 }
