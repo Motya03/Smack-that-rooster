@@ -1438,7 +1438,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &347820618
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2405,7 +2405,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &766753431
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3434,7 +3434,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1036322639
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4372,6 +4372,11 @@ MonoBehaviour:
   startButton: {fileID: 930655388}
   lobbyCanvas: {fileID: 917385446}
   gameplayCanvas: {fileID: 302553873}
+  healthBars:
+  - {fileID: 1945541963}
+  - {fileID: 766753430}
+  - {fileID: 347820617}
+  - {fileID: 1036322638}
 --- !u!1001 &1476670969
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5760,7 +5765,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1945541964
 RectTransform:
   m_ObjectHideFlags: 0
