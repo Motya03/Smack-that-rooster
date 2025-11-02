@@ -12,18 +12,14 @@ public class ChangeSceneBoton : MonoBehaviour
 
     public void CambioEscena()
     {
+        Debug.Log("CambioEscena ejecutado desde clic"); // 👈
         GameData.ResetGameState();
 
-        // Aquí es donde activas el estado "Move" en ambos animators
         if (imagenAnimator1 != null)
-        {
             imagenAnimator1.Play("Move");
-        }
 
         if (imagenAnimator2 != null)
-        {
             imagenAnimator2.Play("Move");
-        }
 
         StartCoroutine(EsperarYEjecutar());
     }
