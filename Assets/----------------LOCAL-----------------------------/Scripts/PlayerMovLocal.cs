@@ -67,7 +67,9 @@ public class PlayerMovLocal : MonoBehaviour
 
     [Header("Vida y Daño")]
     public int vidas = 3;
-    
+    // REFERENCIA AL HealthSystem del UI que se asignará en StartGame del LobbyJoinManager
+    [HideInInspector] public HealthSystem uiHealth;
+
 
     [Header("Hitbox de Ataque")]
     public GameObject kickHitbox; // Asignar el objeto hijo con collider
@@ -495,28 +497,37 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
 
-   
+
 
 
     public void TakeHit()
     {
-        //contadorVida.text = "P1 = " + vidas.ToString();
-        vidas--;
+        // Prioriza la UI asignada (que controla sprites y parpadeo).
+        if (uiHealth != null)
+        {
+            uiHealth.TakeDamage(1);
+            vidas = uiHealth.health; // opcional, sincronizar valor local con UI
+        }
+        else
+        {
+            // fallback si no está asignado (por si algo falla)
+            vidas--;
+        }
+
         Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
+
         if (vidas <= 0)
         {
-            SetState(States.Dead); 
+            SetState(States.Dead);
         }
         else
         {
             myAnimator.SetTrigger("Hit");
             StartCoroutine(PerformDash(transform.forward, "DashFront"));
-           
-
         }
     }
 
-   
+
     private void OnDestroy()
     {
         Destroy(gameObject);

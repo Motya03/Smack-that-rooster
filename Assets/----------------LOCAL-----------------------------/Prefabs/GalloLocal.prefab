@@ -2341,12 +2341,12 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 3.17
-  m_Radius: 0.93
+  m_Radius: 0.75
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.84, z: 0.04}
+  m_Center: {x: 0, y: 0.63, z: 0.04}
 --- !u!95 &-1943637221246495598
 Animator:
   serializedVersion: 7
@@ -2390,12 +2390,12 @@ MonoBehaviour:
   contadorVida: {fileID: 0}
   kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
   footTrigger: {fileID: 4157152892369648213}
-  moveSpeed: 1.5
+  moveSpeed: 5
   gravity: -9.81
   jumpForce: 0.5
   airControl: 0.71
   smoothTime: 0.15
-  dashSpeed: 2
+  dashSpeed: 15
   dashDuration: 0.3
   dashCooldown: 1
   mystate: 0
