@@ -214,6 +214,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
 
         myAnimator.SetBool("RUN", false);
+        myAnimator.SetBool("Hit", false);
 
         // myAnimator.SetTrigger("JumpEnded");
         // myAnimator.CrossFade("IDLE", 0.1f);
@@ -320,6 +321,11 @@ public class PlayerMovLocal : MonoBehaviour
         isMoving = false;
         moveInput = Vector2.zero;
         direction = Vector3.zero;
+    }
+    private void StopMove2()
+    {
+        canReceiveInput = false;
+        
     }
     
     private void DashFront()
@@ -522,7 +528,7 @@ public class PlayerMovLocal : MonoBehaviour
         }
         else
         {
-            myAnimator.SetTrigger("Hit");
+            myAnimator.SetBool("Hit", true);
             StartCoroutine(PerformDash(transform.forward, "DashFront"));
         }
     }
