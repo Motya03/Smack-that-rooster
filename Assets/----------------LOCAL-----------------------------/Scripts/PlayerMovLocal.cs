@@ -457,7 +457,7 @@ public class PlayerMovLocal : MonoBehaviour
 
         myAnimator.Play(animName);
 
-        float dashDistance = 1f;        // Distancia total en metros
+        float dashDistance = 3f;        // Distancia total en metros
         float dashTime = 0.35f;         // Duración total del dash
         float elapsedTime = 0f;
 
