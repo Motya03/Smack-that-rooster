@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Mono.Cecil.Cil;
+
 using UnityEngine;
-using UnityEngine.EventSystems; // 👈 necesario para las interfaces del ratón
+using UnityEngine.EventSystems; 
 
 public class MenuButtonMainNewInput : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
 {
