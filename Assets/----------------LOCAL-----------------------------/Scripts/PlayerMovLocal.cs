@@ -212,7 +212,8 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-
+        if (!isGrounded)
+            return;
         myAnimator.SetBool("RUN", false);
         myAnimator.SetBool("Hit", false);
 
@@ -243,6 +244,8 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Run()
     {
+        if (!isGrounded)
+            return;
         myAnimator.SetBool("RUN", true);
 
         myAnimator.Play("RUN");
@@ -266,7 +269,7 @@ public class PlayerMovLocal : MonoBehaviour
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
             ResetInputs();
-            StopMove();
+            StopMove2();
             SetState(States.Idle);
 
         }
@@ -324,8 +327,9 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void StopMove2()
     {
-        canReceiveInput = false;
-        
+        //canReceiveInput = false;
+        // moveSpeed = defaultSpeed * 0.5f;
+        StartCoroutine(BoostCoroutine(0.5f, 1));
     }
     
     private void DashFront()

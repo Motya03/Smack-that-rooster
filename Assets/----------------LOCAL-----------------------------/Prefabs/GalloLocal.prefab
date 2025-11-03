@@ -62,7 +62,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1539356839267747972}
-  - {fileID: 7714621026822032761}
   m_Father: {fileID: 5845851759038089621}
   m_LocalEulerAnglesHint: {x: -36.78429, y: 72.7899, z: -31.834785}
 --- !u!1 &681454616647803778
@@ -1841,12 +1840,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7005322884339699016}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.730521, y: 0.31098652, z: -0.1940143, w: -0.5761814}
-  m_LocalPosition: {x: -0.004, y: 0.027, z: -0.006}
-  m_LocalScale: {x: 0.83087385, y: 0.83087415, z: 0.83087426}
+  m_LocalRotation: {x: 0.010323137, y: 0.025484014, z: -0.057724483, w: 0.9979539}
+  m_LocalPosition: {x: 0.13, y: 0.73, z: 1.161}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 9079951918651707819}
+  m_Father: {fileID: 8726905420527405097}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7489731370298875140
 MonoBehaviour:
@@ -1880,7 +1879,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 0
   serializedVersion: 3
-  m_Radius: 0.12
+  m_Radius: 0.23
   m_Center: {x: -0.01, y: -0.01, z: 0}
 --- !u!1 &7038497151309083124
 GameObject:
@@ -2239,6 +2238,7 @@ Transform:
   m_Children:
   - {fileID: 1167960215884176672}
   - {fileID: 6331036724154968824}
+  - {fileID: 7714621026822032761}
   - {fileID: 3386981022064824369}
   - {fileID: 4157152892369648213}
   - {fileID: 2810542682848231562}
@@ -2392,7 +2392,7 @@ MonoBehaviour:
   footTrigger: {fileID: 4157152892369648213}
   moveSpeed: 5
   gravity: -9.81
-  jumpForce: 0.5
+  jumpForce: 0.8
   airControl: 0.71
   smoothTime: 0.15
   dashSpeed: 15
