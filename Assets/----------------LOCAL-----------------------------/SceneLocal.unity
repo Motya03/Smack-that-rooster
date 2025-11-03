@@ -1000,7 +1000,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &192957197
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1018,7 +1018,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: -500, y: 278}
-  m_SizeDelta: {x: 600, y: 550}
+  m_SizeDelta: {x: 853, y: 581}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &192957198
 MonoBehaviour:
@@ -1040,7 +1040,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: b5d0a31c09c324941bd934e14e99aea1, type: 3}
+  m_Texture: {fileID: 2800000, guid: c16d922423e900f499ecf3ce00b2b813, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -1677,7 +1677,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &337372631
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1695,7 +1695,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 500, y: 278}
-  m_SizeDelta: {x: 600, y: 550}
+  m_SizeDelta: {x: 853, y: 581}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &337372632
 MonoBehaviour:
@@ -1717,7 +1717,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: d3ce8af26a4500141be2ba77f25549f7, type: 3}
+  m_Texture: {fileID: 2800000, guid: 0302016345620e04fa516742dc98f58d, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -2472,8 +2472,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 150.1, y: 108.2}
+  m_AnchoredPosition: {x: 0, y: 26.4}
+  m_SizeDelta: {x: 229.1, y: 145.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &579030947
 MonoBehaviour:
@@ -2495,7 +2495,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: b7619bca8b5caca4e84de32bf2ecdf00, type: 3}
+  m_Texture: {fileID: 2800000, guid: ffd0cb949a42d2a47b656adbda6b95b4, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -3383,7 +3383,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &792351874
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3400,8 +3400,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 500, y: -170}
-  m_SizeDelta: {x: 600, y: 550}
+  m_AnchoredPosition: {x: 500, y: -142.3}
+  m_SizeDelta: {x: 853, y: 581}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &792351875
 MonoBehaviour:
@@ -3423,7 +3423,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: bd451b6e4828f884c82a0a1eb61c2e6d, type: 3}
+  m_Texture: {fileID: 2800000, guid: 1ec6be0ad0923c94487e58ae37293856, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -3912,7 +3912,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &930655387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3931,7 +3931,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 551}
-  m_SizeDelta: {x: 170.2, y: 92.3}
+  m_SizeDelta: {x: 211.7, y: 134.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &930655388
 MonoBehaviour:
@@ -6887,7 +6887,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1522604960
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6904,8 +6904,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -500, y: -170}
-  m_SizeDelta: {x: 600, y: 550}
+  m_AnchoredPosition: {x: -539.3, y: -139.5}
+  m_SizeDelta: {x: 853, y: 581}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1522604961
 MonoBehaviour:
@@ -6927,7 +6927,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 5e666b2a3b329834cb843627c54e3b80, type: 3}
+  m_Texture: {fileID: 2800000, guid: 9eaf5864a832a9d4c81782e66566b9f6, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
