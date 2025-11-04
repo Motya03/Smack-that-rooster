@@ -474,7 +474,7 @@ Transform:
   m_GameObject: {fileID: 2437787000646404231}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.08549571, y: 1.013, z: -3.94}
+  m_LocalPosition: {x: 0.08549571, y: 1.013, z: -2.96}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2423,7 +2423,6 @@ MonoBehaviour:
   contadorVida: {fileID: 0}
   kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
   footTrigger: {fileID: 4157152892369648213}
-  atttackPoint: {fileID: 3484876371802372352}
   moveSpeed: 5
   gravity: -9.81
   jumpForce: 0.8

@@ -13,7 +13,7 @@ public class PlayerMovLocal : MonoBehaviour
     private Animator myAnimator;
 
     private GameObject currentStunEffect;
-   public GameObject PatadaEffectPrefab;
+    public GameObject PatadaEffectPrefab;
 
     private Vector2 lastMoveInput;
     private Vector2 moveInput;
@@ -304,21 +304,26 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void AttackPatada()
     {
-        PatadaEffectPrefab.transform.rotation = Quaternion.Euler(90, 0, 0); // ejemplo: rotar 90° en Y
-        PatadaEffectPrefab.transform.rotation = transform.rotation;
-
-        Vector3 spawnPos = transform.position;
-            PatadaEffectPrefab = Instantiate(PatadaEffectPrefab, spawnPos, transform.rotation);
-            PatadaEffectPrefab.transform.localRotation = Quaternion.identity;
-            Debug.Log("Patada");
-
         
-            myAnimator.Play("AttackPatada");
+
+        Debug.Log("Patada");
+
+        myAnimator.Play("AttackPatada");
         StopMove();
-       // SpawnKickFX();
         SetState(States.Idle);
     }
 
+    public void EnableVfxPatada()
+    {
+        Vector3 spawnPos = transform.position;
+
+        // Instanciar con rotación del personaje + giro en X
+        GameObject fx = Instantiate(
+            PatadaEffectPrefab,
+            spawnPos,
+            transform.rotation * Quaternion.Euler(90, 0, 0) // gira 90° en X (ajusta valor)
+        );
+    }
     private void AttackLow()
     {
         myAnimator.Play("AttackLow");
