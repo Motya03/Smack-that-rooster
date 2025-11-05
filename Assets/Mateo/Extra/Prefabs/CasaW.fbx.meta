@@ -1,14 +1,9 @@
 fileFormatVersion: 2
-guid: d4d9d8177828c2647947da76b2d9c092
+guid: c50218c9290d64d4389a9e09bf944a91
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: Cube.001 Cube.002
-    second: {fileID: 2800000, guid: 688b5c1362f3859409afcc8ba12b1eb2, type: 3}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
