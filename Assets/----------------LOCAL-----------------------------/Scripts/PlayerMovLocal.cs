@@ -59,6 +59,7 @@ public class PlayerMovLocal : MonoBehaviour
     private bool dashFrontPressed;
     private bool dashBackPressed;
     private bool canReceiveInput = true;
+    private bool canReceiveInputDash = true;
 
 
 
@@ -186,7 +187,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void OnAttack(InputValue value)
     {
-        if (!canReceiveInput) return;
+        if (!canReceiveInput ) return;
         if (value.isPressed)
             isAttacking = true;
     }
@@ -199,14 +200,14 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void OnDashFront(InputValue value)
     {
-        if (!canReceiveInput) return;
+        if (!canReceiveInput ) return;
         if (value.isPressed)
             dashFrontPressed = true;
     }
 
     private void OnDashBack(InputValue value)
     {
-        if (!canReceiveInput) return;
+        if (!canReceiveInput && !canReceiveInputDash) return;
         if (value.isPressed)
             dashBackPressed = true;
     }
@@ -326,7 +327,8 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void AttackLow()
     {
-        myAnimator.Play("AttackLow");
+      //  myAnimator.Play("AttackLow");
+        StartCoroutine(PerformDash(transform.forward, "AttackLow", 1.8f));
         Debug.Log("Loh");
         StopMove();
         SetState(States.Idle);
@@ -334,10 +336,15 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void StopMove()
     {
+        canReceiveInputDash = false;
         canReceiveInput = false;
         isMoving = false;
         moveInput = Vector2.zero;
         direction = Vector3.zero;
+    }
+    public void CanReceiveDash()
+    {
+        canReceiveInputDash = true;
     }
     private void StopMove2()
     {
@@ -352,7 +359,7 @@ public class PlayerMovLocal : MonoBehaviour
         {
             SpawnDashFrontFX();
             StopMove();
-            StartCoroutine(PerformDash(transform.forward, "DashFront"));
+            StartCoroutine(PerformDash(transform.forward, "DashFront",2.5f));
             
 
         }
@@ -365,7 +372,7 @@ public class PlayerMovLocal : MonoBehaviour
         {
             SpawnDashBackFX();
             StopMove();
-            StartCoroutine(PerformDash(-transform.forward, "DashBack"));
+            StartCoroutine(PerformDash(-transform.forward, "DashBack", 2.5f));
             
         }
 
@@ -474,14 +481,14 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
    
-    private IEnumerator PerformDash(Vector3 dashDirection, string animName)
+    private IEnumerator PerformDash(Vector3 dashDirection, string animName, float dashDistance)
     {
         isDashing = true;
         canDash = false;
 
         myAnimator.Play(animName);
 
-        float dashDistance = 3f;        // Distancia total en metros
+       // float dashDistance = 3f;        // Distancia total en metros
         float dashTime = 0.35f;         // Duración total del dash
         float elapsedTime = 0f;
 
@@ -547,7 +554,7 @@ public class PlayerMovLocal : MonoBehaviour
         else
         {
             myAnimator.SetBool("Hit", true);
-            StartCoroutine(PerformDash(transform.forward, "DashFront"));
+            StartCoroutine(PerformDash(transform.forward, "DashFront",1.5f));
         }
     }
 
