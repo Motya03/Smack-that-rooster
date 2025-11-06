@@ -14,8 +14,7 @@ public class ClickGameManager : MonoBehaviour
     private bool active = false;
     public Text battleText;
 
-    public RectTransform fillRed;   // 🔴 lado del Player1
-    public RectTransform fillBlue;  // 🔵 lado del Player2
+ 
     public PlayerMovLocal p1;
     public PlayerMovLocal p2;
 
@@ -32,17 +31,7 @@ public class ClickGameManager : MonoBehaviour
     private void Update()
     {
 
-        if (fillRed != null && fillBlue != null)
-        {
-            // Obtenemos el ancho total del padre
-            float totalWidth = ((RectTransform)fillRed.parent).rect.width;
-
-            // Rojo crece hacia la derecha
-            fillRed.sizeDelta = new Vector2(totalWidth * value, fillRed.sizeDelta.y);
-
-            // Azul crece hacia la izquierda (inverso)
-            fillBlue.sizeDelta = new Vector2(totalWidth * (1f - value), fillBlue.sizeDelta.y);
-        }
+       
         if (!active) return;
 
         value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
