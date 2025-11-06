@@ -214,6 +214,14 @@ public class PlayerMovLocal : MonoBehaviour
         if (value.isPressed)
             dashBackPressed = true;
     }
+    private void OnMash(InputValue value)
+    {
+        if (mystate == States.ClickBattle && value.isPressed)
+        {
+            ClickGameManager.Instance.RegisterClick(this);
+        }
+    }
+
 
     // --- ESTADOS ---
     private void Idle()
@@ -537,13 +545,13 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
 
-    public void TakeHit()
+    public void TakeHit(int damage, PlayerMovLocal attacker)
     {
-       // lastAttacker = attacker;
+        lastAttacker = attacker;
         // Prioriza la UI asignada (que controla sprites y parpadeo).
         if (uiHealth != null)
         {
-            uiHealth.TakeDamage(1);
+            uiHealth.TakeDamage(damage);
             vidas = uiHealth.health; // opcional, sincronizar valor local con UI
         }
         else
@@ -591,7 +599,7 @@ public class PlayerMovLocal : MonoBehaviour
     public  void ClickBattle()
     {
         StopMove();
-        myAnimator.Play("Idle");
+        myAnimator.Play("IDLE");
     }
     public bool CanReceiveInput => canReceiveInput;
 

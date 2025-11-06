@@ -4,6 +4,7 @@ public class Hitbox : MonoBehaviour
 {
     public GameObject owner; // Jugador que lanza el ataque
 
+  
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("noo");
@@ -15,9 +16,10 @@ public class Hitbox : MonoBehaviour
         
         if  ( other.gameObject.CompareTag("Culo"))
         {
+            PlayerMovLocal atacante = owner.GetComponent<PlayerMovLocal>();
             Debug.Log($"{other.name} recibió daño!");
 
-            player.TakeHit();
+            player.TakeHit(1, atacante);
         }
          if (other.gameObject.CompareTag("Pecho"))
         {

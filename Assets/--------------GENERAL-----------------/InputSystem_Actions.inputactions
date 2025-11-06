@@ -113,6 +113,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Mash",
+                    "type": "Button",
+                    "id": "b9a08a2b-e1c1-4ed2-ad33-bf5235e11092",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -520,6 +529,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "DashBack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ab40177-3f45-466b-b01e-848bb088b368",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Mash",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

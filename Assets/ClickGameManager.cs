@@ -1,73 +1,87 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class ClickGameManager : MonoBehaviour
 {
-    public Slider battleSlider;  // UI con valor de 0 a 1 (inicio en 0.5)
+    public static ClickGameManager Instance { get; private set; }
+
+    [Header("Battle Settings")]
+    public Slider battleSlider;
     public float clickPower = 0.02f;
-    public float decaySpeed = 0.01f;
-    public float winThreshold = 0.95f;
+    public float decaySpeed = 0.3f;
+    private float value = 0.5f;
+    private bool active = false;
+    public Text battleText;
 
-    private PlayerMovLocal player1;
-    private PlayerMovLocal player2;
-    private bool battleActive = false;
-    private float battleValue = 0.5f; // Centro
+    public PlayerMovLocal p1;
+    public PlayerMovLocal p2;
 
-    void Update()
+    private void Awake()
     {
-        if (!battleActive) return;
-
-        if (Keyboard.current.jKey.wasPressedThisFrame)
-            battleValue += clickPower;
-        if (Keyboard.current.lKey.wasPressedThisFrame)
-            battleValue -= clickPower;
-
-
-        // --- Decaimiento suave (barra tiende al centro) ---
-        if (battleValue > 0.5f)
-            battleValue -= decaySpeed * Time.deltaTime;
-        else if (battleValue < 0.5f)
-            battleValue += decaySpeed * Time.deltaTime;
-
-        // --- Clamp y UI ---
-        battleValue = Mathf.Clamp01(battleValue);
-        battleSlider.value = battleValue;
-
-        // --- Verificación de victoria ---
-        if (battleValue >= winThreshold)
-            EndBattle(player1);
-        else if (battleValue <= 1f - winThreshold)
-            EndBattle(player2);
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
 
-    public void StartBattle(PlayerMovLocal p1, PlayerMovLocal p2)
+    private void Update()
     {
-        player1 = p1;
-        player2 = p2;
 
-        battleValue = 0.5f;
-        battleSlider.gameObject.SetActive(true);
-        battleSlider.value = battleValue;
+        
 
-        battleActive = true;
+        if (!active) return;
+
+        value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
+        battleSlider.value = value;
+        battleText.text = value.ToString();
+
+
+
+        if (value <= 0.01f)
+            EndBattle(p2);
+        else if (value >= 0.99f)
+            EndBattle(p1);
+        Debug.Log($"Value: {value} / Slider: {battleSlider.value}");
+    }
+
+    public void StartBattle(PlayerMovLocal player1, PlayerMovLocal player2)
+    {
+       
+        p1 = player1;
+        p2 = player2;
         p1.SetState(PlayerMovLocal.States.ClickBattle);
         p2.SetState(PlayerMovLocal.States.ClickBattle);
-
-        Debug.Log($"Click Battle iniciada entre {p1.name} y {p2.name}");
+        value = 0.5f;
+        battleSlider.value = value;
+        active = true;
+        battleSlider.gameObject.SetActive(true);
+        battleText.gameObject.SetActive(true);
     }
 
-    void EndBattle(PlayerMovLocal winner)
+    public void RegisterClick(PlayerMovLocal who)
     {
-        Debug.Log($"Click Battle ganada por {winner.name}");
-        battleActive = false;
+        if (!active) return;
+
+        if (who == p1)
+            value += clickPower;
+        else if (who == p2)
+            value -= clickPower;
+
+        value = Mathf.Clamp01(value);
+        battleSlider.value = value;
+        battleText.text = value.ToString();
+    }
+
+    public void EndBattle(PlayerMovLocal winner)
+    {
+        PlayerMovLocal loser = (winner == p1) ? p2 : p1;
+        if (loser != null) loser.SetState(PlayerMovLocal.States.Dead);
+        if (winner != null) winner.SetState(PlayerMovLocal.States.Idle);
+        active = false;
         battleSlider.gameObject.SetActive(false);
-
-        // El ganador puede rematar, el perdedor muere
-        PlayerMovLocal loser = (winner == player1) ? player2 : player1;
-        loser.SetState(PlayerMovLocal.States.Dead);
-
-        // Reiniciar al ganador al Idle
-        winner.SetState(PlayerMovLocal.States.Idle);
+        battleText.gameObject.SetActive(false);
+        Debug.Log($"Click battle won by: {winner.name}");
     }
 }
