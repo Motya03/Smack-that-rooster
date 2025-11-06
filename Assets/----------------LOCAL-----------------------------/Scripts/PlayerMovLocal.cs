@@ -46,6 +46,8 @@ public class PlayerMovLocal : MonoBehaviour
     private bool isDashing = false;
     private bool canDash = true;
 
+    [Header("ClickGame")]
+    public PlayerMovLocal lastAttacker;
 
     private float currentVelocity;
     private float defaultSpeed;
@@ -63,7 +65,7 @@ public class PlayerMovLocal : MonoBehaviour
 
 
 
-    public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow }
+    public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle}
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
@@ -156,6 +158,7 @@ public class PlayerMovLocal : MonoBehaviour
             case States.Stunned: Stunned(); break;
             case States.Dead: Dead(); break;
             case States.Crouch: Crouch(); break;
+            case States.ClickBattle: ClickBattle(); break;
 
         }
     }
@@ -464,7 +467,7 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
     // --- UTILIDADES ---
-    private void SetState(States newState)
+    public void SetState(States newState)
     {
         mystate = newState;
         Debug.Log("Estado cambiado a: " + mystate);
@@ -528,11 +531,15 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
 
-
+    public void RegisterAttacker(PlayerMovLocal attacker)
+    {
+        lastAttacker = attacker;
+    }
 
 
     public void TakeHit()
     {
+       // lastAttacker = attacker;
         // Prioriza la UI asignada (que controla sprites y parpadeo).
         if (uiHealth != null)
         {
@@ -549,7 +556,8 @@ public class PlayerMovLocal : MonoBehaviour
 
         if (vidas <= 0)
         {
-            SetState(States.Dead);
+            FindFirstObjectByType<ClickGameManager>().StartBattle(lastAttacker, this);
+           // SetState(States.Dead);
         }
         else
         {
@@ -580,6 +588,12 @@ public class PlayerMovLocal : MonoBehaviour
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
     }
+    public  void ClickBattle()
+    {
+        StopMove();
+        myAnimator.Play("Idle");
+    }
+    public bool CanReceiveInput => canReceiveInput;
 
 }
 
