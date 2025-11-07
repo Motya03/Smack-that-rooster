@@ -56,16 +56,17 @@ public class PlayerMovLocal : MonoBehaviour
     private bool isMoving;
     private bool isAttacking;
     private bool isAttackingLow;
-    private bool isJumpPressed;
+    public bool isJumpPressed;
     private bool isCrouchPressed;
-    private bool dashFrontPressed;
+    public bool dashFrontPressed;
     private bool dashBackPressed;
     private bool canReceiveInput = true;
     private bool canReceiveInputDash = true;
+    private bool canReceiveInputAttack = true;
 
 
 
-    public enum States { Idle, Run, AttackPatada, Jump, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle}
+    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle}
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
@@ -153,6 +154,7 @@ public class PlayerMovLocal : MonoBehaviour
             case States.AttackPatada: AttackPatada(); break;
             case States.AttackLow: AttackLow(); break;
             case States.Jump: Jump(); break;
+            case States.Fall: Fall(); break;
             case States.DashFront: DashFront(); break;
             case States.DashBack: DashBack(); break;
             case States.Stunned: Stunned(); break;
@@ -177,34 +179,37 @@ public class PlayerMovLocal : MonoBehaviour
     private void OnCrouch(InputValue value)
     {
         if (!canReceiveInput) return;
-        if (value.isPressed)
+        if (value.isPressed && isGrounded)
             isCrouchPressed = true;
     }
 
     private void OnJump(InputValue value)
     {
-        if (!canReceiveInput) return;
-        if (value.isPressed)
+        if (!canReceiveInput ) return;
+
+        if (value.isPressed && isGrounded)
             isJumpPressed = true;
+         
     }
+
 
     private void OnAttack(InputValue value)
     {
-        if (!canReceiveInput ) return;
+        if (!canReceiveInput && canReceiveInputAttack) return;
         if (value.isPressed)
             isAttacking = true;
     }
     private void OnAttackLow(InputValue value)
     {
         if (!canReceiveInput) return;
-        if (value.isPressed)
+        if (value.isPressed && isGrounded)
             isAttackingLow = true;
     }
 
     private void OnDashFront(InputValue value)
     {
-        if (!canReceiveInput ) return;
-        if (value.isPressed)
+        if (!canReceiveInput && !canReceiveInputDash) return;
+        if (value.isPressed )
             dashFrontPressed = true;
     }
 
@@ -226,10 +231,18 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
+        if (dashFrontPressed) SetState(States.DashFront);
+        if (dashBackPressed) SetState(States.DashBack);
+        if (isAttacking) SetState(States.AttackPatada);
+
         if (!isGrounded)
             return;
-        myAnimator.SetBool("RUN", false);
-        myAnimator.SetBool("Hit", false);
+
+        
+        
+            myAnimator.SetBool("RUN", false);
+            myAnimator.SetBool("Hit", false);
+          //  myAnimator.SetBool("Falling", false);
 
         // myAnimator.SetTrigger("JumpEnded");
         // myAnimator.CrossFade("IDLE", 0.1f);
@@ -238,26 +251,29 @@ public class PlayerMovLocal : MonoBehaviour
 
 
 
-        if (isAttacking)
-        {
-            SetState(States.AttackPatada);
+       
 
-        }
-
-        else if (isJumpPressed && isGrounded) SetState(States.Jump);
-        else if (isMoving) SetState(States.Run);
-        else if (dashFrontPressed) SetState(States.DashFront);
-        else if (dashBackPressed) SetState(States.DashBack);
-        else if (isCrouchPressed) SetState(States.Crouch);
-        else if (isAttackingLow) SetState(States.AttackLow);
+             if (isJumpPressed && isGrounded) SetState(States.Jump);
+            else if (isMoving) SetState(States.Run);
+            // else if (dashFrontPressed) SetState(States.DashFront);
+           // else if (dashBackPressed) SetState(States.DashBack);
+            else if (isCrouchPressed) SetState(States.Crouch);
+            else if (isAttackingLow) SetState(States.AttackLow);
 
 
-        ResetInputs();
+            ResetInputs();
+        
+
+
+            
 
     }
 
     private void Run()
     {
+        if (dashFrontPressed) SetState(States.DashFront);
+        if (dashBackPressed) SetState(States.DashBack);
+        if (isAttacking) SetState(States.AttackPatada);
         if (!isGrounded)
             return;
         myAnimator.SetBool("RUN", true);
@@ -272,25 +288,28 @@ public class PlayerMovLocal : MonoBehaviour
         else if (dashBackPressed) SetState(States.DashBack);
         else if (isCrouchPressed) SetState(States.Crouch);
 
-        ResetInputs();
+        //ResetInputs();
     }
 
     private void Jump()
     {
-        if (isGrounded)
-        {
+
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+            isJumpPressed = false;
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
-            ResetInputs();
+           // ResetInputs();
             StopMove2();
-            SetState(States.Idle);
+            if (dashFrontPressed) SetState(States.DashFront);
+            else if (dashBackPressed) SetState(States.DashBack);
+            else if (isGrounded) SetState(States.Idle);
 
-        }
-
-
-
-
+    }
+    private void Fall()
+    {
+        myAnimator.SetBool("Falling", true);
+        StopMove();
+        SetState(States.Idle);
     }
     private void Crouch()
     {
@@ -348,13 +367,18 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void StopMove()
     {
+        canReceiveInputAttack = false;
         canReceiveInputDash = false;
         canReceiveInput = false;
         isMoving = false;
         moveInput = Vector2.zero;
         direction = Vector3.zero;
     }
-    public void CanReceiveDash()
+    private void CanAttack()
+    {
+        canReceiveInputAttack = true;
+    }
+    private void CanReceiveDash()
     {
         canReceiveInputDash = true;
     }
@@ -534,8 +558,8 @@ public class PlayerMovLocal : MonoBehaviour
 
         isDashing = false;
         canDash = true;
-
-        SetState(States.Idle);
+        if (!isGrounded) SetState(States.Fall);
+        else SetState(States.Idle);
         ResetInputs();
     }
 
