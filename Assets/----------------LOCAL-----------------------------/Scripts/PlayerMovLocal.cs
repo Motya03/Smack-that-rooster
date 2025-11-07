@@ -335,6 +335,7 @@ public class PlayerMovLocal : MonoBehaviour
             spawnPos,
             transform.rotation * Quaternion.Euler(90, 0, 0) // gira 90° en X (ajusta valor)
         );
+        Destroy(fx, 1f);
     }
     private void AttackLow()
     {

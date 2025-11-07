@@ -17,7 +17,7 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 0
   intensity:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 0.189
   response:
     m_OverrideState: 1
@@ -121,7 +121,7 @@ MonoBehaviour:
     m_Value: 37.6
   colorFilter:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.9171978, b: 0.7971698, a: 1}
+    m_Value: {r: 0.9528302, g: 0.92923415, b: 0.8944019, a: 1}
   hueShift:
     m_OverrideState: 0
     m_Value: 89
@@ -146,7 +146,7 @@ MonoBehaviour:
     m_Value: 110
   redOutGreenIn:
     m_OverrideState: 1
-    m_Value: -45
+    m_Value: -33
   redOutBlueIn:
     m_OverrideState: 0
     m_Value: -21

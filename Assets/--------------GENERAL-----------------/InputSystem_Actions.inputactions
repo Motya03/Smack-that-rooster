@@ -542,6 +542,17 @@
                     "action": "Mash",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "32bec725-5376-40f8-b9f4-9c6d78de0ce8",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Mash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
