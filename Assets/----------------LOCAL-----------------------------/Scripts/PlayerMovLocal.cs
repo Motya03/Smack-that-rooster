@@ -67,6 +67,7 @@ public class PlayerMovLocal : MonoBehaviour
     private bool canReceiveInput = true;
     private bool canReceiveInputDash = true;
     private bool canReceiveInputAttack = true;
+    
 
 
 
@@ -106,7 +107,7 @@ public class PlayerMovLocal : MonoBehaviour
     private void Update()
     {
 
-
+      
 
         bool physGrounded = false;
         if (groundCheck != null)
@@ -119,8 +120,8 @@ public class PlayerMovLocal : MonoBehaviour
         isGrounded = physGrounded || controllerGrounded;
 
         // Evitar que se marque falso durante dash o ataque
-        if (isDashing || mystate == States.AttackPatada || mystate == States.AttackLow)
-            isGrounded = true;
+       // if (isDashing || mystate == States.AttackPatada || mystate == States.AttackLow)
+          //  isGrounded = true;
 
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
@@ -214,8 +215,8 @@ public class PlayerMovLocal : MonoBehaviour
     private void OnAttack(InputValue value)
     {
         if (!canReceiveInput && canReceiveInputAttack) return;
-        if (value.isPressed)
-            isAttacking = true;
+        if (value.isPressed )
+        isAttacking = true;
     }
     private void OnAttackLow(InputValue value)
     {
@@ -249,7 +250,7 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-        Debug.Log("999999");
+        
         if (dashFrontPressed) SetState(States.DashFront);
         if (dashBackPressed) SetState(States.DashBack);
         if (isAttacking) SetState(States.AttackPatada);
@@ -258,7 +259,7 @@ public class PlayerMovLocal : MonoBehaviour
             return;
 
 
-        Debug.Log("666666");
+        
         myAnimator.SetBool("RUN", false);
             myAnimator.SetBool("Hit", false);
           //  myAnimator.SetBool("Falling", false);
@@ -290,7 +291,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Run()
     {
-        Debug.Log("888888");
+        
         if (dashFrontPressed)
             SetState(States.DashFront);
         if (dashBackPressed)
@@ -301,7 +302,7 @@ public class PlayerMovLocal : MonoBehaviour
             SetState(States.AttackLow);
         if (!isGrounded)
             return;
-        Debug.Log("777777");
+        
         myAnimator.SetBool("RUN", true);
         myAnimator.Play("RUN");
 
@@ -325,7 +326,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Jump()
     {
-        Debug.Log("44444");
+       
         velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             isJumpPressed = false;
             // myAnimator.SetTrigger("JUMP1");    
@@ -379,8 +380,8 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void AttackPatada()
     {
-        
 
+        isAttacking = false;
         Debug.Log("Patada");
 
         myAnimator.Play("AttackPatada");
@@ -435,6 +436,7 @@ public class PlayerMovLocal : MonoBehaviour
     
     private void DashFront()
     {
+        dashFrontPressed = false;
         if (!isDashing && canDash)
         {
             SpawnDashFrontFX();
@@ -448,6 +450,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void DashBack()
     {
+        dashBackPressed = false;
         if (!isDashing && canDash)
         {
             SpawnDashBackFX();
@@ -563,6 +566,7 @@ public class PlayerMovLocal : MonoBehaviour
    
     private IEnumerator PerformDash(Vector3 dashDirection, string animName, float dashDistance)
     {
+        
         isDashing = true;
         canDash = false;
 
