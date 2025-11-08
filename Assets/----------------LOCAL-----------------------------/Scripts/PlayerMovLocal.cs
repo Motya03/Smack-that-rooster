@@ -2,8 +2,6 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SocialPlatforms.Impl;
-using static UnityEngine.Rendering.DebugUI;
 using UnityEngine.UI;
 
 
@@ -31,6 +29,12 @@ public class PlayerMovLocal : MonoBehaviour
     public GameObject kickWindPrefab;
     public Transform footTrigger;
     //public Transform atttackPoint;
+
+    [Header("Ground Check")]
+    public Transform groundCheck;            // punto de comprobación (ponlo cerca de los pies)
+    public float groundDistance = 0.15f;     // radio de la esfera
+    public LayerMask groundMask;             // que capas cuentan como suelo
+
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -103,10 +107,24 @@ public class PlayerMovLocal : MonoBehaviour
     {
 
 
-        // --- Verificar si está tocando el suelo ---
-        isGrounded = controller.isGrounded;
+
+        bool physGrounded = false;
+        if (groundCheck != null)
+            physGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        // Fallback con CharacterController
+        bool controllerGrounded = controller != null && controller.isGrounded;
+
+        // Combinar ambas lecturas
+        isGrounded = physGrounded || controllerGrounded;
+
+        // Evitar que se marque falso durante dash o ataque
+        if (isDashing || mystate == States.AttackPatada || mystate == States.AttackLow)
+            isGrounded = true;
+
         if (isGrounded && velocity.y < 0)
-            velocity.y = -2f; // Mantener al personaje pegado al suelo
+            velocity.y = -2f;
+
 
         // --- Dirección del input ---
         Vector3 inputDir = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
@@ -231,6 +249,7 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
+        Debug.Log("999999");
         if (dashFrontPressed) SetState(States.DashFront);
         if (dashBackPressed) SetState(States.DashBack);
         if (isAttacking) SetState(States.AttackPatada);
@@ -238,9 +257,9 @@ public class PlayerMovLocal : MonoBehaviour
         if (!isGrounded)
             return;
 
-        
-        
-            myAnimator.SetBool("RUN", false);
+
+        Debug.Log("666666");
+        myAnimator.SetBool("RUN", false);
             myAnimator.SetBool("Hit", false);
           //  myAnimator.SetBool("Falling", false);
 
@@ -271,30 +290,43 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Run()
     {
-        if (dashFrontPressed) SetState(States.DashFront);
-        if (dashBackPressed) SetState(States.DashBack);
-        if (isAttacking) SetState(States.AttackPatada);
+        Debug.Log("888888");
+        if (dashFrontPressed)
+            SetState(States.DashFront);
+        if (dashBackPressed)
+            SetState(States.DashBack);
+        if (isAttacking)
+            SetState(States.AttackPatada);
+        if (isAttackingLow)
+            SetState(States.AttackLow);
         if (!isGrounded)
             return;
+        Debug.Log("777777");
         myAnimator.SetBool("RUN", true);
-
         myAnimator.Play("RUN");
 
-        if (!isMoving) SetState(States.Idle);
-        else if (isAttacking) SetState(States.AttackPatada);
-        else if (isAttackingLow) SetState(States.AttackLow);
-        else if (isJumpPressed && isGrounded) SetState(States.Jump);
-        else if (dashFrontPressed) SetState(States.DashFront);
-        else if (dashBackPressed) SetState(States.DashBack);
-        else if (isCrouchPressed) SetState(States.Crouch);
+        if (!isMoving)
+            SetState(States.Idle);
+        else if (isAttacking)
+            SetState(States.AttackPatada);
+        else if (isAttackingLow)
+            SetState(States.AttackLow);
+        else if (isJumpPressed && isGrounded)
+            SetState(States.Jump);
+        else if (dashFrontPressed)
+            SetState(States.DashFront);
+        else if (dashBackPressed)
+            SetState(States.DashBack);
+        else if (isCrouchPressed)
+            SetState(States.Crouch);
 
-        //ResetInputs();
+        ResetInputs();
     }
 
     private void Jump()
     {
-
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+        Debug.Log("44444");
+        velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             isJumpPressed = false;
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
@@ -302,15 +334,27 @@ public class PlayerMovLocal : MonoBehaviour
             StopMove2();
             if (dashFrontPressed) SetState(States.DashFront);
             else if (dashBackPressed) SetState(States.DashBack);
-            else if (isGrounded) SetState(States.Idle);
+            StartCoroutine(JumpRoutine());
 
+
+    }
+    private IEnumerator JumpRoutine()
+    {
+        // Espera un poco para evitar que vuelva a Idle enseguida
+        yield return new WaitForSeconds(0.1f);
+        SetState(States.Idle);
     }
     private void Fall()
     {
         myAnimator.SetBool("Falling", true);
-        StopMove();
-        SetState(States.Idle);
+
+        if (isGrounded)
+        {
+            myAnimator.SetBool("Falling", false);
+            SetState(States.Idle);
+        }
     }
+
     private void Crouch()
     {
         Debug.Log("nyam");

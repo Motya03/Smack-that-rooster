@@ -826,6 +826,37 @@ Transform:
   - {fileID: 6132324479272489278}
   m_Father: {fileID: 8316506511581076950}
   m_LocalEulerAnglesHint: {x: -56.635803, y: -61.51221, z: 75.65747}
+--- !u!1 &3642252324892186807
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 792254243274507087}
+  m_Layer: 0
+  m_Name: GroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &792254243274507087
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3642252324892186807}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.03, y: -1.07, z: -0.18}
+  m_LocalScale: {x: 2.8432546, y: 2.8432546, z: 2.8432546}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8726905420527405097}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3644630521596377495
 GameObject:
   m_ObjectHideFlags: 0
@@ -2277,6 +2308,7 @@ Transform:
   - {fileID: 4188236843394335455}
   - {fileID: 8454006998476921829}
   - {fileID: 3484876371802372352}
+  - {fileID: 792254243274507087}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &-8389807999619602992
@@ -2423,6 +2455,11 @@ MonoBehaviour:
   contadorVida: {fileID: 0}
   kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
   footTrigger: {fileID: 4157152892369648213}
+  groundCheck: {fileID: 792254243274507087}
+  groundDistance: 0.15
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
   moveSpeed: 5
   gravity: -9.81
   jumpForce: 0.8
@@ -2432,6 +2469,8 @@ MonoBehaviour:
   dashDuration: 0.3
   dashCooldown: 1
   lastAttacker: {fileID: 0}
+  isJumpPressed: 0
+  dashFrontPressed: 0
   mystate: 0
   model: {fileID: 0}
   vidas: 3
