@@ -2446,6 +2446,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PatadaEffectPrefab: {fileID: 8442901411129158963, guid: e306a0b5c32f46948a7adde594860852, type: 3}
+  CagePrefab: {fileID: 1383231037179557638, guid: c91f570ca8e447e4ba3bde1f2199cfb7, type: 3}
   isGrounded: 0
   stunEffectPrefab: {fileID: 2360192096358823000, guid: 7911b2aecf6b9884993d7797158f133a, type: 3}
   dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: 12772a34ba0f2a84c8fe6acc6ac1e57e, type: 3}

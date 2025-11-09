@@ -12,6 +12,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private GameObject currentStunEffect;
     public GameObject PatadaEffectPrefab;
+    public GameObject CagePrefab;
 
     private Vector2 lastMoveInput;
     private Vector2 moveInput;
@@ -184,7 +185,7 @@ public class PlayerMovLocal : MonoBehaviour
             case States.Stunned: Stunned(); break;
             case States.Dead: Dead(); break;
             case States.Crouch: Crouch(); break;
-            case States.ClickBattle: ClickBattle(); break;
+            //case States.ClickBattle: ClickBattle(); break;
 
         }
     }
@@ -572,6 +573,8 @@ public class PlayerMovLocal : MonoBehaviour
     {
         mystate = newState;
         Debug.Log("Estado cambiado a: " + mystate);
+        if (newState == States.ClickBattle)
+            ClickBattle();
     }
 
     private void ResetInputs()
@@ -695,6 +698,11 @@ public class PlayerMovLocal : MonoBehaviour
     {
         StopMove();
         myAnimator.Play("IDLE");
+        Vector3 spawnPos = dashPointBack != null ? dashPointBack.position : transform.position + Vector3.up * 0.5f;
+        Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 0, 0);
+
+        GameObject fx = Instantiate(CagePrefab, spawnPos, spawnRot); 
+        
     }
     public bool CanReceiveInput => canReceiveInput;
 
