@@ -161,9 +161,14 @@ public class PlayerMovLocal : MonoBehaviour
             controller.Move(moveDir * moveSpeed * Time.deltaTime);
         }
 
+        
         // --- Movimiento vertical y gravedad ---
-        velocity.y += gravity * Time.deltaTime;
+        if (!isDashing)
+            velocity.y += gravity * Time.deltaTime;
+
         controller.Move(velocity * Time.deltaTime);
+
+
 
         // --- Máquina de estados ---
         switch (mystate)
@@ -331,10 +336,10 @@ public class PlayerMovLocal : MonoBehaviour
             isJumpPressed = false;
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
-           // ResetInputs();
-            StopMove2();
-            if (dashFrontPressed) SetState(States.DashFront);
-            else if (dashBackPressed) SetState(States.DashBack);
+        // ResetInputs();
+        StartCoroutine(BoostCoroutine(0.5f, 1f));
+        if (dashFrontPressed) SetState(States.DashFront);
+            if (dashBackPressed) SetState(States.DashBack);
             StartCoroutine(JumpRoutine());
 
 
@@ -342,12 +347,16 @@ public class PlayerMovLocal : MonoBehaviour
     private IEnumerator JumpRoutine()
     {
         // Espera un poco para evitar que vuelva a Idle enseguida
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.05f);
         SetState(States.Idle);
     }
     private void Fall()
     {
+        if (isAttacking)
+            SetState(States.AttackPatada);
         myAnimator.SetBool("Falling", true);
+        // StopMove2();
+        StartCoroutine(BoostCoroutine(0.5f, 0.5f));
 
         if (isGrounded)
         {
@@ -380,13 +389,23 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void AttackPatada()
     {
+        if (isGrounded)
+        {
+            isAttacking = false;
+            Debug.Log("Patada");
 
-        isAttacking = false;
-        Debug.Log("Patada");
-
-        myAnimator.Play("AttackPatada");
-        StopMove();
-        SetState(States.Idle);
+            myAnimator.Play("AttackPatada");
+            StopMove();
+            SetState(States.Idle);
+        }
+        else
+        {
+            isAttacking = false;
+            myAnimator.Play("AttackCircAire");
+            StopMove();
+            SetState(States.Idle);
+        }
+       
     }
 
     public void EnableVfxPatada()
@@ -440,6 +459,7 @@ public class PlayerMovLocal : MonoBehaviour
         if (!isDashing && canDash)
         {
             SpawnDashFrontFX();
+             StartCoroutine(BoostCoroutine(0.5f, 0.5f));
             StopMove();
             StartCoroutine(PerformDash(transform.forward, "DashFront",2.5f));
             
@@ -454,6 +474,7 @@ public class PlayerMovLocal : MonoBehaviour
         if (!isDashing && canDash)
         {
             SpawnDashBackFX();
+            StartCoroutine(BoostCoroutine(0.5f, 0.5f));
             StopMove();
             StartCoroutine(PerformDash(-transform.forward, "DashBack", 2.5f));
             
@@ -580,8 +601,7 @@ public class PlayerMovLocal : MonoBehaviour
         Vector3 targetPos = startPos + dashDirection.normalized * dashDistance;
 
         // Desactivamos gravedad durante el dash
-        float originalGravity = gravity;
-        gravity = 0f;
+        
 
         while (elapsedTime < dashTime)
         {
@@ -598,17 +618,19 @@ public class PlayerMovLocal : MonoBehaviour
             yield return null;
         }
 
-        // Restaurar gravedad
-        gravity = originalGravity;
 
-        // Pequeño cooldown
-        //  yield return new WaitForSeconds(dashCooldown);
+
 
         isDashing = false;
         canDash = true;
-        if (!isGrounded) SetState(States.Fall);
-        else SetState(States.Idle);
+
+        // Asegurar que no "rebote"
+        if (isGrounded)
+            velocity.y = -2f;
+
+        SetState(isGrounded ? States.Idle : States.Fall);
         ResetInputs();
+
     }
 
 
