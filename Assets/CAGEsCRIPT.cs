@@ -2,27 +2,23 @@
 
 public class CageScript : MonoBehaviour
 {
-    private Animator myAnimator;
+    public Animator myAnimator;
 
-    private void Start()
-    {
-        // busca el Animator en el mismo objeto o en hijos
-        myAnimator = GetComponent<Animator>();
-    }
+
 
     public void ClickBattleEnd()
     {
-        if (myAnimator == null)
+        Debug.Log("LALAL");
+
+        // Si el objeto está inactivo, lo activamos
+        if (!myAnimator.gameObject.activeInHierarchy)
         {
-            Debug.LogWarning("⚠️ No se encontró Animator en la jaula.");
-            return;
+            myAnimator.gameObject.SetActive(true);
         }
 
-        Debug.Log("LALAL");
-        myAnimator.Play("cAGEbACK");
+        // Ahora sí, reproducimos la animación
+        myAnimator.Play("CageBack");
     }
-    private void OnDestroy()
-    { 
-        Destroy(this.gameObject); 
-    }
+
+
 }
