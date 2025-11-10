@@ -14,7 +14,9 @@ public class ClickGameManager : MonoBehaviour
     private bool active = false;
     public Text battleText;
 
- 
+    public CageScript scriptCage;
+
+
     public PlayerMovLocal p1;
     public PlayerMovLocal p2;
 
@@ -84,5 +86,7 @@ public class ClickGameManager : MonoBehaviour
         battleSlider.gameObject.SetActive(false);
         battleText.gameObject.SetActive(false);
         Debug.Log($"Click battle won by: {winner.name}");
+        CageScript script = scriptCage.GetComponent<CageScript>();
+        script.ClickBattleEnd();
     }
 }

@@ -12,7 +12,9 @@ public class PlayerMovLocal : MonoBehaviour
 
     private GameObject currentStunEffect;
     public GameObject PatadaEffectPrefab;
-    public GameObject CagePrefab;
+    public  GameObject CagePrefab;
+
+    private static GameObject currentCage;
 
     private Vector2 lastMoveInput;
     private Vector2 moveInput;
@@ -694,16 +696,17 @@ public class PlayerMovLocal : MonoBehaviour
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
     }
-    public  void ClickBattle()
+    public void ClickBattle()
     {
+        if (currentCage != null) return; // ya hay una jaula en escena
+
         StopMove();
         myAnimator.Play("IDLE");
-        Vector3 spawnPos = dashPointBack != null ? dashPointBack.position : transform.position + Vector3.up * 0.5f;
-        Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 0, 0);
 
-        GameObject fx = Instantiate(CagePrefab, spawnPos, spawnRot); 
-        
+        Vector3 spawnPos = transform.position  ;
+        currentCage = Instantiate(CagePrefab, spawnPos, transform.rotation);
     }
+   
     public bool CanReceiveInput => canReceiveInput;
 
 }

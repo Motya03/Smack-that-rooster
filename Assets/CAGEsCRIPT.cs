@@ -1,24 +1,28 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CageScript : MonoBehaviour
 {
-    
+    private Animator myAnimator;
 
-    void OnCollisionEnter(Collision other)
+    private void Start()
     {
-        if (other.gameObject.CompareTag("Player"))
-        {
-            Collider mainCol = GetComponent<BoxCollider>();
-            Physics.IgnoreCollision(mainCol, other.collider, true);
-        }
+        // busca el Animator en el mismo objeto o en hijos
+        myAnimator = GetComponent<Animator>();
     }
 
-    void OnCollisionExit(Collision col)
+    public void ClickBattleEnd()
     {
-        if (col.gameObject.CompareTag("Player"))
+        if (myAnimator == null)
         {
-            Collider mainCol = GetComponent<BoxCollider>();
-            Physics.IgnoreCollision(mainCol, col.collider, false);
+            Debug.LogWarning("⚠️ No se encontró Animator en la jaula.");
+            return;
         }
+
+        Debug.Log("LALAL");
+        myAnimator.Play("cAGEbACK");
+    }
+    private void OnDestroy()
+    { 
+        Destroy(this.gameObject); 
     }
 }

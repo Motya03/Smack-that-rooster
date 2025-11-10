@@ -1577,7 +1577,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -32.32483, y: -14.8498535}
+  m_AnchoredPosition: {x: -32.324707, y: -14.8498535}
   m_SizeDelta: {x: 13.049978, y: 282.6998}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &264001036
@@ -2665,6 +2665,7 @@ MonoBehaviour:
   clickPower: 0.02
   decaySpeed: 0.01
   battleText: {fileID: 767854848}
+  scriptCage: {fileID: 3602489737392908745, guid: 46bf547fcd8c5c4468cf80bad139ee93, type: 3}
   p1: {fileID: 0}
   p2: {fileID: 0}
 --- !u!4 &464868090
