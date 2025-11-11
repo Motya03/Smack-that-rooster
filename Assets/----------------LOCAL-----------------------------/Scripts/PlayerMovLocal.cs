@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -705,8 +706,36 @@ public class PlayerMovLocal : MonoBehaviour
 
         Vector3 spawnPos = transform.position  ;
         currentCage = Instantiate(CagePrefab, spawnPos, transform.rotation);
+       
     }
-   
+    public void CageGone()
+    {
+        Debug.Log($"CageGone called by: {name}");
+
+        if (currentCage == null)
+        {
+            Debug.LogWarning("No active cage in scene!");
+            return;
+        }
+
+        CageScript script = currentCage.GetComponentInChildren<CageScript>();
+        if (script != null)
+        {
+            script.ClickBattleEnd();
+        }
+        else
+        {
+            Debug.LogWarning("No CageScript found on current cage!");
+        }
+
+        // Optional: destroy cage after animation delay
+        
+        currentCage = null;
+    }
+
+
+
+
     public bool CanReceiveInput => canReceiveInput;
 
 }

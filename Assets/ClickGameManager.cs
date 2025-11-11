@@ -14,7 +14,7 @@ public class ClickGameManager : MonoBehaviour
     private bool active = false;
     public Text battleText;
 
-    public CageScript scriptCage;
+    public GameObject Cage;
 
 
     public PlayerMovLocal p1;
@@ -38,7 +38,7 @@ public class ClickGameManager : MonoBehaviour
 
         value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
         battleSlider.value = value;
-        battleText.text = value.ToString();
+        battleText.text = $"{value * 100f:F0}%";
 
 
 
@@ -86,7 +86,7 @@ public class ClickGameManager : MonoBehaviour
         battleSlider.gameObject.SetActive(false);
         battleText.gameObject.SetActive(false);
         Debug.Log($"Click battle won by: {winner.name}");
-        CageScript script = scriptCage.GetComponent<CageScript>();
-        script.ClickBattleEnd();
+        if (winner != null)
+            winner.CageGone();
     }
 }

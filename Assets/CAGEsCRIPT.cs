@@ -20,5 +20,9 @@ public class CageScript : MonoBehaviour
         myAnimator.Play("CageBack");
     }
 
+    private void OnDestroy()
+    {
+        Destroy(this.gameObject);
+    }
 
 }
