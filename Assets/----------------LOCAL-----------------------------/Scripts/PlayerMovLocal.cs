@@ -507,6 +507,15 @@ public class PlayerMovLocal : MonoBehaviour
 
 
     }
+    private void StunEffect()
+    {
+        if (currentStunEffect == null)
+        {
+            Vector3 spawnPos = transform.position + Vector3.up * 0.7f;
+            currentStunEffect = Instantiate(stunEffectPrefab, spawnPos, Quaternion.identity, transform);
+            currentStunEffect.transform.localRotation = Quaternion.identity;
+        }
+    }
 
     public void AnimStunStop()
     {
