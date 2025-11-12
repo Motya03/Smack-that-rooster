@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 //using UnityEngine.UIElements;
 
@@ -16,7 +17,7 @@ public class ClickGameManager : MonoBehaviour
 
     public GameObject Cage;
 
-
+    public static int lives;
     public PlayerMovLocal p1;
     public PlayerMovLocal p2;
 
@@ -56,13 +57,17 @@ public class ClickGameManager : MonoBehaviour
         p2 = player2;
         p1.SetState(PlayerMovLocal.States.ClickBattle);
         p2.SetState(PlayerMovLocal.States.ClickBattle);
+        StartCoroutine(CanvasApear(1f));
+    }
+    private IEnumerator CanvasApear(float duration)
+    {
+        yield return new WaitForSeconds(duration);
         value = 0.5f;
         battleSlider.value = value;
         active = true;
         battleSlider.gameObject.SetActive(true);
         battleText.gameObject.SetActive(true);
     }
-
     public void RegisterClick(PlayerMovLocal who)
     {
         if (!active) return;
@@ -80,8 +85,46 @@ public class ClickGameManager : MonoBehaviour
     public void EndBattle(PlayerMovLocal winner)
     {
         PlayerMovLocal loser = (winner == p1) ? p2 : p1;
-        if (loser != null) loser.SetState(PlayerMovLocal.States.Dead);
-        if (winner != null) winner.SetState(PlayerMovLocal.States.Idle);
+        if (loser != null)
+        {
+            if (loser.vidas > 0)
+            {
+                
+                loser.SetState(PlayerMovLocal.States.Idle);
+                loser.ResetInputs();
+            }
+            // Si el jugador no tiene vidas y tampoco tiene "segunda oportunidad"
+            else if (loser.vidas <= 0 )
+            {
+                loser.SetState(PlayerMovLocal.States.Dead);
+                Debug.Log($"{loser.name} ha perdido y no tenía segunda oportunidad.");
+            }
+
+
+            // Si tenía vidas == 0 pero sí tenía una segunda oportunidad
+           // else if ((loser.vidas <= 0 && loser.lives > 0))
+          //  {
+          //      // Pierde su segunda oportunidad
+          //      loser.lives--;
+          //      loser.ResetVidas(); // restaurar 3 vidas
+          //      loser.SetState(PlayerMovLocal.States.Idle);
+          //      Debug.Log($"{loser.name} usó su segunda oportunidad. Le quedan {loser.lives} oportunidades.");
+          //  }
+        }
+
+        
+   
+            if ((winner.vidas <= 0 && winner.lives > 0))
+            {
+                winner.lives--;
+                winner.ResetVidas(); // restaurar 3 vidas
+                winner.SetState(PlayerMovLocal.States.Idle);
+                winner.ResetInputs();
+            }
+
+        
+        winner.ResetInputs();
+        winner.SetState(PlayerMovLocal.States.Idle);
         active = false;
         battleSlider.gameObject.SetActive(false);
         battleText.gameObject.SetActive(false);

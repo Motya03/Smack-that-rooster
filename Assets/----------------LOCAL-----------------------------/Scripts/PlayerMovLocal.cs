@@ -56,10 +56,12 @@ public class PlayerMovLocal : MonoBehaviour
 
     [Header("ClickGame")]
     public PlayerMovLocal lastAttacker;
-
+    
     private float currentVelocity;
     private float defaultSpeed;
     private Coroutine boostCoroutine;
+
+    
 
     private bool isMoving;
     private bool isAttacking;
@@ -82,6 +84,8 @@ public class PlayerMovLocal : MonoBehaviour
 
     [Header("Vida y Daño")]
     public int vidas = 3;
+
+    public  int lives = 1;
     // REFERENCIA AL HealthSystem del UI que se asignará en StartGame del LobbyJoinManager
     [HideInInspector] public HealthSystem uiHealth;
 
@@ -589,7 +593,7 @@ public class PlayerMovLocal : MonoBehaviour
             ClickBattle();
     }
 
-    private void ResetInputs()
+    public void ResetInputs()
     {
         isCrouchPressed = false;
         isAttacking = false;
@@ -658,31 +662,44 @@ public class PlayerMovLocal : MonoBehaviour
     public void TakeHit(int damage, PlayerMovLocal attacker)
     {
         lastAttacker = attacker;
-        // Prioriza la UI asignada (que controla sprites y parpadeo).
+
+        // Actualizar UI y vida
         if (uiHealth != null)
         {
             uiHealth.TakeDamage(damage);
-            vidas = uiHealth.health; // opcional, sincronizar valor local con UI
+            vidas = uiHealth.health;
         }
         else
         {
-            // fallback si no está asignado (por si algo falla)
-            vidas--;
+            vidas -= damage;
         }
 
         Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
 
+        // 🔻 Si las vidas bajan a 0
         if (vidas <= 0)
         {
-            FindFirstObjectByType<ClickGameManager>().StartBattle(lastAttacker, this);
-           // SetState(States.Dead);
+            // Si aún tiene "vida extra", entra a click battle
+            if (lives > 0)
+            {
+                FindFirstObjectByType<ClickGameManager>().StartBattle(lastAttacker, this);
+            }
+            else
+            {
+                // Si ya no tiene vidas extra, muere directamente
+                SetState(States.Dead);
+            }
         }
         else
         {
+            // Pequeño retroceso o animación de daño
             myAnimator.SetBool("Hit", true);
-            StartCoroutine(PerformDash(transform.forward, "DashFront",1.5f));
+            StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
         }
     }
+
+   
+
 
 
     private void OnDestroy()
@@ -743,7 +760,12 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
 
-
+    public void ResetVidas()
+    {
+        vidas = 3;
+        if (uiHealth != null)
+            uiHealth.ResetHealth();
+    }
 
     public bool CanReceiveInput => canReceiveInput;
 

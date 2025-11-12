@@ -5,6 +5,8 @@ public class HealthSystem : MonoBehaviour
 {
     [Header("Vida (UI)")]
     public int maxHealth = 3;
+   
+
 
     [HideInInspector] public int health;
 
@@ -23,12 +25,17 @@ public class HealthSystem : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
+        
+        
         health -= amount;
         health = Mathf.Clamp(health, 0, maxHealth);
         UpdateHearts();
 
         if (heartFlash != null)
             heartFlash.FlashHearts();
+
+        
+
     }
 
     public void Heal(int amount)
