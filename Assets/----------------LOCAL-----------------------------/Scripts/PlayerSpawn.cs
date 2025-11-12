@@ -11,6 +11,9 @@ public class PlayerSpawn : MonoBehaviour
     // 🔹 Guardaremos todos los jugadores que se unan
     public static List<PlayerInput> joinedPlayers = new List<PlayerInput>();
 
+    [SerializeField] private Material[] outlineMaterials;
+
+
     public void OnPlayerJoined(PlayerInput playerInput)
     {
         StartCoroutine(PlacePlayerNextFrame(playerInput));
@@ -47,6 +50,38 @@ public class PlayerSpawn : MonoBehaviour
         TogglePlayerControl(playerInput, false);
 
         Debug.Log($"Jugador {playerInput.playerIndex} spawneado en {spawn.name}");
+
+
+        // 🔹 Buscar el mesh dentro del prefab (por nombre o por tipo)
+        Transform meshChild = playerInput.transform.Find("Sphere.001");
+        if (meshChild != null)
+        {
+            // 🔹 Buscar el componente de render (MeshRenderer o SkinnedMeshRenderer)
+            Renderer renderer = meshChild.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                List<Material> mats = new List<Material>(renderer.sharedMaterials);
+
+                if (mats.Count == 1)
+                    mats.Add(outlineMaterials[playerInput.playerIndex]);
+                else
+                    mats[1] = outlineMaterials[playerInput.playerIndex];
+
+                renderer.materials = mats.ToArray();
+
+                Debug.Log($"🟢 Asignado outline {outlineMaterials[playerInput.playerIndex].name} al jugador {playerInput.playerIndex}");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ No se encontró Renderer en {meshChild.name}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ No se encontró el objeto 'Sphere.001' en el prefab del jugador {playerInput.playerIndex}");
+        }
+
+
     }
 
     private int GetUniqueRandomIndex()

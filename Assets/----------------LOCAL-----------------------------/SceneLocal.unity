@@ -5031,6 +5031,11 @@ MonoBehaviour:
   spawnPoints:
   - {fileID: 12199484}
   - {fileID: 1981607109}
+  outlineMaterials:
+  - {fileID: 2100000, guid: fb0773543fba86f4d808c0fff64e550e, type: 2}
+  - {fileID: 2100000, guid: e57a2e593c512764b8be4126d024ac9d, type: 2}
+  - {fileID: 2100000, guid: 8377a480df77528428f77b5f9d5b2030, type: 2}
+  - {fileID: 2100000, guid: be7c91412fa4d094e84aa81cc54c00dc, type: 2}
 --- !u!4 &954400705
 Transform:
   m_ObjectHideFlags: 0
