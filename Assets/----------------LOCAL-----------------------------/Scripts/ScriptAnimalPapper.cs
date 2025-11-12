@@ -1,36 +1,28 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
-public class RandomNavMeshWanderAuto : MonoBehaviour
+public class RandomNavMeshWanderAuto_NoWait : MonoBehaviour
 {
-    public float waitTime = 2f;   // Tiempo de espera entre destinos
     private NavMeshAgent agent;
-    private float timer;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        timer = waitTime;
         MoveToRandomPoint();
     }
 
     void Update()
     {
-        // Cuando llega a destino, espera un poco y elige otro punto
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        // Si está a menos de 1 metro del destino, elige un nuevo punto
+        if (!agent.pathPending && agent.remainingDistance <= 1f)
         {
-            timer -= Time.deltaTime;
-            if (timer <= 0f)
-            {
-                MoveToRandomPoint();
-                timer = waitTime;
-            }
+            MoveToRandomPoint();
         }
     }
 
     void MoveToRandomPoint()
     {
-        // Obtener la geometría del NavMesh actual
+        // Obtener toda la geometría del NavMesh
         NavMeshTriangulation navMeshData = NavMesh.CalculateTriangulation();
 
         // Elegir un triángulo aleatorio
@@ -43,11 +35,11 @@ public class RandomNavMeshWanderAuto : MonoBehaviour
             navMeshData.vertices[navMeshData.indices[vertexIndex + 2]]
         );
 
-        // Enviar al agente al punto elegido
+        // Enviar al agente hacia ese punto
         agent.SetDestination(point);
     }
 
-    // Genera un punto aleatorio dentro de un triángulo 3D
+    // Genera un punto aleatorio dentro de un triángulo
     Vector3 RandomPointInTriangle(Vector3 a, Vector3 b, Vector3 c)
     {
         float r1 = Mathf.Sqrt(Random.value);
