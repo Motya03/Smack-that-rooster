@@ -71,14 +71,21 @@ public class ClickGameManager : MonoBehaviour
         active = true;
         battleSlider.gameObject.SetActive(true);
         battleText.gameObject.SetActive(true);
-        // Llamar al temporizador
+
         if (timerClickGame != null)
         {
-            timerClickGame.gameObject.SetActive(true); // Activa todo el objeto del timer
-            timerClickGame.ReiniciarTemporizador(); // Nuevo método que puedes crear
-        }
+            // Desuscribimos cualquier evento anterior, por seguridad
+            timerClickGame.OnTimerEnd = null;
 
+            // Nos suscribimos al evento de finalización
+            timerClickGame.OnTimerEnd += HandleTimerEnded;
+
+            // Activamos el timer
+            timerClickGame.gameObject.SetActive(true);
+            timerClickGame.ReiniciarTemporizador();
+        }
     }
+
     public void RegisterClick(PlayerMovLocal who)
     {
         if (!active) return;
@@ -95,6 +102,12 @@ public class ClickGameManager : MonoBehaviour
 
     public void EndBattle(PlayerMovLocal winner)
     {
+        if (timerClickGame != null)
+        {
+            timerClickGame.DetenerTemporizador(); // 🔹 Detenemos el timer cuando alguien gana
+        }
+
+
         PlayerMovLocal loser = (winner == p1) ? p2 : p1;
         if (loser != null)
         {
@@ -143,4 +156,20 @@ public class ClickGameManager : MonoBehaviour
         if (winner != null)
             winner.CageGone();
     }
+    private void HandleTimerEnded()
+    {
+        Debug.Log("El tiempo del Click Battle ha terminado.");
+
+        if (!active) return; // si ya terminó por otra razón, no repetir
+
+        // Determinar quién va ganando según el valor del slider
+        PlayerMovLocal winner;
+        if (value >= 0.5f)
+            winner = p1;
+        else
+            winner = p2;
+
+        EndBattle(winner);
+    }
+
 }

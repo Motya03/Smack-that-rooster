@@ -7,7 +7,7 @@ public class TimerClickGame : MonoBehaviour
     [SerializeField] private Text timerText;
 
     [Header("Configuración")]
-    [SerializeField] private float duration = 60f; // segundos
+    [SerializeField] private float duration = 15f; // segundos
 
     private float tiempoRestante;
     private bool temporizadorActivo = false;
@@ -47,19 +47,35 @@ public class TimerClickGame : MonoBehaviour
 
     private void ActualizarTextoTemporizador()
     {
-        int minutos = Mathf.FloorToInt(tiempoRestante / 60);
-        int segundos = Mathf.FloorToInt(tiempoRestante % 60);
+        int segundos = Mathf.CeilToInt(tiempoRestante); // redondea hacia arriba para que no muestre 59.9 → 59
 
         if (timerText != null)
-            timerText.text = string.Format("{0:00}:{1:00}", minutos, segundos);
+            timerText.text = segundos.ToString("00"); // muestra por ejemplo: 05, 14, 32...
     }
+
+    public System.Action OnTimerEnd; // <- Evento público para avisar cuando termina el tiempo
 
     private void TemporizadorFinalizado()
     {
         Debug.Log("¡El temporizador ha finalizado!");
 
-        // 🔹 Oculta el texto al terminar
+        // 🔹 Avisamos al GameManager que terminó el tiempo
+        OnTimerEnd?.Invoke();
+
+        // 🔹 Ocultamos el texto
         if (timerText != null)
             timerText.gameObject.SetActive(false);
     }
+    public void DetenerTemporizador()
+    {
+        temporizadorActivo = false;
+
+        // Ocultamos el texto
+        if (timerText != null)
+            timerText.gameObject.SetActive(false);
+
+        Debug.Log("Temporizador detenido manualmente.");
+    }
+
+
 }
