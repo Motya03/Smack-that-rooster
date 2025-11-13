@@ -1577,7 +1577,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -32.324707, y: -14.8498535}
+  m_AnchoredPosition: {x: -32.324585, y: -14.8498535}
   m_SizeDelta: {x: 13.049978, y: 282.6998}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &264001036
@@ -2668,6 +2668,7 @@ MonoBehaviour:
   Cage: {fileID: 1383231037179557638, guid: c91f570ca8e447e4ba3bde1f2199cfb7, type: 3}
   p1: {fileID: 0}
   p2: {fileID: 0}
+  timerClickGame: {fileID: 1364288532}
 --- !u!4 &464868090
 Transform:
   m_ObjectHideFlags: 0
@@ -2783,7 +2784,7 @@ RectTransform:
   m_GameObject: {fileID: 479854755}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3.9523, y: 3.9523, z: 3.9523}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 443526338}
@@ -2792,9 +2793,9 @@ RectTransform:
   - {fileID: 712831269}
   m_Father: {fileID: 1364288531}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -251, y: -413}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -150.61, y: 67}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &479854757
@@ -4259,7 +4260,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 41.81142, y: 10.493988}
+  m_AnchoredPosition: {x: 41.81142, y: 10.494019}
   m_SizeDelta: {x: 222.8487, y: 9.7945}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &716010971
@@ -4640,9 +4641,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1364288531}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -9, y: -153}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: -9, y: 233.29999}
   m_SizeDelta: {x: 487.209, y: 162.59442}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &767854848
@@ -6588,6 +6589,85 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1687553157}
   m_SourcePrefab: {fileID: 100100000, guid: 12e8c1bf0e4669548bb40c278f9bb82a, type: 3}
+--- !u!1 &1127664801
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1127664802}
+  - component: {fileID: 1127664804}
+  - component: {fileID: 1127664803}
+  m_Layer: 5
+  m_Name: TimerClick
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1127664802
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127664801}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1364288531}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 211.20001, y: 96.600006}
+  m_SizeDelta: {x: 400.5, y: 148.65}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1127664803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127664801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 12800000, guid: 379faef6a95aa440781f3873babe4887, type: 3}
+    m_FontSize: 79
+    m_FontStyle: 1
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 88
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 00:00
+--- !u!222 &1127664804
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127664801}
+  m_CullTransparentMesh: 1
 --- !u!1 &1128857424 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3849762623622064168, guid: 12e8c1bf0e4669548bb40c278f9bb82a, type: 3}
@@ -7662,13 +7742,14 @@ GameObject:
   - component: {fileID: 1364288530}
   - component: {fileID: 1364288529}
   - component: {fileID: 1364288528}
+  - component: {fileID: 1364288532}
   m_Layer: 5
   m_Name: ClickBattle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1364288528
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7727,7 +7808,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -7746,6 +7827,7 @@ RectTransform:
   m_Children:
   - {fileID: 479854756}
   - {fileID: 767854847}
+  - {fileID: 1127664802}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7753,6 +7835,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1364288532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1364288527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f7134c37da17214e9831ca4fb0c0dde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timerText: {fileID: 1127664803}
+  duration: 10
+  principio: 0
 --- !u!1001 &1364989260
 PrefabInstance:
   m_ObjectHideFlags: 0

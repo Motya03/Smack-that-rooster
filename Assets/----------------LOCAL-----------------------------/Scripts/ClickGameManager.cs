@@ -21,6 +21,10 @@ public class ClickGameManager : MonoBehaviour
     public PlayerMovLocal p1;
     public PlayerMovLocal p2;
 
+    [Header("Timer")]
+    public TimerClickGame timerClickGame; // Referencia al script TimerClickGame
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -67,6 +71,13 @@ public class ClickGameManager : MonoBehaviour
         active = true;
         battleSlider.gameObject.SetActive(true);
         battleText.gameObject.SetActive(true);
+        // Llamar al temporizador
+        if (timerClickGame != null)
+        {
+            timerClickGame.gameObject.SetActive(true); // Activa todo el objeto del timer
+            timerClickGame.ReiniciarTemporizador(); // Nuevo método que puedes crear
+        }
+
     }
     public void RegisterClick(PlayerMovLocal who)
     {
