@@ -1,144 +1,185 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class GameManagerLocal : MonoBehaviour
 {
     [Header("Referencias")]
-    [SerializeField] private TimerLocal timer;           // Referencia al temporizador
-    [SerializeField] private GameObject[] playerPopups;  // Pop-ups individuales por jugador
-    [SerializeField] private Text winnerText;            // Texto compartido
-    [SerializeField] private GameObject canvasWinner;    // Canvas que se activa al final del juego
+    [SerializeField] private TimerLocal timer;
+    [SerializeField] private GameObject[] playerPopups;
+    [SerializeField] private Text winnerText;
+    [SerializeField] private GameObject canvasWinner;
 
+    [Header("Canvas Gameplay (HUD Local)")]
+    [SerializeField] private GameObject canvasLocal;
+
+    private bool gameStarted = false;
     private bool gameEnded = false;
     private bool isSuddenDeath = false;
 
+    // 🔥 Indica si el click battle está activo
+    private bool clickerActive = false;
+    public void SetClickerState(bool state) => clickerActive = state;
+
     private void Start()
     {
-        // Desactivar pop-ups y canvas al inicio
-        foreach (var popup in playerPopups)
-            popup.SetActive(false);
+        // Se apaga todo al iniciar
+        foreach (var p in playerPopups)
+            p.SetActive(false);
 
         if (canvasWinner != null)
             canvasWinner.SetActive(false);
-
-        // Escuchar el evento del temporizador
-        if (timer != null)
-            timer.onFinished.AddListener(OnTimerFinished);
     }
+
+    // 🔥 Activado desde LobbyJoinManager cuando presionan START
+    public void ActivateGame()
+    {
+        if (gameStarted) return;
+
+        gameStarted = true;
+        Debug.Log("🏁 GameManagerLocal ACTIVADO");
+
+        if (timer != null)
+        {
+            timer.onFinished.AddListener(OnTimerFinished);
+            timer.ResetTimer();
+        }
+    }
+
     private void Update()
     {
-        if (!gameEnded)
-            CheckRemainingPlayers();
+        if (!gameStarted || gameEnded)
+            return;
+
+        // ⛔ No revisar nada mientras haya click battle
+        if (clickerActive)
+            return;
+
+        CheckRemainingPlayers();
     }
 
-    // Revisa cuántos jugadores siguen vivos
+    // -----------------------------------------------------
+    // 🔍 Revisa cuántos jugadores siguen vivos
+    // -----------------------------------------------------
     public void CheckRemainingPlayers()
     {
-        int aliveCount = 0;
-        int lastAliveIndex = -1;
+        int alive = 0;
+        int lastAlive = -1;
 
         for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
         {
-            var playerObj = PlayerSpawn.joinedPlayers[i];
-            if (!playerObj) continue;
+            GameObject obj = PlayerSpawn.joinedPlayers[i];
+            if (!obj) continue;
 
-            var player = playerObj.GetComponent<PlayerMovLocal>();
-            if (player == null) continue;
+            PlayerMovLocal p = obj.GetComponent<PlayerMovLocal>();
+            if (!p) continue;
 
-            // Solo cuenta jugadores con vida y que no estén marcados como definitivamente muertos
-            if (player.uiHealth != null && player.uiHealth.health > 0 && !player.isDefinitivelyDead)
+            if (p.uiHealth != null &&
+                p.uiHealth.health > 0 &&
+                !p.isDefinitivelyDead)
             {
-                aliveCount++;
-                lastAliveIndex = i;
+                alive++;
+                lastAlive = i;
             }
         }
 
-        // Si solo queda uno vivo, termina el juego
-        if (aliveCount == 1 && lastAliveIndex != -1)
-        {
-            EndGame(lastAliveIndex);
-        }
+        if (alive == 1 && lastAlive != -1)
+            EndGame(lastAlive);
     }
 
-    // Se ejecuta automáticamente cuando el temporizador llega a 0
+    // -----------------------------------------------------
+    // ⏳ Cuando el timer llega a 0
+    // -----------------------------------------------------
     private void OnTimerFinished()
     {
-        if (gameEnded) return;
+        if (gameEnded || clickerActive)
+            return;
 
-        int aliveCount = CountAlivePlayers();
+        int alive = CountAlivePlayers();
 
-        if (aliveCount >= 2 && !isSuddenDeath)
+        if (alive >= 2 && !isSuddenDeath)
         {
             ActivateSuddenDeath();
+            return;
         }
-        else if (aliveCount >= 2 && isSuddenDeath)
+
+        if (alive >= 2 && isSuddenDeath)
         {
-            EndGame(-2); // empate final
+            EndGame(GetWinnerIndexByHealth());
+            return;
         }
-        else
-        {
-            int winnerIndex = GetWinnerIndexByHealth();
-            EndGame(winnerIndex);
-        }
+
+        EndGame(GetWinnerIndexByHealth());
     }
 
-    // Cuenta los jugadores activos y no definitivamente muertos
     private int CountAlivePlayers()
     {
         int count = 0;
 
-        for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
+        foreach (var obj in PlayerSpawn.joinedPlayers)
         {
-            var playerObj = PlayerSpawn.joinedPlayers[i];
-            if (!playerObj) continue;
+            if (!obj) continue;
 
-            var player = playerObj.GetComponent<PlayerMovLocal>();
-            if (player != null && player.uiHealth != null && player.uiHealth.health > 0 && !player.isDefinitivelyDead)
+            PlayerMovLocal p = obj.GetComponent<PlayerMovLocal>();
+            if (!p) continue;
+
+            if (p.uiHealth != null &&
+                p.uiHealth.health > 0 &&
+                !p.isDefinitivelyDead)
                 count++;
         }
 
         return count;
     }
 
-    // Determina el jugador con más vida
+    // -----------------------------------------------------
+    // ❤️ Ganador por salud (sin empates)
+    // -----------------------------------------------------
     private int GetWinnerIndexByHealth()
     {
         int maxHealth = -1;
-        int winnerIndex = -1;
-        bool empate = false;
+        List<int> candidates = new List<int>();
 
         for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
         {
-            var playerObj = PlayerSpawn.joinedPlayers[i];
-            if (!playerObj) continue;
+            GameObject obj = PlayerSpawn.joinedPlayers[i];
+            if (!obj) continue;
 
-            var player = playerObj.GetComponent<PlayerMovLocal>();
-            if (player == null || player.uiHealth == null || player.isDefinitivelyDead) continue;
+            PlayerMovLocal p = obj.GetComponent<PlayerMovLocal>();
+            if (!p || p.isDefinitivelyDead || p.uiHealth == null) continue;
 
-            int h = player.uiHealth.health;
+            int h = p.uiHealth.health;
+
             if (h > maxHealth)
             {
                 maxHealth = h;
-                winnerIndex = i;
-                empate = false;
+                candidates.Clear();
+                candidates.Add(i);
             }
             else if (h == maxHealth)
             {
-                empate = true;
+                candidates.Add(i);
             }
         }
 
-        return empate ? -2 : winnerIndex;
+        // 🔥 Si hay empate → elegir uno aleatorio (sin empates finales)
+        if (candidates.Count > 1)
+            return candidates[Random.Range(0, candidates.Count)];
+
+        return candidates.Count == 1 ? candidates[0] : 0;
     }
 
-    // Activa la fase de Muerte Súbita
+    // -----------------------------------------------------
+    // ⚡ Activar muerte súbita
+    // -----------------------------------------------------
     private void ActivateSuddenDeath()
     {
         isSuddenDeath = true;
-        Debug.Log("Muerte súbita activada.");
+
+        Debug.Log("⚡ Muerte súbita activada");
 
         if (winnerText != null)
-            winnerText.text = "Muerte súbita";
+            winnerText.text = "Muerte Súbita";
 
         if (timer != null)
         {
@@ -148,39 +189,41 @@ public class GameManagerLocal : MonoBehaviour
         }
     }
 
-    // Finaliza la partida
+    // -----------------------------------------------------
+    // 🏆 Final de partida
+    // -----------------------------------------------------
     private void EndGame(int winnerIndex)
     {
+        if (gameEnded) return;
+
         gameEnded = true;
 
         // Desactivar control de jugadores
-        foreach (var player in PlayerSpawn.joinedPlayers)
-            PlayerSpawn.TogglePlayerControl(player, false);
+        foreach (var obj in PlayerSpawn.joinedPlayers)
+            PlayerSpawn.TogglePlayerControl(obj, false);
 
-        // Apagar todos los pop-ups
-        foreach (var popup in playerPopups)
-            popup.SetActive(false);
+        // Apagar popups individuales
+        foreach (var p in playerPopups)
+            p.SetActive(false);
 
-        string message;
+        // Mensaje ganador
+        string msg = $"Ganador: Jugador {winnerIndex + 1}";
 
-        if (winnerIndex == -2)
-        {
-            message = "Empate final";
-        }
-        else
-        {
-            message = $"Ganador: Jugador {winnerIndex + 1}";
-            if (winnerIndex >= 0 && winnerIndex < playerPopups.Length)
-                playerPopups[winnerIndex].SetActive(true);
-        }
+        // Mostrar popup del ganador
+        if (winnerIndex >= 0 && winnerIndex < playerPopups.Length)
+            playerPopups[winnerIndex].SetActive(true);
 
-        // Mostrar texto y activar Canvas Winner
+        // 🔥 DESACTIVAR HUD LOCAL
+        if (canvasLocal != null)
+            canvasLocal.SetActive(false);
+
+        // 🔥 ACTIVAR CANVAS GANADOR
         if (winnerText != null)
-            winnerText.text = message;
+            winnerText.text = msg;
 
         if (canvasWinner != null)
             canvasWinner.SetActive(true);
 
-        Debug.Log("Fin de la partida -> " + message);
+        Debug.Log("🎉 FIN DE PARTIDA → " + msg);
     }
 }

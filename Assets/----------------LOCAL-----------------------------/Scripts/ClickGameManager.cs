@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-//using UnityEngine.UIElements;
 
 public class ClickGameManager : MonoBehaviour
 {
@@ -15,17 +14,13 @@ public class ClickGameManager : MonoBehaviour
     private bool active = false;
     public Text battleText;
 
-    public GameObject Cage;
-
-    public static int lives;
-    public PlayerMovLocal p1;
-    public PlayerMovLocal p2;
-
-    public static GameManagerLocal gamemanagerlocal;
+    public PlayerMovLocal attacker;   // EL QUE HIZO KO
+    public PlayerMovLocal knocked;    // EL KO
 
     [Header("Timer")]
-    public TimerClickGame timerClickGame; // Referencia al script TimerClickGame
+    public TimerClickGame timerClickGame;
 
+    public GameManagerLocal gamemanagerlocal;
 
     private void Awake()
     {
@@ -34,55 +29,59 @@ public class ClickGameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
+
+        if (gamemanagerlocal == null)
+            gamemanagerlocal = FindFirstObjectByType<GameManagerLocal>();
     }
 
     private void Update()
     {
-
-       
         if (!active) return;
 
         value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
         battleSlider.value = value;
         battleText.text = $"{value * 100f:F0}%";
 
-
-
         if (value <= 0.01f)
-            EndBattle(p2);
+            EndBattle(attacker);
+
         else if (value >= 0.99f)
-            EndBattle(p1);
-        Debug.Log($"Value: {value} / Slider: {battleSlider.value}");
+            EndBattle(knocked);
     }
 
-    public void StartBattle(PlayerMovLocal player1, PlayerMovLocal player2)
+    // attacker = el que golpeó
+    // knocked = el que llegó a 0 HP
+    public void StartBattle(PlayerMovLocal atk, PlayerMovLocal kn)
     {
-       
-        p1 = player1;
-        p2 = player2;
-        p1.SetState(PlayerMovLocal.States.ClickBattle);
-        p2.SetState(PlayerMovLocal.States.ClickBattle);
+        attacker = atk;
+        knocked = kn;
+
+        // 🔥 Bloquear la lógica del GameManager
+        gamemanagerlocal.SetClickerState(true);
+
+        attacker.SetState(PlayerMovLocal.States.ClickBattle);
+        knocked.SetState(PlayerMovLocal.States.ClickBattle);
+
         StartCoroutine(CanvasApear(1f));
     }
+
     private IEnumerator CanvasApear(float duration)
     {
         yield return new WaitForSeconds(duration);
+
         value = 0.5f;
         battleSlider.value = value;
         active = true;
+
         battleSlider.gameObject.SetActive(true);
         battleText.gameObject.SetActive(true);
 
         if (timerClickGame != null)
         {
-            // Desuscribimos cualquier evento anterior, por seguridad
             timerClickGame.OnTimerEnd = null;
-
-            // Nos suscribimos al evento de finalización
             timerClickGame.OnTimerEnd += HandleTimerEnded;
-
-            // Activamos el timer
             timerClickGame.gameObject.SetActive(true);
             timerClickGame.ReiniciarTemporizador();
         }
@@ -92,89 +91,72 @@ public class ClickGameManager : MonoBehaviour
     {
         if (!active) return;
 
-        if (who == p1)
-            value += clickPower;
-        else if (who == p2)
-            value -= clickPower;
+        if (who == attacker) value -= clickPower;   // attacker empuja hacia 0%
+        else if (who == knocked) value += clickPower; // knocked empuja hacia 100%
 
         value = Mathf.Clamp01(value);
         battleSlider.value = value;
-        battleText.text = value.ToString();
+        battleText.text = $"{value * 100f:F0}%";
     }
 
     public void EndBattle(PlayerMovLocal winner)
     {
         if (timerClickGame != null)
+            timerClickGame.DetenerTemporizador();
+
+        PlayerMovLocal loser = (winner == attacker) ? knocked : attacker;
+
+        // ------------------------------------
+        // SI GANA EL ATTACKER → KNOCKED MUERE
+        // ------------------------------------
+        if (winner == attacker)
         {
-            timerClickGame.DetenerTemporizador(); // 🔹 Detenemos el timer cuando alguien gana
-        }
+            knocked.isDefinitivelyDead = true;
+            knocked.SetState(PlayerMovLocal.States.Dead);
 
+            Debug.Log($"❌ {knocked.name} murió definitivamente por perder el click battle.");
 
-        PlayerMovLocal loser = (winner == p1) ? p2 : p1;
-        if (loser != null)
-        {
-            if (loser.vidas > 0)
-            {
-                
-                loser.SetState(PlayerMovLocal.States.Idle);
-                loser.ResetInputs();
-            }
-            // Si el jugador no tiene vidas y tampoco tiene "segunda oportunidad"
-            else if (loser.vidas <= 0 )
-            {
-                loser.SetState(PlayerMovLocal.States.Dead);
-                Debug.Log($"{loser.name} ha perdido y no tenía segunda oportunidad.");
-                // Llamar al GameManager
-                gamemanagerlocal.CheckRemainingPlayers();
+            active = false;
+            battleSlider.gameObject.SetActive(false);
+            battleText.gameObject.SetActive(false);
 
-            }
-
-
-            // Si tenía vidas == 0 pero sí tenía una segunda oportunidad
-           // else if ((loser.vidas <= 0 && loser.lives > 0))
-          //  {
-          //      // Pierde su segunda oportunidad
-          //      loser.lives--;
-          //      loser.ResetVidas(); // restaurar 3 vidas
-          //      loser.SetState(PlayerMovLocal.States.Idle);
-          //      Debug.Log($"{loser.name} usó su segunda oportunidad. Le quedan {loser.lives} oportunidades.");
-          //  }
-        }
-
-        
-   
-            if ((winner.vidas <= 0 && winner.lives > 0))
-            {
-                winner.lives--;
-                winner.ResetVidas(); // restaurar 3 vidas
-                winner.SetState(PlayerMovLocal.States.Idle);
-                winner.ResetInputs();
-            }
-
-        
-        winner.ResetInputs();
-        winner.SetState(PlayerMovLocal.States.Idle);
-        active = false;
-        battleSlider.gameObject.SetActive(false);
-        battleText.gameObject.SetActive(false);
-        Debug.Log($"Click battle won by: {winner.name}");
-        if (winner != null)
             winner.CageGone();
+
+            // 🔥 Desbloquear y revisar win condition
+            gamemanagerlocal.SetClickerState(false);
+            gamemanagerlocal.CheckRemainingPlayers();
+            return;
+        }
+
+        // ------------------------------------
+        // SI GANA EL KNOCKED → REVIVE
+        // ------------------------------------
+        if (winner == knocked)
+        {
+            knocked.lives--;   // consume su vida extra
+            knocked.ResetVidas();
+            knocked.SetState(PlayerMovLocal.States.Idle);
+            knocked.ResetInputs();
+
+            Debug.Log($"💖 {knocked.name} ganó su segunda oportunidad.");
+
+            active = false;
+            battleSlider.gameObject.SetActive(false);
+            battleText.gameObject.SetActive(false);
+
+            winner.CageGone();
+
+            // 🔥 Se desbloquea el GameManager
+            gamemanagerlocal.SetClickerState(false);
+            return;
+        }
     }
+
     private void HandleTimerEnded()
     {
-        Debug.Log("El tiempo del Click Battle ha terminado.");
+        if (!active) return;
 
-        if (!active) return; // si ya terminó por otra razón, no repetir
-
-        // Determinar quién va ganando según el valor del slider
-        PlayerMovLocal winner;
-        if (value >= 0.5f)
-            winner = p1;
-        else
-            winner = p2;
-
+        PlayerMovLocal winner = (value >= 0.5f) ? knocked : attacker;
         EndBattle(winner);
     }
-
 }

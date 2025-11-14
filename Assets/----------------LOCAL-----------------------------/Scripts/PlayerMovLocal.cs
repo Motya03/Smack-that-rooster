@@ -660,6 +660,10 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
 
+    // ----------------------------
+    // CORRECCIÓN IMPORTANTE: MUERTE DEFINITIVA
+    // ----------------------------
+
     public void TakeHit(int damage, PlayerMovLocal attacker)
     {
         lastAttacker = attacker;
@@ -680,26 +684,30 @@ public class PlayerMovLocal : MonoBehaviour
         // 🔻 Si las vidas bajan a 0
         if (vidas <= 0)
         {
-            // Si aún tiene "vida extra", entra a click battle
+            // Si aún tiene vida extra -> entrar a click battle
             if (lives > 0)
             {
                 FindFirstObjectByType<ClickGameManager>().StartBattle(lastAttacker, this);
             }
             else
             {
-                // Si ya no tiene vidas extra, muere directamente
+                // MUERTE DEFINITIVA
+                isDefinitivelyDead = true;
                 SetState(States.Dead);
+
+                // Avisar al GameManager
+                FindFirstObjectByType<GameManagerLocal>().CheckRemainingPlayers();
             }
         }
         else
         {
-            // Pequeño retroceso o animación de daño
             myAnimator.SetBool("Hit", true);
             StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
         }
     }
 
-   
+
+
 
 
 
