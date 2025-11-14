@@ -55,5 +55,11 @@ public class TimerLocal : MonoBehaviour
         int seconds = Mathf.FloorToInt(remaining % 60f);
         timerText.text = $"{minutes:00}:{seconds:00}";
     }
+    public void StartSuddenDeath()
+    {
+        StopAllCoroutines();
+        remaining = duration;
+        StartCoroutine(Countdown());
+    }
 }
 

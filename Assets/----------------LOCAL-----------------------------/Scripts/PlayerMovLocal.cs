@@ -88,6 +88,7 @@ public class PlayerMovLocal : MonoBehaviour
     public  int lives = 1;
     // REFERENCIA AL HealthSystem del UI que se asignará en StartGame del LobbyJoinManager
     [HideInInspector] public HealthSystem uiHealth;
+    [HideInInspector] public bool isDefinitivelyDead = false;
 
 
     [Header("Hitbox de Ataque")]

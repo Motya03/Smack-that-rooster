@@ -21,6 +21,8 @@ public class ClickGameManager : MonoBehaviour
     public PlayerMovLocal p1;
     public PlayerMovLocal p2;
 
+    public static GameManagerLocal gamemanagerlocal;
+
     [Header("Timer")]
     public TimerClickGame timerClickGame; // Referencia al script TimerClickGame
 
@@ -122,6 +124,9 @@ public class ClickGameManager : MonoBehaviour
             {
                 loser.SetState(PlayerMovLocal.States.Dead);
                 Debug.Log($"{loser.name} ha perdido y no tenía segunda oportunidad.");
+                // Llamar al GameManager
+                gamemanagerlocal.CheckRemainingPlayers();
+
             }
 
 
