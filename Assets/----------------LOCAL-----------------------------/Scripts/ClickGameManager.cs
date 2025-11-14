@@ -119,7 +119,7 @@ public class ClickGameManager : MonoBehaviour
             active = false;
             battleSlider.gameObject.SetActive(false);
             battleText.gameObject.SetActive(false);
-
+            attacker.SetState(PlayerMovLocal.States.Idle);
             winner.CageGone();
 
             // 🔥 Desbloquear y revisar win condition
