@@ -133,6 +133,7 @@ public class ClickGameManager : MonoBehaviour
         // ------------------------------------
         if (winner == knocked)
         {
+            attacker.SetState(PlayerMovLocal.States.Idle);
             knocked.lives--;   // consume su vida extra
             knocked.ResetVidas();
             knocked.SetState(PlayerMovLocal.States.Idle);
