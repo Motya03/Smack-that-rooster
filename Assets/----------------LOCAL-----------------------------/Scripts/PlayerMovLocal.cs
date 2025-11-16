@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-
+using UnityEngine.SceneManagement;
 
 public class PlayerMovLocal : MonoBehaviour
 {
@@ -33,6 +33,9 @@ public class PlayerMovLocal : MonoBehaviour
     public GameObject kickWindPrefab;
     public Transform footTrigger;
     //public Transform atttackPoint;
+
+    public GameObject canvasEscape; //canvas escape
+
 
     [Header("Ground Check")]
     public Transform groundCheck;            // punto de comprobación (ponlo cerca de los pies)
@@ -108,8 +111,11 @@ public class PlayerMovLocal : MonoBehaviour
             if (hitboxScript != null) hitboxScript.owner = gameObject; // <-- aquí ya es la instancia
             kickHitbox.SetActive(false);
         }
+        /*canvasEscape = GameObject.FindWithTag("PauseCanvas");
 
-
+        if (canvasEscape == null)
+            Debug.LogError("No encontré ningún objeto con tag PauseCanvas");
+        */
     }
 
 
@@ -197,6 +203,7 @@ public class PlayerMovLocal : MonoBehaviour
 
         }
     }
+   
 
     // --- INPUTS DEL NEW INPUT SYSTEM ---
     private void OnMove(InputValue value)
@@ -209,6 +216,7 @@ public class PlayerMovLocal : MonoBehaviour
         moveInput = currentInput;
         isMoving = moveInput.magnitude > 0.1f;
     }
+    
     private void OnCrouch(InputValue value)
     {
         if (!canReceiveInput) return;
@@ -259,7 +267,29 @@ public class PlayerMovLocal : MonoBehaviour
             ClickGameManager.Instance.RegisterClick(this);
         }
     }
+    /*private void OnEscape(InputValue value)
+    {
+        Debug.Log("ESCAPE PRESSED");
+        if (SceneManager.GetActiveScene().name == "SceneLocal")
+        {
+            canvasEscape.SetActive(true);
+            Time.timeScale = 0f;   // Pausar
+            Cursor.lockState = CursorLockMode.None;  // libera el cursor
+            Cursor.visible = true;                   // muestra el cursor
 
+        }
+        else
+        {
+            canvasEscape.SetActive(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+     public void SetCanvasEscape(GameObject c)
+    {
+        canvasEscape = c;
+    }
+    */
 
     // --- ESTADOS ---
     private void Idle()

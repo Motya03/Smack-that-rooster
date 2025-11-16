@@ -68,6 +68,11 @@ public class PlayerSpawn : MonoBehaviour
                 renderer.materials = mats.ToArray();
             }
         }
+        /* // 🔹 ASIGNAR EL CANVAS JUSTO DESPUÉS DEL SPAWN
+         var mov = playerInput.GetComponent<PlayerMovLocal>();
+         if (mov != null)
+             mov.SetCanvasEscape(GameObject.FindWithTag("PauseCanvas"));
+         */
     }
 
     private int GetUniqueRandomIndex()
