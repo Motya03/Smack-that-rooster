@@ -15,6 +15,8 @@ public class PlayerSpawn : MonoBehaviour
 
     public void OnPlayerJoined(PlayerInput playerInput)
     {
+        //PlayerMovLocal Sc = gameObject.GetComponent<PlayerMovLocal>();
+       // Sc.ResetVidas();
         StartCoroutine(PlacePlayerNextFrame(playerInput));
 
         FindFirstObjectByType<LobbyJoinManager>()?
@@ -73,6 +75,10 @@ public class PlayerSpawn : MonoBehaviour
          if (mov != null)
              mov.SetCanvasEscape(GameObject.FindWithTag("PauseCanvas"));
          */
+       // PlayerMovLocal Sc = playerInput.GetComponent<PlayerMovLocal>();
+        //if (Sc != null)
+           // Sc.ResetVidas();
+
     }
 
     private int GetUniqueRandomIndex()

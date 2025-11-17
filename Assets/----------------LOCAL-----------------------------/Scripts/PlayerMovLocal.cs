@@ -36,7 +36,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     public GameObject canvasEscape; //canvas escape
 
-
+    private bool AttackDone = true;
     [Header("Ground Check")]
     public Transform groundCheck;            // punto de comprobación (ponlo cerca de los pies)
     public float groundDistance = 0.15f;     // radio de la esfera
@@ -430,12 +430,17 @@ public class PlayerMovLocal : MonoBehaviour
     {
         if (isGrounded)
         {
+            if  (!AttackDone ) return;
+            isGrounded = false;
             isAttacking = false;
+            AttackDone = false;
             Debug.Log("Patada");
 
             myAnimator.Play("AttackPatada");
-            StopMove();
-            SetState(States.Idle);
+            //  StopMove();
+            StartCoroutine(BoostCoroutine( 0.3f, 0.8f));
+           // SetState(States.Idle);
+            
         }
         else
         {
@@ -761,6 +766,14 @@ public class PlayerMovLocal : MonoBehaviour
         yield return new WaitForSeconds(duration);
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
+        if (mystate == States.AttackPatada)
+        {
+            AttackDone = true;
+            SetState(States.Idle);
+
+        }
+            
+        
     }
     public void ClickBattle()
     {
