@@ -70,6 +70,7 @@ public class PlayerMovLocal : MonoBehaviour
     private bool isAttacking;
     private bool isAttackingLow;
     public bool isJumpPressed;
+    private bool DancePressed;
     private bool isCrouchPressed;
     public bool dashFrontPressed;
     private bool dashBackPressed;
@@ -80,7 +81,7 @@ public class PlayerMovLocal : MonoBehaviour
 
 
 
-    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle}
+    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance}
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
@@ -199,7 +200,8 @@ public class PlayerMovLocal : MonoBehaviour
             case States.Stunned: Stunned(); break;
             case States.Dead: Dead(); break;
             case States.Crouch: Crouch(); break;
-            //case States.ClickBattle: ClickBattle(); break;
+            case States.Dance: Dance(); break;
+                //case States.ClickBattle: ClickBattle(); break;
 
         }
     }
@@ -267,6 +269,14 @@ public class PlayerMovLocal : MonoBehaviour
             ClickGameManager.Instance.RegisterClick(this);
         }
     }
+    private void OnDance(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            DancePressed = true;
+        }
+
+    }
     /*private void OnEscape(InputValue value)
     {
         Debug.Log("ESCAPE PRESSED");
@@ -322,10 +332,12 @@ public class PlayerMovLocal : MonoBehaviour
             // else if (dashFrontPressed) SetState(States.DashFront);
            // else if (dashBackPressed) SetState(States.DashBack);
             else if (isCrouchPressed) SetState(States.Crouch);
+
             else if (isAttackingLow) SetState(States.AttackLow);
 
-
-            ResetInputs();
+        else if (DancePressed)
+            SetState(States.Dance);
+        ResetInputs();
         
 
 
@@ -364,6 +376,9 @@ public class PlayerMovLocal : MonoBehaviour
             SetState(States.DashBack);
         else if (isCrouchPressed)
             SetState(States.Crouch);
+        else if (DancePressed)
+            SetState(States.Dance);
+        
 
         ResetInputs();
     }
@@ -451,7 +466,17 @@ public class PlayerMovLocal : MonoBehaviour
         }
        
     }
-
+    private void Dance()
+    {
+        
+        myAnimator.Play("Dance");
+        StopMove();
+        SetState(States.Idle);
+    }
+    private void DanceEnded()
+    {
+        Debug.Log("Nice");
+    }
     public void EnableVfxPatada()
     {
         Vector3 spawnPos = transform.position;
@@ -637,6 +662,7 @@ public class PlayerMovLocal : MonoBehaviour
         dashFrontPressed = false;
         dashBackPressed = false;
         isAttackingLow = false;
+        DancePressed = false;
     }
 
    
