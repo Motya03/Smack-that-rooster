@@ -44,11 +44,19 @@ public class PlayerMovLocal : MonoBehaviour
 
 
     [Header("Movement Settings")]
-    public float moveSpeed = 5f;
+    
     public float gravity = -9.81f;
     public float jumpForce = 0.1f;
     public float airControl = 0.2f;
     public float smoothTime = 0.1f;
+
+    private float defaultSpeed;
+    private float speedBoostMultiplier = 1f; //Power Ups
+    private float animBoostMultiplier = 1f; //Otros Cambios de velocidad
+
+    public float moveSpeed = 5f;
+
+
 
     [Header("Dash Settings")]
     public float dashSpeed = 2f;
@@ -61,7 +69,7 @@ public class PlayerMovLocal : MonoBehaviour
     public PlayerMovLocal lastAttacker;
     
     private float currentVelocity;
-    private float defaultSpeed;
+    
     private Coroutine boostCoroutine;
 
     
@@ -103,7 +111,8 @@ public class PlayerMovLocal : MonoBehaviour
         
         controller = GetComponent<CharacterController>();
         myAnimator = GetComponent<Animator>();
-        defaultSpeed = moveSpeed;
+        defaultSpeed = moveSpeed * speedBoostMultiplier * animBoostMultiplier;
+        
         mystate = States.Idle;
 
         if (kickHitbox != null)
@@ -391,7 +400,7 @@ public class PlayerMovLocal : MonoBehaviour
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
         // ResetInputs();
-        StartCoroutine(BoostCoroutine(0.5f, 1f));
+        StartCoroutine(AnimBoostCoroutine(0.5f, 1f));
         if (dashFrontPressed) SetState(States.DashFront);
             if (dashBackPressed) SetState(States.DashBack);
             StartCoroutine(JumpRoutine());
@@ -410,7 +419,7 @@ public class PlayerMovLocal : MonoBehaviour
             SetState(States.AttackPatada);
         myAnimator.SetBool("Falling", true);
         // StopMove2();
-        StartCoroutine(BoostCoroutine(0.5f, 0.5f));
+        StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
 
         if (isGrounded)
         {
@@ -433,7 +442,7 @@ public class PlayerMovLocal : MonoBehaviour
         }
     }
 
-    private void CanReceive()
+    public void CanReceive()
     {
         canReceiveInput = true;
         moveInput = lastMoveInput;
@@ -453,7 +462,7 @@ public class PlayerMovLocal : MonoBehaviour
 
             myAnimator.Play("AttackPatada");
             //  StopMove();
-            StartCoroutine(BoostCoroutine( 0.3f, 0.8f));
+            StartCoroutine(AnimBoostCoroutine( 0.3f, 0.8f));
            // SetState(States.Idle);
             
         }
@@ -519,7 +528,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
         //canReceiveInput = false;
         // moveSpeed = defaultSpeed * 0.5f;
-        StartCoroutine(BoostCoroutine(0.5f, 1));
+        StartCoroutine(AnimBoostCoroutine(0.5f, 1));
     }
     
     private void DashFront()
@@ -528,7 +537,7 @@ public class PlayerMovLocal : MonoBehaviour
         if (!isDashing && canDash)
         {
             SpawnDashFrontFX();
-             StartCoroutine(BoostCoroutine(0.5f, 0.5f));
+             StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
             StopMove();
             StartCoroutine(PerformDash(transform.forward, "DashFront",2.5f));
             
@@ -543,7 +552,7 @@ public class PlayerMovLocal : MonoBehaviour
         if (!isDashing && canDash)
         {
             SpawnDashBackFX();
-            StartCoroutine(BoostCoroutine(0.5f, 0.5f));
+            StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
             StopMove();
             StartCoroutine(PerformDash(-transform.forward, "DashBack", 2.5f));
             
@@ -778,36 +787,64 @@ public class PlayerMovLocal : MonoBehaviour
     }
 
     // --- BOOST TEMPORAL ---
-    public void ActivarBoost(float boostAmount, float duration)
+    public void ActivarSpeedBoost(float amount, float duration)
     {
         if (boostCoroutine != null)
             StopCoroutine(boostCoroutine);
 
-        boostCoroutine = StartCoroutine(BoostCoroutine(boostAmount, duration));
+        boostCoroutine = StartCoroutine(AnimBoostCoroutine(amount, duration));
     }
 
-    private IEnumerator BoostCoroutine(float boostAmount, float duration)
+    private IEnumerator SpeedBoostCoroutine(float amount, float duration)
     {
-        moveSpeed = defaultSpeed * boostAmount;
+        speedBoostMultiplier *= amount;
+        moveSpeed = defaultSpeed * speedBoostMultiplier * animBoostMultiplier ;
         yield return new WaitForSeconds(duration);
-        moveSpeed = defaultSpeed;
+        speedBoostMultiplier /= amount;
+        moveSpeed = defaultSpeed  * animBoostMultiplier;
+        
+
+
+    }
+    private IEnumerator AnimBoostCoroutine(float amount, float duration)
+    {
+        animBoostMultiplier *= amount;
+        moveSpeed = defaultSpeed * speedBoostMultiplier * animBoostMultiplier;
+        yield return new WaitForSeconds(duration);
+        animBoostMultiplier /= amount;
+        moveSpeed = defaultSpeed * speedBoostMultiplier ;
         boostCoroutine = null;
+
+
         if (mystate == States.AttackPatada)
         {
+            Debug.Log("hola");
             AttackDone = true;
             SetState(States.Idle);
 
         }
-            
-        
     }
+
+
+
+
+
+
+    /*private IEnumerator Boost(float BoostAmount, float Duration)
+    {
+        Debug.Log("hola2");
+        moveSpeed = defaultSpeed * BoostAmount;
+        yield return new WaitForSeconds(Duration);
+        moveSpeed = defaultSpeed;
+        boostCoroutine = null;
+    }*/
     public void ClickBattle()
     {
         if (currentCage != null) return; // ya hay una jaula en escena
 
         StopMove();
         myAnimator.Play("IDLE");
-
+        if (currentCage != null) return;
         Vector3 spawnPos = transform.position  ;
         currentCage = Instantiate(CagePrefab, spawnPos, transform.rotation);
        

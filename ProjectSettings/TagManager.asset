@@ -10,6 +10,7 @@ TagManager:
   - ColRing
   - ColGallina
   - PauseCanvas
+  - Hitbox
   layers:
   - Default
   - TransparentFX

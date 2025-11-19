@@ -7,6 +7,9 @@ public class PowerUpRun : MonoBehaviour
     public float tiempoEntreCambios = 4f;
     public float tiempoEspera = 1f;
 
+    public GameObject ParticleAbimalitoPrefab;
+    public float boostAmount = 3f;       
+    public float boostDuration = 5f;
     private Quaternion angulo;
     private bool colisionando = false;
 
@@ -59,4 +62,23 @@ public class PowerUpRun : MonoBehaviour
             colisionando = true;
         }
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        // Verifica si el objeto que toca es un player
+        PlayerMovLocal player = other.GetComponentInParent<PlayerMovLocal>();
+
+     
+        if (other.CompareTag("Hitbox"))
+        {
+            if (player != null)
+            {
+                player.ActivarSpeedBoost(boostAmount, boostDuration);
+                Instantiate(ParticleAbimalitoPrefab, transform.position, Quaternion.identity);
+                // Destruye el maнz al ser recogido
+                Destroy(gameObject);
+            }
+        }
+    }
+   
+
 }

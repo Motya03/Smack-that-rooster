@@ -120,6 +120,7 @@ public class ClickGameManager : MonoBehaviour
             battleSlider.gameObject.SetActive(false);
             battleText.gameObject.SetActive(false);
             attacker.SetState(PlayerMovLocal.States.Idle);
+            attacker.CanReceive();
             winner.CageGone();
 
             // 🔥 Desbloquear y revisar win condition
@@ -137,7 +138,10 @@ public class ClickGameManager : MonoBehaviour
             knocked.lives--;   // consume su vida extra
             knocked.ResetVidas();
             knocked.SetState(PlayerMovLocal.States.Idle);
+            knocked.CanReceive();
+            attacker.CanReceive();
             knocked.ResetInputs();
+            attacker.ResetInputs();
 
             Debug.Log($"💖 {knocked.name} ganó su segunda oportunidad.");
 
