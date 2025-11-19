@@ -8,8 +8,11 @@ public class PowerUpRun : MonoBehaviour
     public float tiempoEspera = 1f;
 
     public GameObject ParticleAbimalitoPrefab;
-    public float boostAmount = 3f;       
+          
+    
+    public float amount = 1f;       
     public float boostDuration = 5f;
+    public float amountBoost = 3f;
     private Quaternion angulo;
     private bool colisionando = false;
 
@@ -72,7 +75,7 @@ public class PowerUpRun : MonoBehaviour
         {
             if (player != null)
             {
-                player.ActivarSpeedBoost(boostAmount, boostDuration);
+                player.ActivarSpeedBoost(amount, amountBoost, boostDuration);
                 Instantiate(ParticleAbimalitoPrefab, transform.position, Quaternion.identity);
                 // Destruye el maнz al ser recogido
                 Destroy(gameObject);

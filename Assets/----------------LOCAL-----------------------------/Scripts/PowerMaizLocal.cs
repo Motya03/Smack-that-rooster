@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class PowerMaizLocal : MonoBehaviour
 {
-    public float boostAmount = 3f;       // multiplicador de velocidad
-    public float boostDuration = 5f;     // duración del efecto en segundos
+    public float amount = 1f;       // multiplicador de velocidad
+    public float boostDuration = 5f;
+    public float amountBoost = 3f;
+    // duración del efecto en segundos
 
     private void OnTriggerEnter(Collider other)
     {
@@ -12,7 +14,7 @@ public class PowerMaizLocal : MonoBehaviour
 
         if (player != null)
         {
-            player.ActivarSpeedBoost(boostAmount, boostDuration);
+            player.ActivarSpeedBoost(amount, amountBoost, boostDuration);
 
             // Destruye el maíz al ser recogido
             Destroy(gameObject);
