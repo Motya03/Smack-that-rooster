@@ -11,6 +11,9 @@ TagManager:
   - ColGallina
   - PauseCanvas
   - Hitbox
+  - proyectile
+  - Ground
+  - Gallina
   layers:
   - Default
   - TransparentFX

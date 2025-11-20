@@ -80,7 +80,19 @@ public class LobbyJoinManager : MonoBehaviour
 
         Debug.Log($"❤️ Activadas {playerCount} barras de vida.");
 
-        // 🔥 ACTIVAR GameManagerLocal AHORA
+        /*// 🔥 ACTIVAR GameManagerLocal AHORA
         FindFirstObjectByType<GameManagerLocal>()?.ActivateGame();
+
+        GameObject[] gallinas = GameObject.FindGameObjectsWithTag("Gallina");
+
+        foreach (GameObject g in gallinas)
+        {
+            ScriptGallinaIdle script = g.GetComponent<ScriptGallinaIdle>();
+            if (script != null)
+            {
+                script.FindEnemy();
+                
+            }
+        }*/
     }
 }

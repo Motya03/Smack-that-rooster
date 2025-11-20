@@ -22237,11 +22237,11 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
-  moveSpeed: 5
   gravity: -9.81
   jumpForce: 0.8
   airControl: 0.71
   smoothTime: 0.15
+  moveSpeed: 5
   dashSpeed: 15
   dashDuration: 0.3
   dashCooldown: 1

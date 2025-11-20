@@ -814,7 +814,7 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private IEnumerator AnimBoostCoroutine(float amount, float amountBoost ,float duration)
     {
-        if (!boostGiven) yield return new WaitForSeconds(1f);
+        if (!boostGiven) yield return new WaitForSeconds(0.5f);
         
         Debug.Log("hola2");
         moveSpeed = defaultSpeed * amount * amountBoost;
