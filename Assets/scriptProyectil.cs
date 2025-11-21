@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class scriptProyectile : MonoBehaviour
 {
@@ -7,9 +7,11 @@ public class scriptProyectile : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
+
+        if (col.transform.root.CompareTag("Player"))   
        
-        if (col.gameObject.tag == "Player")
         {
+            Debug.Log("Colisionó con Player (hijo o padre)");
             PlayerMovLocal player = col.gameObject.GetComponent<PlayerMovLocal>();
             player.TakeStun();
             GameObject exp = Instantiate(explosion, this.transform.position, Quaternion.identity);

@@ -136,7 +136,8 @@ public class PlayerMovLocal : MonoBehaviour
     private void Update()
     {
 
-      
+        if (mystate == States.ClickBattle)
+            return;
 
         bool physGrounded = false;
         if (groundCheck != null)
