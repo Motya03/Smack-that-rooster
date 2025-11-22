@@ -3,6 +3,7 @@
 public class scriptProyectile : MonoBehaviour
 {
     public GameObject explosion;
+    public GameObject cascara;
     Rigidbody rb;
 
     void OnCollisionEnter(Collision col)
@@ -15,12 +16,14 @@ public class scriptProyectile : MonoBehaviour
             PlayerMovLocal player = col.gameObject.GetComponent<PlayerMovLocal>();
             player.TakeStun();
             GameObject exp = Instantiate(explosion, this.transform.position, Quaternion.identity);
+            GameObject explol = Instantiate(cascara, this.transform.position, Quaternion.identity);
             Destroy(exp, 0.5f);
             Destroy(this.gameObject);
         }
         else if (col.gameObject.tag == "Ground")
         {
             GameObject exp = Instantiate(explosion, this.transform.position, Quaternion.identity);
+            GameObject explol = Instantiate(cascara, this.transform.position, Quaternion.identity);
             //SoundManager.PlaySound(SoundType.RockHit);
             Destroy(this.gameObject);
         }

@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosion: {fileID: 1137823006678478666, guid: 02f5ebbbf45469740a60bbd0b3c7bc62, type: 3}
+  cascara: {fileID: 3004809572275005467, guid: 5a792afd23a2347498f7940046b35aea, type: 3}
 --- !u!95 &3208065922771468147
 Animator:
   serializedVersion: 7

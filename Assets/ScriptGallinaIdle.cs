@@ -14,17 +14,24 @@ public class ScriptGallinaIdle : MonoBehaviour
     public float throwSpeed = 10f;
     
     public Transform posicionTiro;
-    
-  
 
- 
+    private Transform enemyPoint;
+
+
+
 
     void Start()
     {
+        GameObject enemy2 = GameObject.FindWithTag("Player");
+        PlayerMovLocal p = enemy2.GetComponent<PlayerMovLocal>();
+         enemyPoint = p.GallinaApunta;
+
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
+            if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
 
+            
+        
         ani = GetComponent<Animator>();
         SetState(States.Movim);
     }
@@ -42,7 +49,7 @@ public class ScriptGallinaIdle : MonoBehaviour
                 return; // esperamos al siguiente frame
             }
 
-            float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
+            float distanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
 
             switch (mystate)
             {
@@ -68,7 +75,7 @@ public class ScriptGallinaIdle : MonoBehaviour
         if (!CanThrow || enemy == null) return;
 
         
-        Vector3 dir = (enemy.transform.position - transform.position).normalized;
+        Vector3 dir = (enemyPoint.position - transform.position).normalized;
          Quaternion lookRotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
          transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime);
 
@@ -88,23 +95,17 @@ public class ScriptGallinaIdle : MonoBehaviour
         GameObject thrownProjectile = Instantiate(projectile, posicionTiro.position, Quaternion.identity);
         Rigidbody rb = thrownProjectile.GetComponent<Rigidbody>();
 
-        Vector3 enemyPos = enemy.transform.position;
-        Vector3 direction = (enemyPos - posicionTiro.position).normalized;
-
-        // Bias opcional
-        Vector3 leftBias = -transform.right * 0.2f;
-        direction = (direction + leftBias).normalized;
-
-        // Crear velocidad con arco
+        Vector3 enemyPos = enemyPoint.position;
+        Vector3 direction = (enemyPos - posicionTiro.position).normalized;   
         Vector3 velocity = direction * throwSpeed;
 
-        velocity.y += 6f;   // <-- Esto le da el arco
+        float distance = Vector3.Distance(posicionTiro.position, enemyPos);   
+        float arc = Mathf.Clamp(distance * 0.5f, 1f, 6f);
 
-        // Nueva forma correcta
+        velocity.y += arc;
         rb.linearVelocity = velocity;
 
         Debug.DrawRay(posicionTiro.position, direction * 10f, Color.green, 2f);
-
         CanThrow = false;
         SetState(States.Movim);
     }

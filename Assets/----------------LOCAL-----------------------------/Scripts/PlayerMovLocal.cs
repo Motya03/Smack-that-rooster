@@ -12,6 +12,7 @@ public class PlayerMovLocal : MonoBehaviour
     private CharacterController controller;
     private Animator myAnimator;
 
+    public Transform GallinaApunta;
     private GameObject currentStunEffect;
     public GameObject PatadaEffectPrefab;
     public  GameObject CagePrefab;
@@ -377,11 +378,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Run()
     {
-        if (sliderDance != null)
-        {
-            dancePoints = 0;
-            sliderDance.gameObject.SetActive(false);
-        }
+       
 
        
         if (dashFrontPressed)
@@ -527,6 +524,11 @@ public class PlayerMovLocal : MonoBehaviour
             {
                 ScriptGallinaIdle gallinas = gallina.GetComponent<ScriptGallinaIdle>();
                 gallinas.SetAttack();
+            }
+            if (sliderDance != null)
+            {
+                dancePoints = 0;
+                sliderDance.gameObject.SetActive(false);
             }
             //Call gallinas script throw
             //Stop dancing
@@ -720,6 +722,17 @@ public class PlayerMovLocal : MonoBehaviour
         Debug.Log("Estado cambiado a: " + mystate);
         if (newState == States.ClickBattle)
             ClickBattle();
+
+        if (newState != States.Idle)
+        {
+            if (sliderDance != null)
+            {
+                dancePoints = 0;
+                sliderDance.gameObject.SetActive(false);
+            }
+        }
+            
+       
     }
 
     public void ResetInputs()
