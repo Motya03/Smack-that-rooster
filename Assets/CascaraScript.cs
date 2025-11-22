@@ -4,6 +4,10 @@ public class FadeMaterial : MonoBehaviour
 {
     public Material transparentMaterial;
     public float fadeSpeed = 1f;
+    private Collider rb;
+
+
+    public string fadeLayer = "IgnorePlayer";
 
     private Renderer rend;
     private Material mat;
@@ -11,6 +15,7 @@ public class FadeMaterial : MonoBehaviour
 
     void Start()
     {
+        rb = GetComponent<SphereCollider>();
         rend = GetComponent<Renderer>();
 
         if (rend == null || transparentMaterial == null)
@@ -29,7 +34,10 @@ public class FadeMaterial : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             startFade = true; // activamos el fade
+                              // rb.isTrigger = true; // 
+            gameObject.layer = LayerMask.NameToLayer(fadeLayer);
         }
+       
     }
 
     void Update()
@@ -40,6 +48,13 @@ public class FadeMaterial : MonoBehaviour
             c.a -= fadeSpeed * Time.deltaTime;
             c.a = Mathf.Clamp01(c.a);
             mat.color = c;
+
+            
+            if (c.a <= 0f)
+            {
+                Destroy(this.gameObject);
+            }
         }
     }
+
 }

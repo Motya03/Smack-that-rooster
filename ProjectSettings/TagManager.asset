@@ -14,6 +14,7 @@ TagManager:
   - proyectile
   - Ground
   - Gallina
+  - CajaRot
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
+  - IgnorePlayer
   - 
   - 
   - 

@@ -25,7 +25,7 @@ public class PlayerMovLocal : MonoBehaviour
     private Vector3 velocity;
     private Vector3 airMomentum;
     [SerializeField] private bool isGrounded;
-    public GameObject stunEffectPrefab;
+  //  public GameObject stunEffectPrefab;
     public GameObject dashFrontEffectPrefab;
     public GameObject dashBackEffectPrefab;
     public Transform dashPointFront;
@@ -628,13 +628,7 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void Stunned()
     {
-        // Si ya hay un efecto activo, no crear otro
-        if (currentStunEffect == null)
-        {
-            Vector3 spawnPos = transform.position + Vector3.up * 0.7f;
-            currentStunEffect = Instantiate(stunEffectPrefab, spawnPos, Quaternion.identity, transform);
-            currentStunEffect.transform.localRotation = Quaternion.identity;
-        }
+       
 
         myAnimator.Play("Stunned");
         StopMove();
@@ -642,15 +636,7 @@ public class PlayerMovLocal : MonoBehaviour
 
 
     }
-    private void StunEffect()
-    {
-        if (currentStunEffect == null)
-        {
-            Vector3 spawnPos = transform.position + Vector3.up * 0.7f;
-            currentStunEffect = Instantiate(stunEffectPrefab, spawnPos, Quaternion.identity, transform);
-            currentStunEffect.transform.localRotation = Quaternion.identity;
-        }
-    }
+   
 
     public void AnimStunStop()
     {
