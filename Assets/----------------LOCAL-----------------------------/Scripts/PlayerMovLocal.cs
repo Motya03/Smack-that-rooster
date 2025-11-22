@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerMovLocal : MonoBehaviour
 {
@@ -34,6 +35,9 @@ public class PlayerMovLocal : MonoBehaviour
     public Transform footTrigger;
     //public Transform atttackPoint;
 
+    public Slider sliderDance;
+    public int dancePoints;
+
     public GameObject canvasEscape; //canvas escape
 
     private bool AttackDone = true;
@@ -42,7 +46,7 @@ public class PlayerMovLocal : MonoBehaviour
     public float groundDistance = 0.15f;     // radio de la esfera
     public LayerMask groundMask;             // que capas cuentan como suelo
 
-
+ 
     [Header("Movement Settings")]
     
     public float gravity = -9.81f;
@@ -87,6 +91,7 @@ public class PlayerMovLocal : MonoBehaviour
     private bool canReceiveInput = true;
     private bool canReceiveInputDash = true;
     private bool canReceiveInputAttack = true;
+
     
 
 
@@ -110,6 +115,13 @@ public class PlayerMovLocal : MonoBehaviour
     private Hitbox hitboxScript;
     void Start()
     {
+        
+            
+        if (sliderDance != null)
+        {
+            sliderDance.value = dancePoints;
+            sliderDance.gameObject.SetActive(false);
+        }
         boostGiven = true;
         controller = GetComponent<CharacterController>();
         myAnimator = GetComponent<Animator>();
@@ -135,7 +147,11 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Update()
     {
-
+        if (sliderDance != null)
+        {
+            sliderDance.value = dancePoints;
+        }
+       
         if (mystate == States.ClickBattle)
             return;
 
@@ -318,7 +334,7 @@ public class PlayerMovLocal : MonoBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-        
+       // dancePoints = 0;
         if (dashFrontPressed) SetState(States.DashFront);
         if (dashBackPressed) SetState(States.DashBack);
         if (isAttacking) SetState(States.AttackPatada);
@@ -361,7 +377,13 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Run()
     {
-        
+        if (sliderDance != null)
+        {
+            dancePoints = 0;
+            sliderDance.gameObject.SetActive(false);
+        }
+
+       
         if (dashFrontPressed)
             SetState(States.DashFront);
         if (dashBackPressed)
@@ -483,11 +505,42 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void Dance()
     {
-        
+        if (sliderDance != null)
+        {
+            sliderDance.gameObject.SetActive(true);
+        }
+        // sliderDance.gameObject.SetActive(true);
         myAnimator.Play("Dance");
         StopMove();
         SetState(States.Idle);
+        
     }
+    private void DanceSlider()
+    {
+        
+        if (dancePoints >=3)
+        {
+            Debug.Log("Tiraaa");
+            myAnimator.Play("IDLE");
+            GameObject gallina = GameObject.FindWithTag("Gallina");
+            if (gallina != null)
+            {
+                ScriptGallinaIdle gallinas = gallina.GetComponent<ScriptGallinaIdle>();
+                gallinas.SetAttack();
+            }
+            //Call gallinas script throw
+            //Stop dancing
+            //reset dancePoints en idle si te mueves 
+        }
+        else
+        {
+            dancePoints++;
+        }
+
+        
+
+    }
+
     private void DanceEnded()
     {
         Debug.Log("Nice");
