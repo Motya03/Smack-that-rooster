@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class ScriptGallinaIdle : MonoBehaviour
 {
@@ -22,16 +23,7 @@ public class ScriptGallinaIdle : MonoBehaviour
 
     void Start()
     {
-        GameObject enemy2 = GameObject.FindWithTag("Player");
-        PlayerMovLocal p = enemy2.GetComponent<PlayerMovLocal>();
-         enemyPoint = p.GallinaApunta;
-
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
-            if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
-
-            
-        
+        StartCoroutine(WaitForGameStart());
         ani = GetComponent<Animator>();
         SetState(States.Movim);
     }
@@ -41,15 +33,12 @@ public class ScriptGallinaIdle : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
         {
             SetAttack();
+            
         }
         
-            if (enemy == null)
-            {
-                FindEnemy();
-                return; // esperamos al siguiente frame
-            }
+           
 
-            float distanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
+           // float distanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
 
             switch (mystate)
             {
@@ -61,11 +50,16 @@ public class ScriptGallinaIdle : MonoBehaviour
 
     }
 
+
     public void FindEnemy()
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
         if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
+
+        GameObject enemy2 = GameObject.FindWithTag("Player");
+        PlayerMovLocal p = enemy2.GetComponent<PlayerMovLocal>();
+        enemyPoint = p.GallinaApunta;
 
     }
     private void AttackState()
@@ -134,7 +128,15 @@ public class ScriptGallinaIdle : MonoBehaviour
     }
 
 
-  
+      public IEnumerator WaitForGameStart()
+    {
+        GameManagerLocal check = GetComponent<GameManagerLocal>();
+
+        // Espera hasta que el juego empiece
+        yield return new WaitUntil(() => check.gameStarted);
+
+        FindEnemy();  // ya hay players en escena
+    }
 
     public void SetState(States newState)
     {

@@ -12295,6 +12295,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AbimalitoPaper2 (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 965898438306465777, guid: fd58ea1c3cbad0241b2c4618c6c6461d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13320,7 +13324,9 @@ MonoBehaviour:
   - {fileID: 1224143054}
   winnerText: {fileID: 671699114}
   canvasWinner: {fileID: 471310990}
+  cajaRota: {fileID: 2093462843581810379, guid: 274d22ea41bea0e40ba0e3fa14d7cca4, type: 3}
   canvasLocal: {fileID: 302553873}
+  gameStarted: 0
 --- !u!4 &626549161
 Transform:
   m_ObjectHideFlags: 0
@@ -68692,6 +68698,10 @@ PrefabInstance:
     - target: {fileID: 4666074793296319050, guid: 0ba39ecd0156ecb44b31f1765da77b54, type: 3}
       propertyPath: m_Name
       value: Proyectile
+      objectReference: {fileID: 0}
+    - target: {fileID: 4666074793296319050, guid: 0ba39ecd0156ecb44b31f1765da77b54, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5461489327072375565, guid: 0ba39ecd0156ecb44b31f1765da77b54, type: 3}
       propertyPath: m_LocalPosition.x

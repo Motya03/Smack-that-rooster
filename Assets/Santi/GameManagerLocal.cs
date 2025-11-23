@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using WebSocketSharp;
 
 public class GameManagerLocal : MonoBehaviour
 {
@@ -10,10 +12,16 @@ public class GameManagerLocal : MonoBehaviour
     [SerializeField] private Text winnerText;
     [SerializeField] private GameObject canvasWinner;
 
+
+    [Header("Jugador")]
+    private GameObject enemy;
+    private Transform enemyPoint;
+    [SerializeField] private GameObject cajaRota;
+    
     [Header("Canvas Gameplay (HUD Local)")]
     [SerializeField] private GameObject canvasLocal;
 
-    private bool gameStarted = false;
+    public bool gameStarted = false;
     private bool gameEnded = false;
     private bool isSuddenDeath = false;
 
@@ -23,6 +31,11 @@ public class GameManagerLocal : MonoBehaviour
 
     private void Start()
     {
+
+        StartCoroutine(WaitForGameStart());
+
+
+
         // Se apaga todo al iniciar
         foreach (var p in playerPopups)
             p.SetActive(false);
@@ -45,9 +58,25 @@ public class GameManagerLocal : MonoBehaviour
             timer.ResetTimer();
         }
     }
+    IEnumerator WaitForGameStart()
+    {
+        GameManagerLocal check = GetComponent<GameManagerLocal>();
 
+        // Espera hasta que el juego empiece
+        yield return new WaitUntil(() => check.gameStarted);
+
+        FindEnemy();  // ya hay players en escena
+    }
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            ThrowCage();
+            Debug.Log("Рщдф");
+        }
+
+
+        //float DistanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
         if (!gameStarted || gameEnded)
             return;
 
@@ -226,4 +255,40 @@ public class GameManagerLocal : MonoBehaviour
 
         Debug.Log("🎉 FIN DE PARTIDA → " + msg);
     }
+    public void ThrowCage()
+    {
+        
+        StartCoroutine(ThrowCageCorutina());
+    }
+    private IEnumerator ThrowCageCorutina()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (enemy == null)
+            FindEnemy();
+
+        if (enemy == null)
+        {
+            Debug.LogWarning("❌ No hay enemigo para tirar la caja");
+            yield break;
+        }
+
+        Vector3 spawnPos = enemy.transform.position + Vector3.up * 10f;
+        Instantiate(cajaRota, spawnPos, Quaternion.identity);
+        Debug.Log("🔥 Caja lanzada correctamente");
+    }
+
+    public void FindEnemy()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+        if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
+
+        GameObject enemy2 = GameObject.FindWithTag("Player");
+        PlayerMovLocal p2 = enemy2.GetComponent<PlayerMovLocal>();
+        enemyPoint = p2.GallinaApunta;
+
+    }
+
+
 }

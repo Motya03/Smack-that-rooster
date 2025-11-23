@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 8925424034652217854}
   - component: {fileID: 3065978424473669260}
   - component: {fileID: 8052518749033620788}
+  - component: {fileID: 9123613151731050230}
   m_Layer: 0
   m_Name: AbimalitoPaper2 (1)
   m_TagString: Untagged
@@ -269,8 +270,9 @@ MonoBehaviour:
   tiempoEntreCambios: 3
   tiempoEspera: 1
   ParticleAbimalitoPrefab: {fileID: 1137823006678478666, guid: 5b963ad6552cdff41ab8fefdbb65a389, type: 3}
-  boostAmount: 2
+  amount: 1
   boostDuration: 5
+  amountBoost: 3
 --- !u!136 &8052518749033620788
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -294,6 +296,27 @@ CapsuleCollider:
   m_Height: 3.1289368
   m_Direction: 1
   m_Center: {x: -0.09997817, y: 1.0644681, z: -0.21039937}
+--- !u!65 &9123613151731050230
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 965898438306465777}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.9259607, y: 2.5259116, z: 1.9807514}
+  m_Center: {x: -0.015220385, y: 0.9388723, z: 0.11735867}
 --- !u!1 &1319046038000061962
 GameObject:
   m_ObjectHideFlags: 0
