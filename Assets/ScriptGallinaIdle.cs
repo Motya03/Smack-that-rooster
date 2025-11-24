@@ -130,11 +130,12 @@ public class ScriptGallinaIdle : MonoBehaviour
 
       public IEnumerator WaitForGameStart()
     {
+       
         GameManagerLocal check = GetComponent<GameManagerLocal>();
-
+        
         // Espera hasta que el juego empiece
         yield return new WaitUntil(() => check.gameStarted);
-
+        
         FindEnemy();  // ya hay players en escena
     }
 

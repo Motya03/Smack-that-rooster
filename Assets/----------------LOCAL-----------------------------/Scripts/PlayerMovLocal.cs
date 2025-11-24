@@ -885,6 +885,7 @@ public class PlayerMovLocal : MonoBehaviour
 
         }
         boostGiven = true;
+        AttackDone = true;
         boost = 1f;
     }
 
