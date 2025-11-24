@@ -41,7 +41,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     public GameObject canvasEscape; //canvas escape
 
-    private bool AttackDone = true;
+    public bool AttackDone = true;
     [Header("Ground Check")]
     public Transform groundCheck;            // punto de comprobación (ponlo cerca de los pies)
     public float groundDistance = 0.15f;     // radio de la esfera
@@ -478,7 +478,7 @@ public class PlayerMovLocal : MonoBehaviour
     {
         if (isGrounded)
         {
-            
+            Debug.Log("Patada1");
             if  (!AttackDone ) return;
             isGrounded = false;
             isAttacking = false;
@@ -730,6 +730,7 @@ public class PlayerMovLocal : MonoBehaviour
         dashBackPressed = false;
         isAttackingLow = false;
         DancePressed = false;
+        
     }
 
    
