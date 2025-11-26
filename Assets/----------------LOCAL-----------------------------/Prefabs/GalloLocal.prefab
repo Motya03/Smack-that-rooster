@@ -6394,7 +6394,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3463730131719275312
 Transform:
   m_ObjectHideFlags: 0
@@ -11236,7 +11236,7 @@ ParticleSystemRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_RenderMode: 3
+  m_RenderMode: 4
   m_MeshDistribution: 0
   m_SortMode: 0
   m_MinParticleSize: 0
@@ -11259,7 +11259,7 @@ ParticleSystemRenderer:
   m_VertexStreams: 000103040522
   m_UseCustomTrailVertexStreams: 0
   m_TrailVertexStreams: 00010304
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: -7387706064836869012, guid: 12e8c1bf0e4669548bb40c278f9bb82a, type: 3}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
@@ -27475,7 +27475,6 @@ MonoBehaviour:
   sliderDance: {fileID: 4506196888431005619}
   dancePoints: 0
   canvasEscape: {fileID: 0}
-  AttackDone: 1
   groundCheck: {fileID: 792254243274507087}
   groundDistance: 0.15
   groundMask:
