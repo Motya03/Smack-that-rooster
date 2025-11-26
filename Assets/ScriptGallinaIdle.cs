@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ScriptGallinaIdle : MonoBehaviour
 {
@@ -51,21 +52,35 @@ public class ScriptGallinaIdle : MonoBehaviour
     }
 
 
+    GameObject lastEnemy;
+
     public void FindEnemy()
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
+        if (players.Length <= 1)
+        {
+            // Si solo hay uno, no se puede evitar
+            enemy = players[0];
+        }
+        else
+        {
+            // Evita elegir el mismo enemigo
+            List<GameObject> list = new List<GameObject>(players);
+            list.Remove(lastEnemy);
+            enemy = list[Random.Range(0, list.Count)];
+        }
 
-        GameObject enemy2 = GameObject.FindWithTag("Player");
-        PlayerMovLocal p = enemy2.GetComponent<PlayerMovLocal>();
+        lastEnemy = enemy;
+
+        PlayerMovLocal p = enemy.GetComponent<PlayerMovLocal>();
         enemyPoint = p.GallinaApunta;
-
     }
+
     private void AttackState()
      {
 
-        if (enemy == null) FindEnemy();
+         FindEnemy();
         if (!CanThrow || enemy == null) return;
 
         
@@ -102,6 +117,8 @@ public class ScriptGallinaIdle : MonoBehaviour
         Debug.DrawRay(posicionTiro.position, direction * 10f, Color.green, 2f);
         CanThrow = false;
         SetState(States.Movim);
+        enemy = null;      
+        enemyPoint = null;
     }
 
 
@@ -131,7 +148,8 @@ public class ScriptGallinaIdle : MonoBehaviour
       public IEnumerator WaitForGameStart()
     {
        
-        GameManagerLocal check = GetComponent<GameManagerLocal>();
+        GameManagerLocal check = Object.FindAnyObjectByType<GameManagerLocal>();
+
         
         // Espera hasta que el juego empiece
         yield return new WaitUntil(() => check.gameStarted);

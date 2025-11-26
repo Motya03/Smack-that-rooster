@@ -116,8 +116,8 @@ public class PlayerMovLocal : MonoBehaviour
     private Hitbox hitboxScript;
     void Start()
     {
-        
-            
+        //DontDestroyOnLoad(gameObject);
+
         if (sliderDance != null)
         {
             sliderDance.value = dancePoints;

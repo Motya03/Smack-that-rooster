@@ -877,7 +877,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 4075714871997835252}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 1
+  m_MaxValue: 3
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -27475,6 +27475,7 @@ MonoBehaviour:
   sliderDance: {fileID: 4506196888431005619}
   dancePoints: 0
   canvasEscape: {fileID: 0}
+  AttackDone: 1
   groundCheck: {fileID: 792254243274507087}
   groundDistance: 0.15
   groundMask:
