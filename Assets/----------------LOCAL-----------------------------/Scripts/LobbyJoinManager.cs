@@ -58,11 +58,24 @@ public class LobbyJoinManager : MonoBehaviour
         lobbyCanvas.SetActive(false);
         gameplayCanvas.SetActive(true);
 
-        foreach (var player in PlayerSpawn.joinedPlayers)
-            PlayerSpawn.TogglePlayerControl(player, true);
+        // ✅ REACTIVAR HUD del GameManager si estaba apagado
+        var gm = FindFirstObjectByType<GameManagerLocal>();
+        if (gm != null && gm.canvasLocal != null)
+            gm.canvasLocal.SetActive(true);
+
+        // ✅ ELIMINAR jugadores destruidos de la lista
+        PlayerSpawn.joinedPlayers.RemoveAll(p => p == null);
+
+        // ✅ ACTIVAR control para jugadores existentes
+        foreach (var playerObj in PlayerSpawn.joinedPlayers)
+        {
+            if (playerObj == null) continue;
+            PlayerSpawn.TogglePlayerControl(playerObj, true);
+        }
 
         int playerCount = PlayerSpawn.joinedPlayers.Count;
 
+        // ✅ ACTIVAR SOLO las barras necesarias y asignar salud
         for (int i = 0; i < healthBars.Length; i++)
         {
             bool active = i < playerCount;
@@ -70,8 +83,14 @@ public class LobbyJoinManager : MonoBehaviour
 
             if (active)
             {
-                var player = PlayerSpawn.joinedPlayers[i].GetComponent<PlayerMovLocal>();
+                var playerObj = PlayerSpawn.joinedPlayers[i];
+                if (playerObj == null) continue;
+
+                var player = playerObj.GetComponent<PlayerMovLocal>();
+                if (player == null) continue;
+
                 var uiHealth = healthBars[i].GetComponent<HealthSystem>();
+                if (uiHealth == null) continue;
 
                 player.uiHealth = uiHealth;
                 uiHealth.ResetHealth();
@@ -80,19 +99,11 @@ public class LobbyJoinManager : MonoBehaviour
 
         Debug.Log($"❤️ Activadas {playerCount} barras de vida.");
 
-        /*// 🔥 ACTIVAR GameManagerLocal AHORA
-        FindFirstObjectByType<GameManagerLocal>()?.ActivateGame();
-
-        GameObject[] gallinas = GameObject.FindGameObjectsWithTag("Gallina");
-
-        foreach (GameObject g in gallinas)
-        {
-            ScriptGallinaIdle script = g.GetComponent<ScriptGallinaIdle>();
-            if (script != null)
-            {
-                script.FindEnemy();
-                
-            }
-        }*/
+        // ✅ ACTIVAR GAME MANAGER
+        gm?.ActivateGame();
     }
+
+
+
+
 }

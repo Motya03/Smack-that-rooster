@@ -812,6 +812,7 @@ public class PlayerMovLocal : MonoBehaviour
             vidas -= damage;
         }
 
+
         Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
 
         // 🔻 Si las vidas bajan a 0
@@ -846,8 +847,10 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void OnDestroy()
     {
-        Destroy(gameObject);
+        // Si tienes una lista global de players, quítate de ella en vez de destruirte otra vez.
+        PlayerSpawn.joinedPlayers?.Remove(gameObject);
     }
+
 
     // --- BOOST TEMPORAL ---
     public void ActivarSpeedBoost(float amount, float amountBoost, float duration)

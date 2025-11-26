@@ -19,7 +19,7 @@ public class GameManagerLocal : MonoBehaviour
     [SerializeField] private GameObject cajaRota;
     
     [Header("Canvas Gameplay (HUD Local)")]
-    [SerializeField] private GameObject canvasLocal;
+    [SerializeField] public GameObject canvasLocal;
 
     public bool gameStarted = false;
     private bool gameEnded = false;
@@ -49,6 +49,10 @@ public class GameManagerLocal : MonoBehaviour
     {
         if (gameStarted) return;
 
+        // Preparar UI y jugadores antes de arrancar
+        PrepareForNewMatch();
+        ResetPlayersForNewMatch();
+
         gameStarted = true;
         Debug.Log("🏁 GameManagerLocal ACTIVADO");
 
@@ -58,6 +62,7 @@ public class GameManagerLocal : MonoBehaviour
             timer.ResetTimer();
         }
     }
+
     IEnumerator WaitForGameStart()
     {
         GameManagerLocal check = GetComponent<GameManagerLocal>();
@@ -98,10 +103,9 @@ public class GameManagerLocal : MonoBehaviour
         for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
         {
             GameObject obj = PlayerSpawn.joinedPlayers[i];
-            if (!obj) continue;
-
+            if (obj == null) continue; // muy importante
             PlayerMovLocal p = obj.GetComponent<PlayerMovLocal>();
-            if (!p) continue;
+            if (p == null) continue;
 
             if (p.uiHealth != null &&
                 p.uiHealth.health > 0 &&
@@ -288,6 +292,63 @@ public class GameManagerLocal : MonoBehaviour
         PlayerMovLocal p2 = enemy2.GetComponent<PlayerMovLocal>();
         enemyPoint = p2.GallinaApunta;
 
+    }
+    
+
+    // Llamar al empezar una nueva partida para rearmar el HUD / estado
+    public void PrepareForNewMatch()
+    {
+        // Reiniciar flags
+        gameEnded = false;
+        isSuddenDeath = false;
+        // Asegurar HUD local activo
+        if (canvasLocal != null)
+            canvasLocal.SetActive(true);
+
+        // Ocultar popup ganador
+        if (canvasWinner != null)
+            canvasWinner.SetActive(false);
+
+        // Resetear texto ganador
+        if (winnerText != null)
+            winnerText.text = "";
+
+        // Apagar popups individuales
+        for (int i = 0; i < playerPopups.Length; i++)
+            playerPopups[i].SetActive(false);
+
+        // Si tienes timer: resetearlo para la nueva partida
+        if (timer != null)
+        {
+            timer.StopAllCoroutines();
+            timer.ResetTimer();
+        }
+
+        // (Opcional) volver a suscribirse al evento si fue removido
+        if (timer != null)
+        {
+            timer.onFinished.RemoveListener(OnTimerFinished);
+            timer.onFinished.AddListener(OnTimerFinished);
+        }
+    }
+
+    // Resetear vida / estado de cada jugador al iniciar partida
+    public void ResetPlayersForNewMatch()
+    {
+        for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
+        {
+            var obj = PlayerSpawn.joinedPlayers[i];
+            if (obj == null) continue;
+            var p = obj.GetComponent<PlayerMovLocal>();
+            if (p == null) continue;
+
+            p.isDefinitivelyDead = false;
+            p.vidas = 3;           // ajusta si tu max es otro
+            p.lives = 1;           // reinicia vidas adicionales si hace falta
+            p.ResetVidas();        // esto resetea también la UI si está asignada
+                                   // habilitar control si lo quieres aquí:
+                                   // PlayerSpawn.TogglePlayerControl(obj, true);
+        }
     }
 
 
