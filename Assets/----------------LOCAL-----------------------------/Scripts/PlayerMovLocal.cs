@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using static UnityEngine.Rendering.DebugUI;
+using System.Collections.Generic;
 
 public class PlayerMovLocal : MonoBehaviour
 {
@@ -512,6 +513,8 @@ public class PlayerMovLocal : MonoBehaviour
         SetState(States.Idle);
         
     }
+    GameObject lastNumero;
+    GameObject numero;
     private void DanceSlider()
     {
         
@@ -519,12 +522,30 @@ public class PlayerMovLocal : MonoBehaviour
         {
             Debug.Log("Tiraaa");
             myAnimator.Play("IDLE");
-            GameObject gallina = GameObject.FindWithTag("Gallina");
-            if (gallina != null)
+            GameObject[] gallina = GameObject.FindGameObjectsWithTag("Gallina");
+            if (gallina.Length <= 1)
             {
-                ScriptGallinaIdle gallinas = gallina.GetComponent<ScriptGallinaIdle>();
-                gallinas.SetAttack();
+                numero = gallina[0];
+
             }
+            else
+            {
+
+               
+                // Evita elegir el mismo enemigo
+                List<GameObject> list = new List<GameObject>(gallina);
+                if (lastNumero != null)
+                    list.Remove(lastNumero);
+
+                if (list.Count == 0)
+                    list = new List<GameObject>(gallina);
+                numero = list[Random.Range(0, list.Count)];
+               
+            }
+            lastNumero = numero;
+
+            ScriptGallinaIdle gall = numero.GetComponent<ScriptGallinaIdle>();
+            gall.SetAttack();
             if (sliderDance != null)
             {
                 dancePoints = 0;
