@@ -877,7 +877,11 @@ public class PlayerMovLocal : MonoBehaviour
     private IEnumerator AnimBoostCoroutine(float amount, float duration)
     {
         if (!boostGiven)
+        {
+            AttackDone = true;
             yield break;
+        }
+           
 
 
         Debug.Log("hola2");
