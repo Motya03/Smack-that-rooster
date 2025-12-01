@@ -673,10 +673,10 @@ public class PlayerMovLocal : MonoBehaviour
     public void SpawnKickFX()
     {
         // Instanciar en la posición y rotación del pie
-        GameObject fx = Instantiate(kickWindPrefab, footTrigger.position, footTrigger.rotation);
+       // GameObject fx = Instantiate(kickWindPrefab, footTrigger.position, footTrigger.rotation);
 
         // Destruir automáticamente después de un tiempo (para limpiar)
-        Destroy(fx, 1f);
+        //Destroy(fx, 1f);
     }
 
     public void SpawnDashFrontFX()
