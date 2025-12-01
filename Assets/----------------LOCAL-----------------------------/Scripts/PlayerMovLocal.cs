@@ -31,9 +31,6 @@ public class PlayerMovLocal : MonoBehaviour
     public Transform dashPointFront;
     public Transform dashPointBack;
 
-    public GameObject jumpEffectPrefab;
-    public Transform jumpPoint;
-
     public Text contadorVida;
     public GameObject kickWindPrefab;
     public Transform footTrigger;
@@ -564,7 +561,6 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void AttackLow()
     {
-        SpawnKickFX();
       //  myAnimator.Play("AttackLow");
         StartCoroutine(PerformDash(transform.forward, "AttackLow", 1.8f));
         Debug.Log("Loh");
@@ -655,10 +651,10 @@ public class PlayerMovLocal : MonoBehaviour
 
     public void SpawnKickFX()
     {
-        Vector3 spawnPos = jumpPoint != null ? jumpPoint.position : transform.position + Vector3.up * 0.5f;
-        Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 180, 0);
+        // Instanciar en la posición y rotación del pie
+        GameObject fx = Instantiate(kickWindPrefab, footTrigger.position, footTrigger.rotation);
 
-        GameObject fx = Instantiate(jumpEffectPrefab, spawnPos, spawnRot);
+        // Destruir automáticamente después de un tiempo (para limpiar)
         Destroy(fx, 1f);
     }
 
