@@ -11,6 +11,8 @@ public class GajaProyectile : MonoBehaviour
     Rigidbody rb;
     private bool activate = true;
 
+    private bool RayoIntantiated = false;
+
     void OnCollisionEnter(Collision col)
     {
 
@@ -50,6 +52,7 @@ public class GajaProyectile : MonoBehaviour
     }
     private void Rayo()
     {
+        if (RayoIntantiated) return;
         activate = false;
 
         RaycastHit hit;
@@ -64,6 +67,7 @@ public class GajaProyectile : MonoBehaviour
         if (Physics.Raycast(origin, Vector3.down, out hit, distanciaRaycast, groundMask))
         {
             Instantiate(prefabCruz, hit.point + Vector3.up * 0.02f, Quaternion.identity);
+            RayoIntantiated = true;
 
             Debug.Log("✔ Cruz instanciada en: " + hit.point);
         }

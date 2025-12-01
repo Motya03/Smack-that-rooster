@@ -75,7 +75,7 @@ public class PowerUpRun : MonoBehaviour
         {
             if (player != null)
             {
-                player.ActivarSpeedBoost(amount, amountBoost, boostDuration);
+                player.ActivarSpeedBoost( amountBoost, boostDuration);
                 Instantiate(ParticleAbimalitoPrefab, transform.position, Quaternion.identity);
                 // Destruye el maнz al ser recogido
                 Destroy(gameObject);

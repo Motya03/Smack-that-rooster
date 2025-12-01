@@ -14,7 +14,7 @@ public class PowerMaizLocal : MonoBehaviour
 
         if (player != null)
         {
-            player.ActivarSpeedBoost(amount, amountBoost, boostDuration);
+            player.ActivarSpeedBoost( amountBoost, boostDuration);
 
             // Destruye el maíz al ser recogido
             Destroy(gameObject);
