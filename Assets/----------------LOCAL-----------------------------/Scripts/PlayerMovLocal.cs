@@ -13,6 +13,7 @@ public class PlayerMovLocal : MonoBehaviour
     private CharacterController controller;
     private Animator myAnimator;
 
+    private GameObject player;
     public Transform GallinaApunta;
     private GameObject currentStunEffect;
     public GameObject PatadaEffectPrefab;
@@ -520,9 +521,13 @@ public class PlayerMovLocal : MonoBehaviour
         
         if (dancePoints >=3)
         {
+            player = this.gameObject;
+            player.gameObject.tag = "Invicible";
+            StartCoroutine(TemporaryTagRoutine());
             Debug.Log("Tiraaa");
             myAnimator.Play("IDLE");
             GameObject[] gallina = GameObject.FindGameObjectsWithTag("Gallina");
+            
             if (gallina.Length <= 1)
             {
                 numero = gallina[0];
@@ -544,6 +549,7 @@ public class PlayerMovLocal : MonoBehaviour
             }
             lastNumero = numero;
 
+            
             ScriptGallinaIdle gall = numero.GetComponent<ScriptGallinaIdle>();
             gall.SetAttack();
             if (sliderDance != null)
@@ -554,6 +560,22 @@ public class PlayerMovLocal : MonoBehaviour
             //Call gallinas script throw
             //Stop dancing
             //reset dancePoints en idle si te mueves 
+            // Find all GameObjects with the tag "GallinaBaile"
+            GameObject[] gallinasBaile = GameObject.FindGameObjectsWithTag("GallinaBaile");
+
+            // Loop through each GameObject
+            foreach (GameObject gallinaBaile in gallinasBaile)
+            {
+                // Get the ScriptGallinaIdle component on that GameObject
+                ScriptGallina script = gallinaBaile.GetComponent<ScriptGallina>();
+
+                // Make sure the component exists before calling the method
+                if (script != null)
+                {
+                    script.DanceState();
+                }
+            }
+
         }
         else
         {
@@ -563,7 +585,12 @@ public class PlayerMovLocal : MonoBehaviour
         
 
     }
+    private IEnumerator TemporaryTagRoutine()
+    {
+        yield return new WaitForSeconds(3f);
+        player.gameObject.tag = "Player";
 
+    }
     private void DanceEnded()
     {
         Debug.Log("Nice");

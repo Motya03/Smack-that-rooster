@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using WebSocketSharp;
+
 
 public class GameManagerLocal : MonoBehaviour
 {
@@ -17,7 +18,8 @@ public class GameManagerLocal : MonoBehaviour
     private GameObject enemy;
     private Transform enemyPoint;
     [SerializeField] private GameObject cajaRota;
-    
+
+    private bool throwCageBool = true;
     [Header("Canvas Gameplay (HUD Local)")]
     [SerializeField] public GameObject canvasLocal;
 
@@ -74,11 +76,11 @@ public class GameManagerLocal : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            ThrowCage();
-            Debug.Log("Рщдф");
-        }
+        //if (Input.GetKeyDown(KeyCode.U))
+        //{
+       //     ThrowCage();
+       //     Debug.Log("Рщдф");
+      //  }
 
 
         //float DistanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
@@ -90,6 +92,17 @@ public class GameManagerLocal : MonoBehaviour
             return;
 
         CheckRemainingPlayers();
+    }
+    public void PrepareCage()
+    {
+        if (throwCageBool == true)
+        {
+            ThrowCage();
+            throwCageBool = false;
+        }
+       
+            
+         
     }
 
     // -----------------------------------------------------
@@ -197,7 +210,8 @@ public class GameManagerLocal : MonoBehaviour
 
         // 🔥 Si hay empate → elegir uno aleatorio (sin empates finales)
         if (candidates.Count > 1)
-            return candidates[Random.Range(0, candidates.Count)];
+            return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+
 
         return candidates.Count == 1 ? candidates[0] : 0;
     }
@@ -286,7 +300,7 @@ public class GameManagerLocal : MonoBehaviour
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
 
-        if (players.Length > 0) enemy = players[Random.Range(0, players.Length)];
+        if (players.Length > 0) enemy = players[UnityEngine.Random.Range(0, players.Length)];
 
         GameObject enemy2 = GameObject.FindWithTag("Player");
         PlayerMovLocal p2 = enemy2.GetComponent<PlayerMovLocal>();
