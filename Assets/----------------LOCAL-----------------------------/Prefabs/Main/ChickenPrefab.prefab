@@ -916,7 +916,7 @@ GameObject:
   - component: {fileID: 8024530969252029541}
   m_Layer: 0
   m_Name: ChickenPrefab
-  m_TagString: Untagged
+  m_TagString: GallinaBaile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -952,6 +952,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runSpeed: 2
   tiempoCambio: 3
+  rb: {fileID: 2731590412583410491}
+  jumpForce: 5
+  jumpInterval: 0.5
   mystate: 0
 --- !u!95 &3415652518733945007
 Animator:

@@ -4,22 +4,19 @@ using System.Collections.Generic;
 
 public class ScriptGallinaIdle : MonoBehaviour
 {
-  
-
     public enum States { Movim, Dance, Attack }
     public States mystate;
 
     public Animator ani;
+
+    public float throwSpeed = 10f;
     public bool CanThrow = false;
+
     public GameObject projectile;
     private GameObject enemy;
-    public float throwSpeed = 10f;
     
     public Transform posicionTiro;
-
     private Transform enemyPoint;
-
-
 
 
     void Start()
@@ -31,24 +28,12 @@ public class ScriptGallinaIdle : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            SetAttack();
-            
-        }
-        
-           
-
-           // float distanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
-
             switch (mystate)
             {
                 case States.Movim: Comportamiento_Gallina(); break;
                 case States.Dance: Dance(); break;
                 case States.Attack: AttackState(); break;
             }
-        
-
     }
 
 
@@ -60,12 +45,12 @@ public class ScriptGallinaIdle : MonoBehaviour
 
         if (players.Length <= 1)
         {
-            // Si solo hay uno, no se puede evitar
+            
             enemy = players[0];
         }
         else
         {
-            // Evita elegir el mismo enemigo
+           
             List<GameObject> list = new List<GameObject>(players);
             list.Remove(lastEnemy);
             enemy = list[Random.Range(0, list.Count)];
@@ -78,25 +63,29 @@ public class ScriptGallinaIdle : MonoBehaviour
     }
 
     private void AttackState()
-     {
-
-         FindEnemy();
+     {  
         if (!CanThrow || enemy == null) return;
 
-        
         Vector3 dir = (enemyPoint.position - transform.position).normalized;
-         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
-         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime);
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime);
 
-        Throw();
-       //  ani.Play("Throw");
+        StartCoroutine(AttackSequence());
+    }
+    private IEnumerator AttackSequence()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            FindEnemy();   
 
+            if (enemy != null)
+            {
+                Throw(); 
+            }
 
-
-
-
-     }
-
+            yield return new WaitForSeconds(1f); 
+        }
+    }
     void Throw()
     {
       
@@ -146,15 +135,10 @@ public class ScriptGallinaIdle : MonoBehaviour
 
 
       public IEnumerator WaitForGameStart()
-    {
-       
+    {  
         GameManagerLocal check = Object.FindAnyObjectByType<GameManagerLocal>();
-
-        
-        // Espera hasta que el juego empiece
-        yield return new WaitUntil(() => check.gameStarted);
-        
-        FindEnemy();  // ya hay players en escena
+        yield return new WaitUntil(() => check.gameStarted);    
+        FindEnemy();  
     }
 
     public void SetState(States newState)

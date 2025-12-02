@@ -17,6 +17,7 @@ public class TimerLocal : MonoBehaviour
 
     private float remaining;
     private bool isRunning;
+   // public bool throwCageBool;
 
     void Start()
     {
@@ -54,6 +55,15 @@ public class TimerLocal : MonoBehaviour
         int minutes = Mathf.FloorToInt(remaining / 60f);
         int seconds = Mathf.FloorToInt(remaining % 60f);
         timerText.text = $"{minutes:00}:{seconds:00}";
+        if (seconds == 30.0f )
+        {
+
+            //throwCageBool = true;
+            FindAnyObjectByType<GameManagerLocal>().PrepareCage();
+
+        }
+
+
     }
     public void StartSuddenDeath()
     {

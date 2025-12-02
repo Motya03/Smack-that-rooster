@@ -8,15 +8,14 @@ public class PlayerSpawn : MonoBehaviour
     [SerializeField] private Transform[] spawnPoints;
     private List<int> usedIndexes = new List<int>();
 
-    // 🔹 AHORA ES UNA LISTA DE GAMEOBJECTS
+   
     public static List<GameObject> joinedPlayers = new List<GameObject>();
 
     [SerializeField] private Material[] outlineMaterials;
 
     public void OnPlayerJoined(PlayerInput playerInput)
     {
-        //PlayerMovLocal Sc = gameObject.GetComponent<PlayerMovLocal>();
-       // Sc.ResetVidas();
+        
         StartCoroutine(PlacePlayerNextFrame(playerInput));
 
         FindFirstObjectByType<LobbyJoinManager>()?
@@ -44,16 +43,16 @@ public class PlayerSpawn : MonoBehaviour
             playerInput.transform.rotation = spawn.rotation;
         }
 
-        // 🔹 Guardar el jugador como GameObject
+        
         if (!joinedPlayers.Contains(playerInput.gameObject))
             joinedPlayers.Add(playerInput.gameObject);
 
-        // 🔹 Desactivar control
+        
         TogglePlayerControl(playerInput.gameObject, false);
 
         Debug.Log($"Jugador {playerInput.playerIndex} spawneado en {spawn.name}");
 
-        // Asignar outline
+       
         Transform meshChild = playerInput.transform.Find("Sphere.001");
         if (meshChild != null)
         {
@@ -70,14 +69,7 @@ public class PlayerSpawn : MonoBehaviour
                 renderer.materials = mats.ToArray();
             }
         }
-        /* // 🔹 ASIGNAR EL CANVAS JUSTO DESPUÉS DEL SPAWN
-         var mov = playerInput.GetComponent<PlayerMovLocal>();
-         if (mov != null)
-             mov.SetCanvasEscape(GameObject.FindWithTag("PauseCanvas"));
-         */
-       // PlayerMovLocal Sc = playerInput.GetComponent<PlayerMovLocal>();
-        //if (Sc != null)
-           // Sc.ResetVidas();
+        
 
     }
 
@@ -97,14 +89,14 @@ public class PlayerSpawn : MonoBehaviour
         return randomIndex;
     }
 
-    // 🔹 AHORA RECIBE GAMEOBJECT
+   
     public static void TogglePlayerControl(GameObject playerObj, bool state)
     {
         if (!playerObj) return;
 
         foreach (var comp in playerObj.GetComponentsInChildren<MonoBehaviour>())
         {
-            if (comp is PlayerInput) continue; // nunca desactivar PlayerInput
+            if (comp is PlayerInput) continue;
             comp.enabled = state;
         }
     }
