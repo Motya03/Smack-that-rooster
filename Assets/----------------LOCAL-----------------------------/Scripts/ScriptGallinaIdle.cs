@@ -88,8 +88,8 @@ public class ScriptGallinaIdle : MonoBehaviour
     }
     void Throw()
     {
-      
 
+        SoundManager.PlaySound(SoundType.Throw);
         GameObject thrownProjectile = Instantiate(projectile, posicionTiro.position, Quaternion.identity);
         Rigidbody rb = thrownProjectile.GetComponent<Rigidbody>();
 

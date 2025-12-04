@@ -33,7 +33,7 @@ public class GajaProyectile : MonoBehaviour
             GameObject exp = Instantiate(cajaRota, this.transform.position, Quaternion.identity);
             GameObject explol = Instantiate(EfectoCajaRota, this.transform.position, Quaternion.identity);
             GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
-            //SoundManager.PlaySound(SoundType.RockHit);
+            SoundManager.PlaySound(SoundType.BoxDestroyed);
             Destroy(this.gameObject);
         }
     }
@@ -42,6 +42,7 @@ public class GajaProyectile : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        SoundManager.PlaySound(SoundType.BoxGoingDown);
     }
 
     
