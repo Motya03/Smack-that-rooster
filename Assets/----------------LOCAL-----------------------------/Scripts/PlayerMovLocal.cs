@@ -425,6 +425,7 @@ public class PlayerMovLocal : MonoBehaviour
             isJumpPressed = false;
             // myAnimator.SetTrigger("JUMP1");    
             myAnimator.Play("Jump");
+       
         // ResetInputs();
         StartCoroutine(AnimBoostCoroutine(0.5f, 1f));
         if (dashFrontPressed) SetState(States.DashFront);
@@ -432,6 +433,10 @@ public class PlayerMovLocal : MonoBehaviour
             StartCoroutine(JumpRoutine());
 
 
+    }
+    private void JumpSound()
+    {
+        SoundManager.PlaySound(SoundType.Jump);
     }
     private IEnumerator JumpRoutine()
     {
@@ -464,6 +469,7 @@ public class PlayerMovLocal : MonoBehaviour
             StopMove();
             SetState(States.Idle);
             ResetInputs();
+            SoundManager.PlaySound(SoundType.Crouch);
 
         }
     }
@@ -488,6 +494,7 @@ public class PlayerMovLocal : MonoBehaviour
             Debug.Log("Patada");
 
             myAnimator.Play("AttackPatada");
+            SoundManager.PlaySound(SoundType.AttackPrime);
             //  StopMove();
             StartCoroutine(AnimBoostCoroutine( 0.3f, 0.8f));
            // SetState(States.Idle);
@@ -499,6 +506,7 @@ public class PlayerMovLocal : MonoBehaviour
             myAnimator.Play("AttackCircAire");
             StopMove();
             SetState(States.Idle);
+            SoundManager.PlaySound(SoundType.AttackPrime);
         }
        
     }
@@ -510,6 +518,7 @@ public class PlayerMovLocal : MonoBehaviour
         }
         // sliderDance.gameObject.SetActive(true);
         myAnimator.Play("Dance");
+        SoundManager.PlaySound(SoundType.Dance);
         StopMove();
         SetState(States.Idle);
         
@@ -614,6 +623,7 @@ public class PlayerMovLocal : MonoBehaviour
         Debug.Log("Loh");
         StopMove();
         SetState(States.Idle);
+        SoundManager.PlaySound(SoundType.AttackSecond);
     }
 
     private void StopMove()
@@ -645,6 +655,7 @@ public class PlayerMovLocal : MonoBehaviour
         dashFrontPressed = false;
         if (!isDashing && canDash)
         {
+            SoundManager.PlaySound(SoundType.Dash);
             SpawnDashFrontFX();
              StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
             StopMove();
@@ -660,6 +671,7 @@ public class PlayerMovLocal : MonoBehaviour
         dashBackPressed = false;
         if (!isDashing && canDash)
         {
+            SoundManager.PlaySound(SoundType.Dash);
             SpawnDashBackFX();
             StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
             StopMove();
@@ -668,7 +680,10 @@ public class PlayerMovLocal : MonoBehaviour
         }
 
     }
-
+    public void RunSteps()
+    {
+         SoundManager.PlaySound(SoundType.Run);
+    }
     public void TakeStun()
     {
         
@@ -676,13 +691,13 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private void Stunned()
     {
-       
-
-        myAnimator.Play("Stunned");
+        myAnimator.Play("Stunned");   
         StopMove();
         SetState(States.Idle);
-
-
+    }
+    private void StunnedSound()
+    {
+        SoundManager.PlaySound(SoundType.StunStars);
     }
    
 
@@ -745,7 +760,7 @@ public class PlayerMovLocal : MonoBehaviour
     private void Dead()
     {
         myAnimator.Play("Dead");
-       
+        SoundManager.PlaySound(SoundType.Dead);
         StopMove();
     }
 
@@ -827,7 +842,7 @@ public class PlayerMovLocal : MonoBehaviour
 
         SetState(isGrounded ? States.Idle : States.Fall);
         ResetInputs();
-
+        
     }
 
 
