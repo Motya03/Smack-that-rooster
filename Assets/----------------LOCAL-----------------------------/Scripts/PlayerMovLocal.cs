@@ -380,9 +380,9 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Run()
     {
-       
 
-       
+
+        SoundManager.StopSound(SoundType.Dance);
         if (dashFrontPressed)
             SetState(States.DashFront);
         if (dashBackPressed)
@@ -767,6 +767,8 @@ public class PlayerMovLocal : MonoBehaviour
     // --- UTILIDADES ---
     public void SetState(States newState)
     {
+       
+
         mystate = newState;
         Debug.Log("Estado cambiado a: " + mystate);
         if (newState == States.ClickBattle)
