@@ -76,11 +76,11 @@ public class GameManagerLocal : MonoBehaviour
     }
     private void Update()
     {
-        //if (Input.GetKeyDown(KeyCode.U))
-        //{
-       //     ThrowCage();
-       //     Debug.Log("Рщдф");
-      //  }
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+           ThrowCage();
+            Debug.Log("Рщдф");
+        }
 
 
         //float DistanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);

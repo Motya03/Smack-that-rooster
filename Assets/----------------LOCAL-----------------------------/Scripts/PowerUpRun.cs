@@ -19,6 +19,7 @@ public class PowerUpRun : MonoBehaviour
     void Start()
     {
         StartCoroutine(Comportamiento_Enemigo());
+        SoundManager.PlaySound(SoundType.AbimalitoStart);
     }
 
     IEnumerator Comportamiento_Enemigo()
@@ -78,10 +79,18 @@ public class PowerUpRun : MonoBehaviour
                 player.ActivarSpeedBoost( amountBoost, boostDuration);
                 Instantiate(ParticleAbimalitoPrefab, transform.position, Quaternion.identity);
                 // Destruye el maнz al ser recogido
+                SoundManager.PlaySound(SoundType.AbimalitoDead);
                 Destroy(gameObject);
             }
         }
     }
-   
+    private void Steps()
+    {
+        {
+            SoundManager.PlaySound(SoundType.AbimalitoRun);
+
+        }
+    }
+
 
 }

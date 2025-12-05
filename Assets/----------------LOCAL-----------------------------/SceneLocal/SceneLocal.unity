@@ -10479,7 +10479,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6af28eb9203dea541b974e7f2de82372, type: 3}
   - {fileID: 8300000, guid: 163479ffc008193408b4dabe644844cb, type: 3}
   - {fileID: 8300000, guid: b12b94f1ce856aa4d8914857fb7aa1fc, type: 3}
-  - {fileID: 8300000, guid: 09adbfa6e7837ce438cc069300efad6f, type: 3}
+  - {fileID: 8300000, guid: b4624a46166e07a4788092b2cefeb27e, type: 3}
   - {fileID: 8300000, guid: f600ee445a169a14a92796d106bd7a13, type: 3}
   - {fileID: 8300000, guid: 4af163d57101b4043b0d3edbc2294f27, type: 3}
   - {fileID: 8300000, guid: 2329f02f5202966489fe9862befc474e, type: 3}
@@ -10490,6 +10490,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 91e96256f1b0bc34589ac7e6a16c5c50, type: 3}
   - {fileID: 8300000, guid: 1f229e29e9f03414c8e2079e7892899c, type: 3}
   - {fileID: 8300000, guid: e6dc9adae594e444fafb184f18bce17b, type: 3}
+  - {fileID: 8300000, guid: baec2d3e21187234b84a5500004b802a, type: 3}
+  - {fileID: 8300000, guid: a7ffe65ab0c54414688f735d898ebea9, type: 3}
+  - {fileID: 8300000, guid: 06680e56ecc14a34abffceb2df5c1b79, type: 3}
+  - {fileID: 8300000, guid: 2f4f83a701bb75547afbb509029c36b6, type: 3}
+  - {fileID: 8300000, guid: ba53bb924530d5e4390a4d05fd207392, type: 3}
 --- !u!82 &256912703
 AudioSource:
   m_ObjectHideFlags: 0
@@ -10512,7 +10517,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 30
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -10596,7 +10601,7 @@ Transform:
   m_GameObject: {fileID: 256912701}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.0654867, y: -5.194953, z: 13.836658}
+  m_LocalPosition: {x: 2.87, y: 1.73, z: 1.88}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
