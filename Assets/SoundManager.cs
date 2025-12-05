@@ -1,7 +1,5 @@
-using System;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Audio;
-
 
 public enum SoundType
 {
@@ -20,30 +18,42 @@ public enum SoundType
     BoxGoingDown,
     FullRun,
     EggCrack
-
-
-
 }
+
 [RequireComponent(typeof(AudioSource))]
 public class SoundManager : MonoBehaviour
 {
     [SerializeField] private AudioClip[] soundList;
-    private static SoundManager instance = null;
-    private AudioSource audioSource;
+
+    private static SoundManager instance;
+    private Dictionary<SoundType, AudioSource> soundSources = new Dictionary<SoundType, AudioSource>();
 
     private void Awake()
     {
-        if (!instance)
+        if (instance == null)
         {
             instance = this;
-            audioSource = GetComponent<AudioSource>();
+
+            // Crear un AudioSource por cada sonido
+            foreach (SoundType type in System.Enum.GetValues(typeof(SoundType)))
+            {
+                AudioSource src = gameObject.AddComponent<AudioSource>();
+                src.clip = soundList[(int)type];
+                soundSources.Add(type, src);
+            }
         }
     }
 
-    public static void PlaySound(SoundType sound, AudioSource source = null, float volume = 1)
+    public static void PlaySound(SoundType sound, float volume = 1f)
     {
-        instance.audioSource.PlayOneShot(instance.soundList[(int)sound], volume);
+        AudioSource src = instance.soundSources[sound];
+        src.volume = volume;
+       
+        src.Play();
+    }
+
+    public static void StopSound(SoundType sound)
+    {
+        instance.soundSources[sound].Stop();
     }
 }
-
-
