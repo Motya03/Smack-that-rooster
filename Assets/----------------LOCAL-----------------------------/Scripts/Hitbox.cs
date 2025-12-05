@@ -20,6 +20,7 @@ public class Hitbox : MonoBehaviour
             Debug.Log($"{other.name} recibió daño!");
 
             player.TakeHit(1, atacante);
+           
         }
          if (other.gameObject.CompareTag("Pecho"))
         {

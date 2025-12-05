@@ -686,7 +686,7 @@ public class PlayerMovLocal : MonoBehaviour
     }
     public void TakeStun()
     {
-        
+        SoundManager.PlaySound(SoundType.HitBody);
         SetState(States.Stunned);
     }
     private void Stunned()
@@ -801,7 +801,7 @@ public class PlayerMovLocal : MonoBehaviour
    
     private IEnumerator PerformDash(Vector3 dashDirection, string animName, float dashDistance)
     {
-        
+        SoundManager.StopSound(SoundType.StunStars);
         isDashing = true;
         canDash = false;
 
@@ -860,6 +860,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     public void TakeHit(int damage, PlayerMovLocal attacker)
     {
+        SoundManager.PlaySound(SoundType.HitCulo);
         lastAttacker = attacker;
 
         // Actualizar UI y vida

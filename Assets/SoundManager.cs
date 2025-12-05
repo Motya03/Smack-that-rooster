@@ -17,7 +17,13 @@ public enum SoundType
     CageImpact,
     BoxGoingDown,
     FullRun,
-    EggCrack
+    EggCrack,
+    HitCulo,
+    HitBody,
+    AbimalitoRun,
+    AbimalitoStart,
+    AbimalitoDead
+    
 }
 
 [RequireComponent(typeof(AudioSource))]
