@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6931529181546719854}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controlmaestro
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8965779030331591992}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pieatras.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78,7 +78,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6030779007841710799}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pieatras.L.001_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,7 +109,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7770956684803548579}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: control cadera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -142,7 +142,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8889335881034505502}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pierna1.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -179,7 +179,7 @@ GameObject:
   - component: {fileID: 3065978424473669260}
   - component: {fileID: 8052518749033620788}
   - component: {fileID: 9123613151731050230}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: AnimalRedFastPrevab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -327,7 +327,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8967028148854211725}
   - component: {fileID: 7477336240703736890}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Retopo_pAPPER
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -442,7 +442,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5349319010011890951}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pie.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -474,7 +474,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 31788489633238857}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: piernatras.R.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -506,7 +506,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2880682978313317702}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pie.R.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -539,7 +539,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6605484967663751913}
   - component: {fileID: 8621802701778170920}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pAPPER.004
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -654,7 +654,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7035058620425321643}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpierna.L_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -685,7 +685,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4211712442072601170}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpierna.R_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -716,7 +716,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1108081324758239988}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pie.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -748,7 +748,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1928600541818653156}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pie.R.001_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -779,7 +779,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3217200129556352079}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpiernatras.R_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -810,7 +810,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1442495597266106869}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: piernatras.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -842,7 +842,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8174868798275623759}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pierna1.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -874,7 +874,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8743932464084408151}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cabeza1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -906,7 +906,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 573158595983429119}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pieatras.R.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -938,7 +938,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5964689927470421837}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: piernatras.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -970,7 +970,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8708588278203086202}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pierna.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1002,7 +1002,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6312004706916806944}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cadera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1038,7 +1038,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4519660344989200560}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cola1_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1069,7 +1069,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8409542099237286156}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pierna.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1101,7 +1101,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6597816750035889175}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pie.L.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1133,7 +1133,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7031831205060413983}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpierna.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1165,7 +1165,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 826427658624665348}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorcabeza
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1197,7 +1197,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5312245648658559566}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pieatras.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1229,7 +1229,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4233549895775171444}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cabeza
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1261,7 +1261,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8835088840420429269}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Armature
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1293,7 +1293,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5948199549969096040}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pieatras.R.001_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1324,7 +1324,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 172525031540144914}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pieatras.L.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1356,7 +1356,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8964304830449965764}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpiernatras.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1388,7 +1388,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3628796158431067877}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cabeza_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1419,7 +1419,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4836900659392613754}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cola
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1451,7 +1451,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8590586084636615317}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: cola1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1483,7 +1483,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7581243209185469162}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpiernatras.L_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1514,7 +1514,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4144528620770562484}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpiernatras.R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1547,7 +1547,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1760991132205057643}
   - component: {fileID: 45049477306644914}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pAPPER.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1662,7 +1662,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8617640013100287374}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: pie.L.001_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1693,7 +1693,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8601792512700772291}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorpierna.L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1725,7 +1725,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9040926506443788060}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: controladorcabeza_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1756,7 +1756,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2513427043407000837}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: piernatras.L.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
