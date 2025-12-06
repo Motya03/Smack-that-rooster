@@ -12,6 +12,7 @@ public class ChangeSceneBoton : MonoBehaviour
 
     public void CambioEscena()
     {
+        MusicManager.StopMusic(MusicType.MainMenuBack);
         Debug.Log("CambioEscena ejecutado desde clic"); // 👈
         GameData.ResetGameState();
 
