@@ -55,6 +55,11 @@ public class ClickGameManager : MonoBehaviour
     // knocked = el que llegó a 0 HP
     public void StartBattle(PlayerMovLocal atk, PlayerMovLocal kn)
     {
+        MusicManager.StopMusic(MusicType.MainMenuBack);
+        MusicManager.StopMusic(MusicType.FightMusic);
+        MusicManager.StopMusic(MusicType.ClickerGameMusic);
+       // MusicManager.StopMusic(MusicType.EnterCharMusic);
+        MusicManager.PlayMusic(MusicType.ClickerGameMusic, 0.5f);
         attacker = atk;
         knocked = kn;
 
@@ -126,7 +131,14 @@ public class ClickGameManager : MonoBehaviour
             // 🔥 Desbloquear y revisar win condition
             gamemanagerlocal.SetClickerState(false);
             gamemanagerlocal.CheckRemainingPlayers();
+            MusicManager.StopMusic(MusicType.MainMenuBack);
+            MusicManager.StopMusic(MusicType.FightMusic);
+            MusicManager.StopMusic(MusicType.ClickerGameMusic);
+           
+            
             return;
+           
+
         }
 
         // ------------------------------------

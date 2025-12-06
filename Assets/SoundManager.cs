@@ -22,7 +22,9 @@ public enum SoundType
     HitBody,
     AbimalitoRun,
     AbimalitoStart,
-    AbimalitoDead
+    AbimalitoDead,
+    SelectionButtonChar,
+    CharEnter
     
 }
 

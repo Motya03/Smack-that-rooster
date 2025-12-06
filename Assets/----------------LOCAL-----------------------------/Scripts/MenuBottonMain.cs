@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems; 
 
-public class MenuButtonMainNewInput : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
+public class MenuButtonMainNewInput : MonoBehaviour//, IPointerEnterHandler, IPointerClickHandler
 {
     [SerializeField] MenuButtonController menuButtonController;
     [SerializeField] Animator animator;
@@ -42,7 +42,7 @@ public class MenuButtonMainNewInput : MonoBehaviour, IPointerEnterHandler, IPoin
     // 👇 SECCIÓN NUEVA 👇
 
     // Cuando el ratón entra sobre este botón
-    public void OnPointerEnter(PointerEventData eventData)
+   /* public void OnPointerEnter(PointerEventData eventData)
     {
         menuButtonController.index = thisIndex; // mueve la selección a este botón
         animator.SetBool("selected", true);
@@ -60,5 +60,5 @@ public class MenuButtonMainNewInput : MonoBehaviour, IPointerEnterHandler, IPoin
     public void OnPointerExit(PointerEventData eventData)
     {
         animator.SetBool("selected", false);
-    }
+    }*/
 }

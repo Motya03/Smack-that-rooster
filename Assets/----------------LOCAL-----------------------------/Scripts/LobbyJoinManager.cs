@@ -41,6 +41,7 @@ public class LobbyJoinManager : MonoBehaviour
     {
         if (index < playerSlots.Length)
         {
+            SoundManager.PlaySound(SoundType.CharEnter);
             playerSlots[index].SetActive(true);
 
             if (index >= 1)
@@ -50,6 +51,7 @@ public class LobbyJoinManager : MonoBehaviour
 
     public void StartGame()
     {
+        SoundManager.PlaySound(SoundType.SelectionButtonChar);
         Debug.Log("🎮 Empieza la partida");
 
         if (inputManager != null)

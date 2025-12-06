@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -33,7 +34,9 @@ public class GameManagerLocal : MonoBehaviour
 
     private void Start()
     {
-
+       
+        
+        
         StartCoroutine(WaitForGameStart());
 
 
@@ -49,6 +52,10 @@ public class GameManagerLocal : MonoBehaviour
     // 🔥 Activado desde LobbyJoinManager cuando presionan START
     public void ActivateGame()
     {
+        MusicManager.PlayMusic(MusicType.ChickenMusic, 0.05f);
+         MusicManager.PlayMusic(MusicType.FightMusic, 0.09f);
+        MusicManager.StopMusic(MusicType.EnterCharMusic);
+
         if (gameStarted) return;
 
         // Preparar UI y jugadores antes de arrancar
@@ -156,6 +163,9 @@ public class GameManagerLocal : MonoBehaviour
         }
 
         EndGame(GetWinnerIndexByHealth());
+        
+
+
     }
 
     private int CountAlivePlayers()
@@ -272,6 +282,11 @@ public class GameManagerLocal : MonoBehaviour
             canvasWinner.SetActive(true);
 
         Debug.Log("🎉 FIN DE PARTIDA → " + msg);
+        MusicManager.StopMusic(MusicType.MainMenuBack);
+        MusicManager.StopMusic(MusicType.FightMusic);
+        MusicManager.StopMusic(MusicType.ChickenMusic);
+        MusicManager.StopMusic(MusicType.ClickerGameMusic);
+        MusicManager.PlayMusic(MusicType.EnterCharMusic, 0.5f);
     }
     public void ThrowCage()
     {
