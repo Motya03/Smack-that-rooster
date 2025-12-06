@@ -13,6 +13,8 @@ public class PlayerMovLocal : MonoBehaviour
     private CharacterController controller;
     private Animator myAnimator;
 
+    private bool isInPowerUp = false;
+
     private GameObject player;
     public Transform GallinaApunta;
     private GameObject currentStunEffect;
@@ -152,6 +154,20 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Update()
     {
+
+        // --- Animación especial del Power Up ---
+        if (mystate == States.PowerUp)
+        {
+            Vector3 currentMoveDir = new Vector3(moveInput.x, 0f, moveInput.y);
+
+            if (currentMoveDir.magnitude < 0.1f)
+                myAnimator.Play("Idle");
+            else
+                myAnimator.Play("RunFast");
+        }
+
+
+
         if (sliderDance != null)
         {
             sliderDance.value = dancePoints;
@@ -778,7 +794,7 @@ public class PlayerMovLocal : MonoBehaviour
     // --- UTILIDADES ---
     public void SetState(States newState)
     {
-       
+        if (mystate == States.PowerUp && isInPowerUp) return;
 
         mystate = newState;
         Debug.Log("Estado cambiado a: " + mystate);
@@ -793,6 +809,7 @@ public class PlayerMovLocal : MonoBehaviour
                 sliderDance.gameObject.SetActive(false);
             }
         }
+        
             
        
     }
@@ -953,6 +970,12 @@ public class PlayerMovLocal : MonoBehaviour
     }
     private IEnumerator AnimBoostCoroutine(float amount, float duration)
     {
+        if (mystate == States.PowerUp)
+        {
+            AttackDone = true;
+            yield break;
+        }
+            
         if (!boostGiven)
         {
             AttackDone = true;
@@ -964,6 +987,11 @@ public class PlayerMovLocal : MonoBehaviour
         Debug.Log("hola2");
         moveSpeed = defaultSpeed * amount;
         yield return new WaitForSeconds(duration);
+        if (mystate == States.PowerUp)
+        {
+            AttackDone = true;
+            yield break;
+        }
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
 
@@ -1031,18 +1059,24 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void PowerUp()
     {
-        myAnimator.Play("RunFast");
+        
+
+        if (isInPowerUp) return;
+
+        isInPowerUp = true;
+       
         StartCoroutine(PowerSpeed());
-        //SetState(States.Idle);
+       
     }
     private IEnumerator PowerSpeed()
     {
         StopMove(); 
         moveSpeed = 15;
-        //CanMove();
+        CanMove();
         yield return new WaitForSeconds(3);
         moveSpeed = defaultSpeed;
         CanReceive();
+        isInPowerUp = false;
         SetState(States.Idle);
 
     }
