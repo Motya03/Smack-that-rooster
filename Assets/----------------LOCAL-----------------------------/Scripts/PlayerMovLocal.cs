@@ -94,12 +94,14 @@ public class PlayerMovLocal : MonoBehaviour
     private bool canReceiveInput = true;
     private bool canReceiveInputDash = true;
     private bool canReceiveInputAttack = true;
-
-    
-
+    private bool canReceiveInputMove = true;
 
 
-    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance}
+
+
+
+
+    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance, PowerUp}
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
@@ -234,6 +236,7 @@ public class PlayerMovLocal : MonoBehaviour
             case States.Dead: Dead(); break;
             case States.Crouch: Crouch(); break;
             case States.Dance: Dance(); break;
+            case States.PowerUp: PowerUp(); break;
                 //case States.ClickBattle: ClickBattle(); break;
 
         }
@@ -246,7 +249,7 @@ public class PlayerMovLocal : MonoBehaviour
         Vector2 currentInput = value.Get<Vector2>();
         lastMoveInput = currentInput;
 
-        if (!canReceiveInput) return;
+        if (!canReceiveInput && !canReceiveInputMove) return;
 
         moveInput = currentInput;
         isMoving = moveInput.magnitude > 0.1f;
@@ -477,6 +480,7 @@ public class PlayerMovLocal : MonoBehaviour
     public void CanReceive()
     {
         canReceiveInput = true;
+        
         moveInput = lastMoveInput;
         isMoving = moveInput.magnitude > 0.1f;
     }
@@ -486,6 +490,8 @@ public class PlayerMovLocal : MonoBehaviour
     {
         if (isGrounded)
         {
+            if (dashFrontPressed) SetState(States.DashFront);
+            if (dashBackPressed) SetState(States.DashBack);
             Debug.Log("Patada1");
             if  (!AttackDone ) return;
             isGrounded = false;
@@ -497,7 +503,7 @@ public class PlayerMovLocal : MonoBehaviour
             SoundManager.PlaySound(SoundType.AttackPrime);
             //  StopMove();
             StartCoroutine(AnimBoostCoroutine( 0.3f, 0.8f));
-           // SetState(States.Idle);
+          // SetState(States.Idle);
             
         }
         else
@@ -628,6 +634,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void StopMove()
     {
+        canReceiveInputMove = false;
         canReceiveInputAttack = false;
         canReceiveInputDash = false;
         canReceiveInput = false;
@@ -638,6 +645,10 @@ public class PlayerMovLocal : MonoBehaviour
     private void CanAttack()
     {
         canReceiveInputAttack = true;
+    }
+    private void CanMove()
+    {
+        canReceiveInputMove = true;
     }
     private void CanReceiveDash()
     {
@@ -1018,7 +1029,22 @@ public class PlayerMovLocal : MonoBehaviour
         currentCage = null;
     }
 
+    private void PowerUp()
+    {
+        myAnimator.Play("RunFast");
+        StartCoroutine(PowerSpeed());
+    }
+    private IEnumerator PowerSpeed()
+    {
+        StopMove();
+        
+        moveSpeed = 15;
+        CanMove();
+        yield return new WaitForSeconds(3);
+        moveSpeed = defaultSpeed;
+        CanReceive();
 
+    }
     public void ResetVidas()
     {
         vidas = 3;
