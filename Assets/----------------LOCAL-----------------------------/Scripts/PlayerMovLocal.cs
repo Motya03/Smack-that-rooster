@@ -1033,16 +1033,17 @@ public class PlayerMovLocal : MonoBehaviour
     {
         myAnimator.Play("RunFast");
         StartCoroutine(PowerSpeed());
+        //SetState(States.Idle);
     }
     private IEnumerator PowerSpeed()
     {
-        StopMove();
-        
+        StopMove(); 
         moveSpeed = 15;
-        CanMove();
+        //CanMove();
         yield return new WaitForSeconds(3);
         moveSpeed = defaultSpeed;
         CanReceive();
+        SetState(States.Idle);
 
     }
     public void ResetVidas()

@@ -76,7 +76,8 @@ public class PowerUpRun : MonoBehaviour
         {
             if (player != null)
             {
-                player.ActivarSpeedBoost( amountBoost, boostDuration);
+                // player.ActivarSpeedBoost( amountBoost, boostDuration);
+                player.SetState(PlayerMovLocal.States.PowerUp);
                 Instantiate(ParticleAbimalitoPrefab, transform.position, Quaternion.identity);
                 // Destruye el maнz al ser recogido
                 SoundManager.PlaySound(SoundType.AbimalitoDead);
