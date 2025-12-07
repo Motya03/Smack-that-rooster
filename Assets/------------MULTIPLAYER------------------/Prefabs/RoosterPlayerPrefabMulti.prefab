@@ -41958,7 +41958,7 @@ GameObject:
   - component: {fileID: 3365055292205216125}
   - component: {fileID: 7177771715482488037}
   - component: {fileID: -1943637221246495598}
-  - component: {fileID: -5073686935127232703}
+  - component: {fileID: -6768802283923360996}
   - component: {fileID: 8106760067093118335}
   m_Layer: 6
   m_Name: RoosterPlayerPrefabMulti
@@ -42230,7 +42230,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-5073686935127232703
+--- !u!114 &-6768802283923360996
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42239,24 +42239,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 8239303162948211347}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f03b890bad41e8e498b3526d0698a9ee, type: 3}
+  m_Script: {fileID: 11500000, guid: 57006571648440645bb7191508030f14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   GallinaApunta: {fileID: 4682378294767445713}
-  PatadaEffectPrefab: {fileID: 8442901411129158963, guid: e96123b7e34c75c45b10caf3a0648803, type: 3}
-  CagePrefab: {fileID: 1383231037179557638, guid: 2f918dac292609b4a9c96d6900aaa24b, type: 3}
+  PatadaEffectPrefab: {fileID: 8442901411129158963, guid: e306a0b5c32f46948a7adde594860852, type: 3}
+  CagePrefab: {fileID: 1383231037179557638, guid: c91f570ca8e447e4ba3bde1f2199cfb7, type: 3}
   isGrounded: 0
-  dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: 7331363c7ee74374ab150f49b8ba6a91, type: 3}
-  dashBackEffectPrefab: {fileID: 7304561259499901744, guid: 9aeb3b1aada32454baf207d423dc351d, type: 3}
+  dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: 12772a34ba0f2a84c8fe6acc6ac1e57e, type: 3}
+  dashBackEffectPrefab: {fileID: 7304561259499901744, guid: 2513ef303eece7e4ea2dea51910bb7ab, type: 3}
   dashPointFront: {fileID: 4188236843394335455}
   dashPointBack: {fileID: 8454006998476921829}
   contadorVida: {fileID: 0}
-  kickWindPrefab: {fileID: 7304561259499901744, guid: b13ac42a67839584b9cd98a91dd4461e, type: 3}
+  kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
   footTrigger: {fileID: 4157152892369648213}
   sliderDance: {fileID: 4506196888431005619}
-  networkDancePoints:
-    m_InternalValue: 0
+  dancePoints: 0
+  canvasEscape: {fileID: 0}
   AttackDone: 1
   groundCheck: {fileID: 792254243274507087}
   groundDistance: 0.15
@@ -42271,19 +42270,15 @@ MonoBehaviour:
   dashSpeed: 15
   dashDuration: 0.3
   dashCooldown: 1
-  lastAttackerId: 0
+  lastAttacker: {fileID: 0}
   isJumpPressed: 0
   dashFrontPressed: 0
-  networkState:
-    m_InternalValue: 0
+  mystate: 0
   model: {fileID: 0}
-  networkVidas:
-    m_InternalValue: 3
-  networkLives:
-    m_InternalValue: 1
+  vidas: 3
+  lives: 1
   uiHealth: {fileID: 0}
-  networkIsDefinitivelyDead:
-    m_InternalValue: 0
+  isDefinitivelyDead: 0
   kickHitbox: {fileID: 0}
 --- !u!54 &8106760067093118335
 Rigidbody:
