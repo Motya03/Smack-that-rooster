@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
@@ -13,7 +13,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     private Vector3 direction;
     private Vector3 velocity;
     private Vector3 airMomentum;
-    [SerializeField] private bool isGrounded;
+   [SerializeField] private bool isGrounded;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -49,12 +49,12 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        // --- Verificar si est· tocando el suelo ---
+        // --- Verificar si est√° tocando el suelo ---
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f; // Mantener al personaje pegado al suelo
 
-        // --- DirecciÛn del input ---
+        // --- Direcci√≥n del input ---
         Vector3 inputDir = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
 
         if (isGrounded)
@@ -73,7 +73,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             direction = Vector3.Lerp(airMomentum.normalized, inputDir, airControl).normalized;
         }
 
-        // --- Movimiento horizontal y rotaciÛn ---
+        // --- Movimiento horizontal y rotaci√≥n ---
         if (direction.sqrMagnitude > 0.01f)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
@@ -92,7 +92,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // --- M·quina de estados ---
+        // --- M√°quina de estados ---
         switch (mystate)
         {
             case States.Idle: Idle(); break;
@@ -145,17 +145,17 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-
+        
         myAnimator.SetBool("RUN", false);
         myAnimator.SetTrigger("JumpEnded");
-
+       
 
         if (isAttacking)
         {
             SetState(States.AttackPatada);
-
+            
         }
-
+            
         else if (isJumpPressed && isGrounded) SetState(States.Jump);
         else if (isMoving) SetState(States.Run);
         else if (dashFrontPressed) SetState(States.DashFront);
@@ -183,26 +183,26 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         {
             myAnimator.SetTrigger("JUMP1");
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-
+            
 
             SetState(States.Idle);
             ResetInputs();
         }
 
-
-
+      
+       
     }
 
 
     private void AttackPatada()
     {
-
+        
         myAnimator.SetTrigger("ATTACK");
-
+        
         StartCoroutine(MoveNull());
         ResetInputs();
-        SetState(States.Idle);
-
+        SetState(States.Idle); 
+        
     }
     IEnumerator MoveNull()
     {
@@ -281,5 +281,5 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         moveSpeed = defaultSpeed;
         boostCoroutine = null;
     }
-
+    
 }
