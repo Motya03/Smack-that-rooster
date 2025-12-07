@@ -17,6 +17,7 @@ TagManager:
   - CajaRot
   - Invicible
   - GallinaBaile
+  - Hitbox2
   layers:
   - Default
   - TransparentFX
