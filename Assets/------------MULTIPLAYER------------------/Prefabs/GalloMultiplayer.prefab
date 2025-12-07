@@ -1783,16 +1783,16 @@ GameObject:
   m_Component:
   - component: {fileID: 7150580534145016299}
   - component: {fileID: 777571603761157333}
-  - component: {fileID: 4474735270430039853}
   - component: {fileID: -5189323279353105116}
-  - component: {fileID: -1661343873495578123}
-  - component: {fileID: -2456176779140336203}
   - component: {fileID: 3556604994011322551}
   - component: {fileID: 138450085535888484}
+  - component: {fileID: 4474735270430039853}
+  - component: {fileID: -1661343873495578123}
+  - component: {fileID: -2456176779140336203}
   - component: {fileID: 3608453763287471967}
   m_Layer: 0
   m_Name: GalloMultiplayer
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1860,6 +1860,93 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-5189323279353105116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525558617848232785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2053977852
+  InScenePlacedSourceGlobalObjectIdHash: 2053977852
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!143 &3556604994011322551
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525558617848232785}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 3.17
+  m_Radius: 0.93
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1.08, z: 0.04}
+--- !u!114 &138450085535888484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525558617848232785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f03b890bad41e8e498b3526d0698a9ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  isGrounded: 0
+  moveSpeed: 3
+  gravity: -9.81
+  jumpForce: 1
+  airControl: 0.71
+  smoothTime: 0.15
+  dashSpeed: 2
+  dashDuration: 0.3
+  dashCooldown: 1
+  groundCheck: {fileID: 0}
+  groundDistance: 0.15
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
+  sliderDance: {fileID: 0}
+  dancePoints: 0
+  PatadaEffectPrefab: {fileID: 0}
+  dashPointFront: {fileID: 0}
+  dashPointBack: {fileID: 0}
+  footTrigger: {fileID: 0}
+  vidas: 3
+  lives: 1
+  isDefinitivelyDead: 0
+  model: {fileID: 0}
 --- !u!114 &4474735270430039853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1890,31 +1977,6 @@ MonoBehaviour:
   m_DefaultActionMap: PlayerLocal
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &-5189323279353105116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7525558617848232785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2053977852
-  InScenePlacedSourceGlobalObjectIdHash: 2053977852
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &-1661343873495578123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1974,52 +2036,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!143 &3556604994011322551
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7525558617848232785}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 3.17
-  m_Radius: 0.93
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1.08, z: 0.04}
---- !u!114 &138450085535888484
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7525558617848232785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f03b890bad41e8e498b3526d0698a9ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  isGrounded: 0
-  moveSpeed: 3
-  gravity: -9.81
-  jumpForce: 1
-  airControl: 0.71
-  smoothTime: 0.15
-  mystate: 0
-  model: {fileID: 0}
 --- !u!95 &3608453763287471967
 Animator:
   serializedVersion: 7

@@ -1,66 +1,75 @@
-using System.Threading.Tasks;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
-using Unity.Services.Authentication;
-using Unity.Services.Core;
-using Unity.Services.Relay;
-using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
-public class Netmanager : MonoBehaviour
+
+public class NetManager : MonoBehaviour
 {
     public Button serverBtn;
     public Button hostBtn;
     public Button clientBtn;
+    public GameObject connectionPanel;
+    public GameObject gameUI; // Referencia a UI del juego (opcional)
 
-    private  void Awake()
+    void Start()
     {
-        serverBtn.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.StartServer();
-        });
-        hostBtn.onClick.AddListener( () =>
-        {
-            StartHost();
+        serverBtn.onClick.AddListener(StartServer);
+        hostBtn.onClick.AddListener(StartHost);
+        clientBtn.onClick.AddListener(StartClient);
 
+        // Ocultar UI del juego al inicio
+        if (gameUI != null)
+            gameUI.SetActive(false);
 
-        });
-        clientBtn.onClick.AddListener(() =>
-        {
-            StartClient();
-        });
-    }
-    private async void StartHost( )
-    {
-        await StartHostWithRelay(4, "udp");
+        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
     }
 
-    private async void StartClient()
+    private void StartServer()
     {
-        await StartClientWithRelay("udp", "udp");
-    }
-    public async Task<string> StartHostWithRelay(int maxConnections, string connectionType)
-    {
-        await UnityServices.InitializeAsync();
-        if (!AuthenticationService.Instance.IsSignedIn)
+        connectionPanel.SetActive(false);
+        if (gameUI != null)
+            gameUI.SetActive(true);
+
+        if (NetworkManager.Singleton.StartServer())
         {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            Debug.Log("Servidor iniciado en esta misma escena");
+            SpawnPlayers(); // Método para spawnear jugadores
         }
-        var allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
-        var joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-        return NetworkManager.Singleton.StartHost() ? joinCode : null;
-    }
-    public async Task<bool> StartClientWithRelay(string joinCode, string connectionType)
-    {
-        await UnityServices.InitializeAsync();
-        if (!AuthenticationService.Instance.IsSignedIn)
-        {
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
-        var allocation = await RelayService.Instance.JoinAllocationAsync(joinCode: joinCode);
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
-        return !string.IsNullOrEmpty(joinCode) && NetworkManager.Singleton.StartClient();
     }
 
+    private void StartHost()
+    {
+        connectionPanel.SetActive(false);
+        if (gameUI != null)
+            gameUI.SetActive(true);
+
+        if (NetworkManager.Singleton.StartHost())
+        {
+            Debug.Log("Host iniciado en esta misma escena");
+            SpawnPlayers(); // El host también es jugador
+        }
+    }
+
+    private void StartClient()
+    {
+        connectionPanel.SetActive(false);
+        if (gameUI != null)
+            gameUI.SetActive(true);
+
+        if (NetworkManager.Singleton.StartClient())
+        {
+            Debug.Log("Cliente conectando...");
+        }
+    }
+
+    private void SpawnPlayers()
+    {
+        // Este método se llamará automáticamente cuando los jugadores se conecten
+        // gracias al PlayerSpawnManager o ServerPlayerMove que ya tienes
+        Debug.Log("Jugadores listos para spawnear");
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        Debug.Log($"Cliente {clientId} conectado");
+    }
 }
