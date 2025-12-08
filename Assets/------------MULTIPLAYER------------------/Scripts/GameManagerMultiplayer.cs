@@ -48,44 +48,37 @@ public class GameManagerMultiplayer : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
+        // Suscribirse a cambios ANTES de hacer cualquier cosa
+        gameEnded.OnValueChanged += OnGameEndedChanged;
+        winnerIndex.OnValueChanged += OnWinnerChanged;
+
+        // Configurar UI inicial para TODOS los clientes
+        SetupInitialUI();
+
         if (IsServer)
         {
             Debug.Log("GameManagerMultiplayer iniciado en servidor");
 
-            // Buscar Timer automáticamente si no está asignado
+            // Buscar Timer automáticamente
             if (timer == null)
             {
                 timer = FindAnyObjectByType<TimerLocalMultiplayer>();
             }
 
-            // Asegurar que el timer NO inicie automáticamente
+            // Configurar timer
             if (timer != null)
             {
                 timer.onFinished.AddListener(OnTimerFinished);
-                Debug.Log("Timer configurado");
+                Debug.Log("Timer configurado correctamente");
+            }
+            else
+            {
+                Debug.LogError("No se encontró TimerLocalMultiplayer en la escena");
             }
 
-            // Ocultar UI inicial
-            if (canvasWinner != null)
-                canvasWinner.SetActive(false);
-
-            if (canvasLocal != null)
-                canvasLocal.SetActive(false);
-
-            foreach (var p in playerPopups)
-                p.SetActive(false);
-
-            // Esperar a que los jugadores se conecten
-            StartCoroutine(WaitForPlayers());
+            // Iniciar el flujo del juego
+            StartCoroutine(WaitForPlayersAndStart());
         }
-
-        // Todos los clientes se suscriben a cambios
-        gameEnded.OnValueChanged += OnGameEndedChanged;
-        winnerIndex.OnValueChanged += OnWinnerChanged;
-
-        // Inicialmente ocultar UI de juego
-        if (canvasLocal != null)
-            canvasLocal.SetActive(false);
     }
 
     public override void OnNetworkDespawn()
@@ -95,33 +88,52 @@ public class GameManagerMultiplayer : NetworkBehaviour
         base.OnNetworkDespawn();
     }
 
-    private IEnumerator WaitForPlayers()
+    private void SetupInitialUI()
+    {
+        // Ocultar UI del ganador al inicio
+        if (canvasWinner != null)
+            canvasWinner.SetActive(false);
+
+        // Mostrar UI local (timer y HUD) desde el inicio
+        if (canvasLocal != null)
+            canvasLocal.SetActive(true);
+
+        // Ocultar popups de jugadores
+        foreach (var p in playerPopups)
+        {
+            if (p != null) p.SetActive(false);
+        }
+
+        Debug.Log("UI inicial configurada");
+    }
+
+    private IEnumerator WaitForPlayersAndStart()
     {
         Debug.Log("Esperando a que los jugadores se conecten...");
 
-        // Esperar hasta que haya al menos 2 jugadores conectados
+        // Esperar a que haya al menos 2 jugadores conectados
         yield return new WaitUntil(() =>
             NetworkManager.Singleton != null &&
             NetworkManager.Singleton.ConnectedClients.Count >= 2);
 
         Debug.Log($"Jugadores conectados: {NetworkManager.Singleton.ConnectedClients.Count}");
 
-        // Esperar un poco más para asegurar que todos los jugadores estén registrados
+        // Esperar un poco más para que los jugadores se registren
         yield return new WaitForSeconds(1f);
 
         Debug.Log($"Jugadores registrados en lista: {players.Count}");
 
-        // Asegurar que al menos hay 2 jugadores registrados
+        // Si no hay suficientes jugadores registrados, esperar más
         if (players.Count < 2)
         {
-            Debug.Log("No hay suficientes jugadores registrados. Esperando...");
+            Debug.Log($"Esperando a que se registren más jugadores...");
             yield return new WaitUntil(() => players.Count >= 2);
         }
 
         // Inicializar jugadores
         InitializePlayersForGame();
 
-        // Mostrar cuenta regresiva
+        // Mostrar cuenta regresiva en todos los clientes
         StartCountdownClientRpc();
 
         yield return new WaitForSeconds(startGameDelay);
@@ -133,8 +145,8 @@ public class GameManagerMultiplayer : NetworkBehaviour
     [ClientRpc]
     private void StartCountdownClientRpc()
     {
-        Debug.Log("¡El juego comenzará en " + startGameDelay + " segundos!");
-        // Aquí podrías mostrar una cuenta regresiva en UI
+        Debug.Log($"¡El juego comenzará en {startGameDelay} segundos!");
+        // Aquí podrías mostrar una cuenta regresiva en UI si quieres
     }
 
     private void InitializePlayersForGame()
@@ -174,9 +186,6 @@ public class GameManagerMultiplayer : NetworkBehaviour
         winnerIndex.Value = -1;
         isSuddenDeath.Value = false;
 
-        // Mostrar UI del juego
-        ShowGameUIClientRpc();
-
         // Iniciar timer
         if (timer != null)
         {
@@ -193,16 +202,6 @@ public class GameManagerMultiplayer : NetworkBehaviour
 
         // Notificar a todos los clientes
         GameStartedAnnouncementClientRpc();
-    }
-
-    [ClientRpc]
-    private void ShowGameUIClientRpc()
-    {
-        if (canvasLocal != null)
-            canvasLocal.SetActive(true);
-
-        if (canvasWinner != null)
-            canvasWinner.SetActive(false);
     }
 
     [ClientRpc]
@@ -225,6 +224,9 @@ public class GameManagerMultiplayer : NetworkBehaviour
     private void GameStartedAnnouncementClientRpc()
     {
         Debug.Log("¡El juego ha comenzado!");
+        // Asegurar que el canvasLocal esté activo
+        if (canvasLocal != null && !canvasLocal.activeSelf)
+            canvasLocal.SetActive(true);
     }
 
     private void Update()
@@ -422,6 +424,10 @@ public class GameManagerMultiplayer : NetworkBehaviour
     private void OnGameEndedChanged(bool oldValue, bool newValue)
     {
         Debug.Log($"GameEnded cambiado: {oldValue} -> {newValue}");
+        if (newValue)
+        {
+            Debug.Log("El juego ha terminado (recibido en cliente)");
+        }
     }
 
     private void OnWinnerChanged(int oldValue, int newValue)

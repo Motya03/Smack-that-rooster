@@ -41954,11 +41954,10 @@ GameObject:
   - component: {fileID: -9171316853757336354}
   - component: {fileID: 7177771715482488037}
   - component: {fileID: -1943637221246495598}
-  - component: {fileID: -6768802283923360996}
-  - component: {fileID: 8106760067093118335}
   - component: {fileID: -8404735797435933570}
-  - component: {fileID: -6683454083144059123}
+  - component: {fileID: -2918716644399821700}
   - component: {fileID: 6356890470106609456}
+  - component: {fileID: 853229729406530164}
   m_Layer: 6
   m_Name: RoosterPlayerPrefabMulti
   m_TagString: Player
@@ -42128,83 +42127,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-6768802283923360996
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8239303162948211347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57006571648440645bb7191508030f14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GallinaApunta: {fileID: 4682378294767445713}
-  PatadaEffectPrefab: {fileID: 8442901411129158963, guid: e306a0b5c32f46948a7adde594860852, type: 3}
-  CagePrefab: {fileID: 1383231037179557638, guid: c91f570ca8e447e4ba3bde1f2199cfb7, type: 3}
-  isGrounded: 0
-  dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: 12772a34ba0f2a84c8fe6acc6ac1e57e, type: 3}
-  dashBackEffectPrefab: {fileID: 7304561259499901744, guid: 2513ef303eece7e4ea2dea51910bb7ab, type: 3}
-  dashPointFront: {fileID: 4188236843394335455}
-  dashPointBack: {fileID: 8454006998476921829}
-  contadorVida: {fileID: 0}
-  kickWindPrefab: {fileID: 7304561259499901744, guid: 31cae3067e7afdf439bfdbe1d52a6ea1, type: 3}
-  footTrigger: {fileID: 4157152892369648213}
-  sliderDance: {fileID: 4506196888431005619}
-  dancePoints: 0
-  canvasEscape: {fileID: 0}
-  AttackDone: 1
-  groundCheck: {fileID: 792254243274507087}
-  groundDistance: 0.15
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 8
-  gravity: -9.81
-  jumpForce: 0.8
-  airControl: 0.71
-  smoothTime: 0.15
-  moveSpeed: 5
-  dashSpeed: 15
-  dashDuration: 0.3
-  dashCooldown: 1
-  lastAttacker: {fileID: 0}
-  isJumpPressed: 0
-  dashFrontPressed: 0
-  mystate: 0
-  model: {fileID: 0}
-  vidas: 3
-  lives: 1
-  uiHealth: {fileID: 0}
-  isDefinitivelyDead: 0
-  kickHitbox: {fileID: 0}
---- !u!54 &8106760067093118335
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8239303162948211347}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!114 &-8404735797435933570
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42230,7 +42152,58 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &-6683454083144059123
+--- !u!114 &-2918716644399821700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8239303162948211347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f03b890bad41e8e498b3526d0698a9ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  PatadaEffectPrefab: {fileID: 8442901411129158963, guid: 1ace9523761f8a8489289e64a3dbd7e2, type: 3}
+  CagePrefab: {fileID: 1383231037179557638, guid: 244b3dacabb1dba488690eb0b674aea5, type: 3}
+  dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: a95d559fc6a85b6488a4932c39b7b3a5, type: 3}
+  dashBackEffectPrefab: {fileID: 7304561259499901744, guid: b3fa430a9a867ba469f71b7b634cdb6b, type: 3}
+  model: {fileID: 0}
+  kickHitbox: {fileID: 0}
+  dashPointFront: {fileID: 4188236843394335455}
+  dashPointBack: {fileID: 8454006998476921829}
+  footTrigger: {fileID: 4157152892369648213}
+  sliderDance: {fileID: 4506196888431005619}
+  dancePoints: 0
+  contadorVida: {fileID: 0}
+  moveSpeed: 5
+  smoothTime: 0.15
+  gravity: -9.81
+  jumpForce: 0.8
+  airControl: 0.71
+  groundCheck: {fileID: 792254243274507087}
+  groundDistance: 0.15
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  dashDuration: 0.3
+  uiHealth: {fileID: 0}
+  isDefinitivelyDead: 0
+--- !u!114 &6356890470106609456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8239303162948211347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d6094496d08f984b88e93f634d4ad0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &853229729406530164
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42276,19 +42249,6 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &6356890470106609456
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8239303162948211347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d6094496d08f984b88e93f634d4ad0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &8251348622258787727
 GameObject:
   m_ObjectHideFlags: 0
