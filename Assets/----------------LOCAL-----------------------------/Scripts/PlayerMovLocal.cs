@@ -154,7 +154,7 @@ public class PlayerMovLocal : MonoBehaviour
 
     private void Update()
     {
-
+        
         // --- Animación especial del Power Up ---
         if (mystate == States.PowerUp)
         {

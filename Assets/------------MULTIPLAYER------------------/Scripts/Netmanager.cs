@@ -7,7 +7,7 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
-public class Netmanager : MonoBehaviour
+public class Netmanager2 : MonoBehaviour
 {
     public Button serverBtn;
     public Button hostBtn;

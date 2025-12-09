@@ -134,12 +134,20 @@ public class ScriptGallinaIdle : MonoBehaviour
     }
 
 
-      public IEnumerator WaitForGameStart()
-    {  
+    public IEnumerator WaitForGameStart()
+    {
         GameManagerLocal check = Object.FindAnyObjectByType<GameManagerLocal>();
-        yield return new WaitUntil(() => check.gameStarted);    
-        FindEnemy();  
+
+        if (check == null)
+        {
+            Debug.LogError("No GameManagerLocal found in scene!");
+            yield break;
+        }
+
+        yield return new WaitUntil(() => check.gameStarted);
+        FindEnemy();
     }
+
 
     public void SetState(States newState)
     {

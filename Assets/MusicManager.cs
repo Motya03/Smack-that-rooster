@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UnityEditor.SearchService;
+
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 
 
 public enum MusicType
@@ -29,8 +29,8 @@ public class MusicManager : MonoBehaviour
        
 
         DontDestroyOnLoad(this);
-        if (instance == null)
-        {
+        
+      
             instance = this;
 
             // Crear un AudioSource por cada sonido
@@ -40,7 +40,7 @@ public class MusicManager : MonoBehaviour
                 src.clip = soundList[(int)type];
                 soundSources.Add(type, src);
             }
-        }
+        
     }
 
     public static void PlayMusic(MusicType sound, float volume )

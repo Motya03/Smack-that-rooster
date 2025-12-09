@@ -1,0 +1,105 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.InputSystem;
+
+public class LobbyJoinManagerMultiplayer : MonoBehaviour
+{
+    [Header("UI References")]
+    [SerializeField] private GameObject[] playerSlots;
+    [SerializeField] private Button startButton;
+    [SerializeField] private GameObject lobbyCanvas;
+    [SerializeField] private GameObject gameplayCanvas;
+
+    [Header("Gameplay UI")]
+    [SerializeField] private GameObject[] healthBars;
+
+    
+
+    private void Awake()
+    {
+
+       // StartGame();
+        startButton.gameObject.SetActive(false);
+        gameplayCanvas.SetActive(false);
+
+        foreach (var slot in playerSlots)
+            slot.SetActive(false);
+
+        foreach (var bar in healthBars)
+            bar.SetActive(false);
+    }
+
+    public void OnPlayerJoinedVisual(int index)
+    {
+        if (index < playerSlots.Length)
+        {
+            SoundManager.PlaySound(SoundType.CharEnter);
+            playerSlots[index].SetActive(true);
+
+            if (index >= 1)
+                StartGame();
+            startButton.gameObject.SetActive(true);
+            Debug.Log("🎮Entro uno");
+        }
+    }
+
+
+    public void StartGame()
+    {
+        SoundManager.PlaySound(SoundType.SelectionButtonChar);
+        Debug.Log("🎮 Empieza la partida");
+
+       
+
+        lobbyCanvas.SetActive(false);
+        gameplayCanvas.SetActive(true);
+
+        // ✅ REACTIVAR HUD del GameManager si estaba apagado
+        var gm = FindFirstObjectByType<GameManagerLocal>();
+        if (gm != null && gm.canvasLocal != null)
+            gm.canvasLocal.SetActive(true);
+
+        // ✅ ELIMINAR jugadores destruidos de la lista
+        PlayerSpawn.joinedPlayers.RemoveAll(p => p == null);
+
+        // ✅ ACTIVAR control para jugadores existentes
+        foreach (var playerObj in PlayerSpawn.joinedPlayers)
+        {
+            if (playerObj == null) continue;
+            PlayerSpawn.TogglePlayerControl(playerObj, true);
+        }
+
+        int playerCount = PlayerSpawn.joinedPlayers.Count;
+
+        // ✅ ACTIVAR SOLO las barras necesarias y asignar salud
+        for (int i = 0; i < healthBars.Length; i++)
+        {
+            bool active = i < playerCount;
+            healthBars[i].SetActive(active);
+
+            if (active)
+            {
+                var playerObj = PlayerSpawn.joinedPlayers[i];
+                if (playerObj == null) continue;
+
+                var player = playerObj.GetComponent<PlayerMovLocal>();
+                if (player == null) continue;
+
+                var uiHealth = healthBars[i].GetComponent<HealthSystem>();
+                if (uiHealth == null) continue;
+
+                player.uiHealth = uiHealth;
+                uiHealth.ResetHealth();
+            }
+        }
+
+        Debug.Log($"❤️ Activadas {playerCount} barras de vida.");
+
+        // ✅ ACTIVAR GAME MANAGER
+        gm?.ActivateGame();
+    }
+
+
+
+
+}

@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
-public class ServerPlayerSpawnPoints : MonoBehaviour
+public class ServerPlayerSpawnPoints2 : MonoBehaviour
 {
-    public static ServerPlayerSpawnPoints Instance { get; private set; }
+    public static ServerPlayerSpawnPoints2 Instance { get; private set; }
 
     [SerializeField]
     private List<GameObject> m_SpawnPoints;

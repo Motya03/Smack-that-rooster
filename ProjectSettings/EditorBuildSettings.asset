@@ -8,12 +8,20 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/----------------LOCAL-----------------------------/SceneLocal/Menu.unity
     guid: 10521e8afdab3104f9da0c4ce63e0255
-  - enabled: 1
+  - enabled: 0
     path: Assets/----------------LOCAL-----------------------------/SceneLocal/SceneLocal.unity
     guid: 3a7d6965e66e82b44858c094d50b6836
   - enabled: 1
+    path: Assets/----------------MultiplayerMateoTry-----------------------------
+      1/Scene/SceneMultiplayer2.unity
+    guid: 4dcec2121d8f68c45b3ebbeb14efbb33
+  - enabled: 0
     path: Assets/------------MULTIPLAYER------------------/SceneMultiplayer.unity
     guid: 3c64c8f7c754c894daa453973dbda075
+  - enabled: 1
+    path: Assets/----------------MultiplayerMateoTry-----------------------------
+      1/Scene/TryMulti.unity
+    guid: d0efcfed90fe4e44da15e507e2ccfb13
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: e71387b4aa398ca4d9d19753f1ec5bdf, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -3447,7 +3447,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: cb5f9ce7b09c0a44497cda2c5c6f9b1f, type: 2}
     - target: {fileID: 8726610833462051959, guid: ab0a09288065a2940ae57dd906555453, type: 3}
       propertyPath: nombreEscena
-      value: SceneMultiplayer
+      value: SceneMultiplayer2
       objectReference: {fileID: 0}
     - target: {fileID: 8726610833462051959, guid: ab0a09288065a2940ae57dd906555453, type: 3}
       propertyPath: imagenAnimator1
