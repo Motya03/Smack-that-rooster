@@ -1136,7 +1136,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         }
         else
         {
-            myAnimator.SetBool("Hit", true);
+            //myAnimator.SetBool("Hit", true);
             // El impulso físico es mejor que lo calcule solo el dueño para evitar jitter, 
             // o usar NetworkTransform con interpolación.
             if (IsOwner) StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));

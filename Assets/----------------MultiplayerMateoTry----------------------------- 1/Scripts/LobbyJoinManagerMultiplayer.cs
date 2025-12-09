@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
-public class LobbyJoinManagerMultiplayer : MonoBehaviour
+public class LobbyJoinManagerMultiplayer : NetworkBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject[] playerSlots;
@@ -13,20 +14,60 @@ public class LobbyJoinManagerMultiplayer : MonoBehaviour
     [Header("Gameplay UI")]
     [SerializeField] private GameObject[] healthBars;
 
-    
+    private NetworkVariable<int> playerCount = new NetworkVariable<int>(0);
+    private int localPlayerIndex = -1;
+    private bool isHost = false;
 
     private void Awake()
     {
-
-       // StartGame();
-        startButton.gameObject.SetActive(false);
+        lobbyCanvas.SetActive(true);
         gameplayCanvas.SetActive(false);
+        startButton.gameObject.SetActive(false);
 
         foreach (var slot in playerSlots)
             slot.SetActive(false);
 
         foreach (var bar in healthBars)
             bar.SetActive(false);
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        isHost = IsHost;
+
+        // Solo el host ve el botón de inicio
+        if (!isHost)
+        {
+            startButton.gameObject.SetActive(false);
+        }
+
+        playerCount.OnValueChanged += OnPlayerCountChanged;
+
+        // Registrar jugador en el servidor
+        RegisterPlayerServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RegisterPlayerServerRpc(ServerRpcParams rpcParams = default)
+    {
+        playerCount.Value++;
+
+        // Notificar a todos los clientes sobre el nuevo jugador
+        int newPlayerIndex = playerCount.Value - 1;
+        OnPlayerJoinedClientRpc(newPlayerIndex, rpcParams.Receive.SenderClientId);
+    }
+
+    [ClientRpc]
+    private void OnPlayerJoinedClientRpc(int playerIndex, ulong clientId)
+    {
+        if (NetworkManager.Singleton.LocalClientId == clientId)
+        {
+            localPlayerIndex = playerIndex;
+        }
+
+        OnPlayerJoinedVisual(playerIndex);
     }
 
     public void OnPlayerJoinedVisual(int index)
@@ -36,20 +77,38 @@ public class LobbyJoinManagerMultiplayer : MonoBehaviour
             SoundManager.PlaySound(SoundType.CharEnter);
             playerSlots[index].SetActive(true);
 
-            if (index >= 1)
-                StartGame();
-            startButton.gameObject.SetActive(true);
-            Debug.Log("🎮Entro uno");
+            Debug.Log($"🎮 Jugador {index + 1} se unió");
+
+            // Solo el host puede iniciar y solo si hay al menos 2 jugadores
+            if (isHost && playerCount.Value >= 2)
+            {
+                startButton.gameObject.SetActive(true);
+            }
         }
     }
 
-
     public void StartGame()
+    {
+        // Solo el host puede iniciar la partida
+        if (!isHost) return;
+
+        StartGameServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void StartGameServerRpc(ServerRpcParams rpcParams = default)
+    {
+        // Solo permitir al host iniciar el juego
+        if (!IsHost) return;
+
+        StartGameClientRpc();
+    }
+
+    [ClientRpc]
+    private void StartGameClientRpc()
     {
         SoundManager.PlaySound(SoundType.SelectionButtonChar);
         Debug.Log("🎮 Empieza la partida");
-
-       
 
         lobbyCanvas.SetActive(false);
         gameplayCanvas.SetActive(true);
@@ -99,7 +158,8 @@ public class LobbyJoinManagerMultiplayer : MonoBehaviour
         gm?.ActivateGame();
     }
 
-
-
-
+    private void OnPlayerCountChanged(int oldValue, int newValue)
+    {
+        Debug.Log($"👥 Jugadores conectados: {newValue}");
+    }
 }

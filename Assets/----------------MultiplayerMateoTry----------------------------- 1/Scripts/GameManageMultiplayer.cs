@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,22 +32,17 @@ public class GameManageMultiplayer : MonoBehaviour
     private bool clickerActive = false;
     public void SetClickerState(bool state) => clickerActive = state;
 
+    // En la función Start(), cambiar:
     private void Start()
     {
-        //to not have issues yet with multiplayer
-        ActivateGame();
-
-        StartCoroutine(WaitForGameStart());
-
-
-
-        // Se apaga todo al iniciar
-        foreach (var p in playerPopups)
-            p.SetActive(false);
-
-        if (canvasWinner != null)
-            canvasWinner.SetActive(false);
+        // Esperar a que NetworkManager esté listo
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+        {
+            StartCoroutine(WaitForGameStart());
+        }
     }
+
+    
 
     // 🔥 Activado desde LobbyJoinManager cuando presionan START
     public void ActivateGame()
