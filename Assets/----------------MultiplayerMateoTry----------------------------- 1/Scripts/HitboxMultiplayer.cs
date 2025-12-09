@@ -1,35 +1,34 @@
+ï»¿using Unity.Netcode;
 using UnityEngine;
 
-public class HitboxMultiplayer : MonoBehaviour
+public class HitboxMultiplayer : NetworkBehaviour
 {
-    public GameObject owner; // Jugador que lanza el ataque
+    public NetworkObject ownerNetObj;
 
-  
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("noo");
-        Debug.Log($"KickHitbox tocó: {other.name}");
+        if (!IsServer) return;  // LÃ³gica autoritativa del servidor
 
-        if (other.gameObject == owner || other.transform.IsChildOf(owner.transform)) return;
+        // Obtenemos el NetworkObject del objeto golpeado (buscando en padres por si golpea un hueso)
+        var targetNO = other.GetComponentInParent<NetworkObject>();
 
-        PlayerMovLocal player = other.GetComponentInParent<PlayerMovLocal>();
-        
-        if  ( other.gameObject.CompareTag("Culo"))
+        // Validaciones bÃ¡sicas
+        if (targetNO == null || targetNO == ownerNetObj) return;
+
+        var targetPlayer = targetNO.GetComponent<PlayerMovMultiplayer>();
+
+        // Si no es un jugador, salimos
+        if (targetPlayer == null) return;
+
+        // Detectar zona de impacto
+        if (other.CompareTag("Culo"))
         {
-            PlayerMovLocal atacante = owner.GetComponent<PlayerMovLocal>();
-            Debug.Log($"{other.name} recibió daño!");
-
-            player.TakeHit(1, atacante);
-           
+            // Llamamos a un mÃ©todo directo, NO a un RPC, porque ya estamos en el Server
+            targetPlayer.ProcessDamageOnServer(1, ownerNetObj.NetworkObjectId);
         }
-         if (other.gameObject.CompareTag("Pecho"))
+        else if (other.CompareTag("Pecho"))
         {
-            Debug.Log("Stunned");
-
-            player.TakeStun();
+            targetPlayer.ProcessStunOnServer(ownerNetObj.NetworkObjectId);
         }
     }
-
 }
-//if (other.gameObject == owner) return; // No golpearse a sí mismo
-

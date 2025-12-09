@@ -18,6 +18,7 @@ TagManager:
   - Invicible
   - GallinaBaile
   - Hitbox2
+  - HitboxMulti
   layers:
   - Default
   - TransparentFX

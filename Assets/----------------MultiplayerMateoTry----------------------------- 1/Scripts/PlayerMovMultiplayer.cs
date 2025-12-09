@@ -1,28 +1,13 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using Unity.Netcode;
 
 public class PlayerMovMultiplayer : NetworkBehaviour
 {
-
-    private string currentAnimName = "";
-    [Rpc(SendTo.Everyone)]
-    void PlayAnimationRpc(string animName)
-    {
-        
-        if (myAnimator != null)
-            myAnimator.Play(animName);
-    }
-    private void ChangeAnimationState(string newAnim)
-    {
-        if (currentAnimName == newAnim) return; // Si ya está sonando, no hacer nada
-
-        currentAnimName = newAnim;
-        PlayAnimationRpc(newAnim);
-    }
     private CharacterController controller;
     private Animator myAnimator;
 
@@ -32,7 +17,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public Transform GallinaApunta;
     private GameObject currentStunEffect;
     public GameObject PatadaEffectPrefab;
-    public  GameObject CagePrefab;
+    public GameObject CagePrefab;
 
     private static GameObject currentCage;
 
@@ -42,7 +27,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     private Vector3 velocity;
     private Vector3 airMomentum;
     [SerializeField] private bool isGrounded;
-  //  public GameObject stunEffectPrefab;
+    //  public GameObject stunEffectPrefab;
     public GameObject dashFrontEffectPrefab;
     public GameObject dashBackEffectPrefab;
     public Transform dashPointFront;
@@ -64,15 +49,15 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public float groundDistance = 0.15f;     // radio de la esfera
     public LayerMask groundMask;             // que capas cuentan como suelo
 
- 
+
     [Header("Movement Settings")]
-    
+
     public float gravity = -9.81f;
-    public float jumpForce = 0.1f;
+    public float jumpForce = 12f;
     public float airControl = 0.2f;
     public float smoothTime = 0.1f;
 
-    private bool boostGiven = true ;
+    private bool boostGiven = true;
 
     private float defaultSpeed;
     private float speedBoostMultiplier = 1f; //Power Ups
@@ -91,12 +76,12 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     [Header("ClickGame")]
     public PlayerMovMultiplayer lastAttacker;
-    
+
     private float currentVelocity;
-    
+
     private Coroutine boostCoroutine;
 
-    
+
 
     private bool isMoving;
     private bool isAttacking;
@@ -116,7 +101,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
 
 
-    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance, PowerUp}
+    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance, PowerUp }
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
@@ -124,7 +109,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     [Header("Vida y Daño")]
     public int vidas = 3;
 
-    public  int lives = 1;
+    public int lives = 1;
     // REFERENCIA AL HealthSystem del UI que se asignará en StartGame del LobbyJoinManager
     [HideInInspector] public HealthSystem uiHealth;
     [HideInInspector] public bool isDefinitivelyDead = false;
@@ -132,19 +117,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     [Header("Hitbox de Ataque")]
     public GameObject kickHitbox; // Asignar el objeto hijo con collider
-    private Hitbox hitboxScript;
+    private HitboxMultiplayer hitboxScript;
     void Start()
     {
-        // Tu Start original...
-        if (!IsOwner)
-        {
-            var input = GetComponent<PlayerInput>();
-            if (input) input.enabled = false;
-            // IMPORTANTE: No retornes aquí si necesitas inicializar componentes como Animator o Controller
-            // para que los RPCs funcionen en los clientes remotos.
-        }
-
-        
+        if (!IsOwner) return;
+        //DontDestroyOnLoad(gameObject);
 
         if (sliderDance != null)
         {
@@ -162,8 +139,9 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
         if (kickHitbox != null)
         {
-            hitboxScript = kickHitbox.GetComponent<Hitbox>();
-            if (hitboxScript != null) hitboxScript.owner = gameObject; // <-- aquí ya es la instancia
+            hitboxScript = kickHitbox.GetComponent<HitboxMultiplayer>();
+            if (hitboxScript != null) hitboxScript.ownerNetObj = GetComponent<NetworkObject>();
+ // <-- aquí ya es la instancia
             kickHitbox.SetActive(false);
         }
         /*canvasEscape = GameObject.FindWithTag("PauseCanvas");
@@ -178,15 +156,15 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-
         // --- Animación especial del Power Up ---
         if (mystate == States.PowerUp)
         {
             Vector3 currentMoveDir = new Vector3(moveInput.x, 0f, moveInput.y);
+
             if (currentMoveDir.magnitude < 0.1f)
-                ChangeAnimationState("Idle"); // Usar el nuevo método
+                myAnimator.Play("Idle");
             else
-                ChangeAnimationState("RunFast"); // Usar el nuevo método
+                myAnimator.Play("RunFast");
         }
 
 
@@ -196,31 +174,37 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             sliderDance.value = dancePoints;
         }
 
-        if (mystate == States.ClickBattle) return;
+        if (mystate == States.ClickBattle)
+            return;
 
-        // Checks de suelo
         bool physGrounded = false;
         if (groundCheck != null)
             physGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        // Fallback con CharacterController
         bool controllerGrounded = controller != null && controller.isGrounded;
+
+        // Combinar ambas lecturas
         isGrounded = physGrounded || controllerGrounded;
 
-        HandleMovement();
-        HandleStateMachine();
-
-    }
-    private void HandleMovement()
-    {
-        // Como ya pusimos "if (!IsOwner) return" en Update, esto solo corre en el dueño. Correcto.
+        // Evitar que se marque falso durante dash o ataque
+        // if (isDashing || mystate == States.AttackPatada || mystate == States.AttackLow)
+        //  isGrounded = true;
 
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
+       
+
+
+        // --- Dirección del input ---
         Vector3 inputDir = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
 
         if (isGrounded)
         {
             direction = inputDir;
+
+            // Guardar inercia solo si hay movimiento
             if (direction.magnitude > 0.1f)
                 airMomentum = direction * moveSpeed;
             else
@@ -228,32 +212,36 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         }
         else
         {
+            // En el aire: mezcla entre inercia y control del jugador
             direction = Vector3.Lerp(airMomentum.normalized, inputDir, airControl).normalized;
         }
 
+        // --- Movimiento horizontal y rotación ---
         if (direction.sqrMagnitude > 0.01f)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-            // ... lógica de rotación ...
-            // Asegúrate de definir currentVelocity como float global si no lo está
-            // float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref currentVelocity, smoothTime);
-            transform.rotation = Quaternion.Euler(0f, targetAngle, 0f); // Simplificado para el ejemplo
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref currentVelocity, smoothTime);
+
+            if (model != null)
+                model.rotation = Quaternion.Euler(0f, angle, 0f);
+            else
+                transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             controller.Move(moveDir * moveSpeed * Time.deltaTime);
         }
 
+
+        // --- Movimiento vertical y gravedad ---
         if (!isDashing)
             velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
-    }
 
-    private void HandleStateMachine()
-    {
-        if (!IsOwner) return;
+
+
+        // --- Máquina de estados ---
         switch (mystate)
-
         {
             case States.Idle: Idle(); break;
             case States.Run: Run(); break;
@@ -272,6 +260,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
         }
     }
+
+
     // --- INPUTS DEL NEW INPUT SYSTEM ---
     private void OnMove(InputValue value)
     {
@@ -284,7 +274,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         moveInput = currentInput;
         isMoving = moveInput.magnitude > 0.1f;
     }
-    
+
     private void OnCrouch(InputValue value)
     {
         if (!IsOwner) return;
@@ -296,11 +286,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     private void OnJump(InputValue value)
     {
         if (!IsOwner) return;
-        if (!canReceiveInput ) return;
+        if (!canReceiveInput) return;
 
         if (value.isPressed && isGrounded)
             isJumpPressed = true;
-         
+
     }
 
 
@@ -308,8 +298,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     {
         if (!IsOwner) return;
         if (!canReceiveInput && canReceiveInputAttack) return;
-        if (value.isPressed )
-        isAttacking = true;
+        if (value.isPressed)
+            isAttacking = true;
     }
     private void OnAttackLow(InputValue value)
     {
@@ -323,7 +313,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     {
         if (!IsOwner) return;
         if (!canReceiveInput && !canReceiveInputDash) return;
-        if (value.isPressed )
+        if (value.isPressed)
             dashFrontPressed = true;
     }
 
@@ -378,7 +368,6 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     // --- ESTADOS ---
     private void Idle()
     {
-        if (!IsOwner) return;
         // dancePoints = 0;
         if (dashFrontPressed) SetState(States.DashFront);
         if (dashBackPressed) SetState(States.DashBack);
@@ -389,7 +378,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
 
 
-        ChangeAnimationState("IDLE");
+        myAnimator.SetBool("RUN", false);
+        myAnimator.SetBool("Hit", false);
         //  myAnimator.SetBool("Falling", false);
 
         // myAnimator.SetTrigger("JumpEnded");
@@ -402,27 +392,27 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
 
         if (isJumpPressed && isGrounded) SetState(States.Jump);
-            else if (isMoving) SetState(States.Run);
-            // else if (dashFrontPressed) SetState(States.DashFront);
-           // else if (dashBackPressed) SetState(States.DashBack);
-            else if (isCrouchPressed) SetState(States.Crouch);
+        else if (isMoving) SetState(States.Run);
+        // else if (dashFrontPressed) SetState(States.DashFront);
+        // else if (dashBackPressed) SetState(States.DashBack);
+        else if (isCrouchPressed) SetState(States.Crouch);
 
-            else if (isAttackingLow) SetState(States.AttackLow);
+        else if (isAttackingLow) SetState(States.AttackLow);
 
         else if (DancePressed)
             SetState(States.Dance);
         ResetInputs();
-        
 
 
-            
+
+
 
     }
 
     private void Run()
     {
 
-        if (!IsOwner) return;
+
         SoundManager.StopSound(SoundType.Dance);
         if (dashFrontPressed)
             SetState(States.DashFront);
@@ -435,7 +425,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         if (!isGrounded)
             return;
 
-        ChangeAnimationState("RUN");
+        myAnimator.SetBool("RUN", true);
+        myAnimator.Play("RUN");
 
         if (!isMoving)
             SetState(States.Idle);
@@ -453,31 +444,29 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             SetState(States.Crouch);
         else if (DancePressed)
             SetState(States.Dance);
-        
+
 
         ResetInputs();
     }
 
     private void Jump()
     {
-        if (!IsOwner) return;
+
         velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-            isJumpPressed = false;
+        isJumpPressed = false;
         // myAnimator.SetTrigger("JUMP1");    
-        currentAnimName = "";
-        ChangeAnimationState("Jump");
+        myAnimator.Play("Jump");
 
         // ResetInputs();
         StartCoroutine(AnimBoostCoroutine(0.5f, 1f));
         if (dashFrontPressed) SetState(States.DashFront);
-            if (dashBackPressed) SetState(States.DashBack);
-            StartCoroutine(JumpRoutine());
+        if (dashBackPressed) SetState(States.DashBack);
+        StartCoroutine(JumpRoutine());
 
 
     }
     private void JumpSound()
     {
-        if (!IsOwner) return;
         SoundManager.PlaySound(SoundType.Jump);
     }
     private IEnumerator JumpRoutine()
@@ -489,7 +478,6 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     }
     private void Fall()
     {
-        if (!IsOwner) return;
         if (isAttacking)
             SetState(States.AttackPatada);
         myAnimator.SetBool("Falling", true);
@@ -505,13 +493,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     private void Crouch()
     {
-        if (!IsOwner) return;
         Debug.Log("nyam");
         if (isGrounded)
         {
 
-            currentAnimName = "";
-            ChangeAnimationState("Crouch");
+            myAnimator.Play("Crouch");
             StopMove();
             SetState(States.Idle);
             ResetInputs();
@@ -523,7 +509,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public void CanReceive()
     {
         canReceiveInput = true;
-        
+
         moveInput = lastMoveInput;
         isMoving = moveInput.magnitude > 0.1f;
     }
@@ -531,67 +517,61 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     private void AttackPatada()
     {
-        if (!IsOwner) return;
         if (isGrounded)
         {
             if (dashFrontPressed) SetState(States.DashFront);
             if (dashBackPressed) SetState(States.DashBack);
             Debug.Log("Patada1");
-            if  (!AttackDone ) return;
+            if (!AttackDone) return;
             isGrounded = false;
             isAttacking = false;
             AttackDone = false;
             Debug.Log("Patada");
 
-            currentAnimName = "";
-            ChangeAnimationState("AttackPatada");
+            myAnimator.Play("AttackPatada");
             SoundManager.PlaySound(SoundType.AttackPrime);
             //  StopMove();
-            StartCoroutine(AnimBoostCoroutine( 0.3f, 0.8f));
-          // SetState(States.Idle);
-            
+            StartCoroutine(AnimBoostCoroutine(0.3f, 0.8f));
+            // SetState(States.Idle);
+
         }
         else
         {
             isAttacking = false;
-            currentAnimName = "";
-            ChangeAnimationState("AttackCircAire");
+            myAnimator.Play("AttackCircAire");
             StopMove();
             SetState(States.Idle);
             SoundManager.PlaySound(SoundType.AttackPrime);
         }
-       
+
     }
     private void Dance()
     {
-        if (!IsOwner) return;
         if (sliderDance != null)
         {
             sliderDance.gameObject.SetActive(true);
         }
         // sliderDance.gameObject.SetActive(true);
-        currentAnimName = "";
-        ChangeAnimationState("Dance");
+        myAnimator.Play("Dance");
         SoundManager.PlaySound(SoundType.Dance);
         StopMove();
         SetState(States.Idle);
-        
+
     }
     GameObject lastNumero;
     GameObject numero;
     private void DanceSlider()
     {
-        if (!IsOwner) return;
-        if (dancePoints >=3)
+
+        if (dancePoints >= 3)
         {
             player = this.gameObject;
             player.gameObject.tag = "Invicible";
             StartCoroutine(TemporaryTagRoutine());
             Debug.Log("Tiraaa");
-            currentAnimName = "";
-            ChangeAnimationState("IDLE");
+            myAnimator.Play("IDLE");
             GameObject[] gallina = GameObject.FindGameObjectsWithTag("Gallina");
-            
+
             if (gallina.Length <= 1)
             {
                 numero = gallina[0];
@@ -600,7 +580,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             else
             {
 
-               
+
                 // Evita elegir el mismo enemigo
                 List<GameObject> list = new List<GameObject>(gallina);
                 if (lastNumero != null)
@@ -609,11 +589,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
                 if (list.Count == 0)
                     list = new List<GameObject>(gallina);
                 numero = list[Random.Range(0, list.Count)];
-               
+
             }
             lastNumero = numero;
 
-            
+
             ScriptGallinaIdle gall = numero.GetComponent<ScriptGallinaIdle>();
             gall.SetAttack();
             if (sliderDance != null)
@@ -646,7 +626,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             dancePoints++;
         }
 
-        
+
 
     }
     private IEnumerator TemporaryTagRoutine()
@@ -674,7 +654,6 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     }
     private void AttackLow()
     {
-        if (!IsOwner) return;
         //  myAnimator.Play("AttackLow");
         StartCoroutine(PerformDash(transform.forward, "AttackLow", 1.8f));
         Debug.Log("Loh");
@@ -711,19 +690,19 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         // moveSpeed = defaultSpeed * 0.5f;
         StartCoroutine(AnimBoostCoroutine(0.5f, 1));
     }
-    
+
     private void DashFront()
     {
-        if (!IsOwner) return;
+
         dashFrontPressed = false;
         if (!isDashing && canDash)
         {
             SoundManager.PlaySound(SoundType.Dash);
             SpawnDashFrontFX();
-             StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
+            StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
             StopMove();
-            StartCoroutine(PerformDash(transform.forward, "DashFront",2.5f));
-            
+            StartCoroutine(PerformDash(transform.forward, "DashFront", 2.5f));
+
 
         }
 
@@ -731,7 +710,6 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     private void DashBack()
     {
-        if (!IsOwner) return;
         dashBackPressed = false;
         if (!isDashing && canDash)
         {
@@ -740,24 +718,18 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             StartCoroutine(AnimBoostCoroutine(0.5f, 0.5f));
             StopMove();
             StartCoroutine(PerformDash(-transform.forward, "DashBack", 2.5f));
-            
+
         }
 
     }
     public void RunSteps()
     {
-         SoundManager.PlaySound(SoundType.Run);
+        SoundManager.PlaySound(SoundType.Run);
     }
-    public void TakeStun()
-    {
-        SoundManager.PlaySound(SoundType.HitBody);
-        SetState(States.Stunned);
-    }
+   
     private void Stunned()
     {
-        if (!IsOwner) return;
-        currentAnimName = "";
-        ChangeAnimationState("Stunned");
+        myAnimator.Play("Stunned");
         StopMove();
         SetState(States.Idle);
     }
@@ -765,7 +737,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     {
         SoundManager.PlaySound(SoundType.StunStars);
     }
-   
+
 
     public void AnimStunStop()
     {
@@ -774,14 +746,14 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             Debug.Log("You");
             Destroy(currentStunEffect);
             currentStunEffect = null;
-            
+
         }
     }
 
     public void SpawnKickFX()
     {
         // Instanciar en la posición y rotación del pie
-       // GameObject fx = Instantiate(kickWindPrefab, footTrigger.position, footTrigger.rotation);
+        // GameObject fx = Instantiate(kickWindPrefab, footTrigger.position, footTrigger.rotation);
 
         // Destruir automáticamente después de un tiempo (para limpiar)
         //Destroy(fx, 1f);
@@ -792,7 +764,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         Vector3 spawnPos = dashPointFront != null ? dashPointFront.position : transform.position + Vector3.up * 0.5f;
         Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 180, 0);
 
-       // GameObject fx = Instantiate(dashFrontEffectPrefab, spawnPos, spawnRot);
+        // GameObject fx = Instantiate(dashFrontEffectPrefab, spawnPos, spawnRot);
         //Destroy(fx, 1f);
     }
 
@@ -801,8 +773,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         Vector3 spawnPos = dashPointBack != null ? dashPointBack.position : transform.position + Vector3.up * 0.5f;
         Quaternion spawnRot = Quaternion.LookRotation(transform.forward) * Quaternion.Euler(0, 0, 0);
 
-       // GameObject fx = Instantiate(dashBackEffectPrefab, spawnPos, spawnRot);
-       // Destroy(fx, 1f);
+        // GameObject fx = Instantiate(dashBackEffectPrefab, spawnPos, spawnRot);
+        // Destroy(fx, 1f);
     }
 
 
@@ -825,8 +797,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     */
     private void Dead()
     {
-        currentAnimName = "";
-        ChangeAnimationState("Dead");
+        myAnimator.Play("Dead");
         SoundManager.PlaySound(SoundType.Dead);
         StopMove();
     }
@@ -850,9 +821,9 @@ public class PlayerMovMultiplayer : NetworkBehaviour
                 sliderDance.gameObject.SetActive(false);
             }
         }
-        
-            
-       
+
+
+
     }
 
     public void ResetInputs()
@@ -864,10 +835,10 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         dashBackPressed = false;
         isAttackingLow = false;
         DancePressed = false;
-        
+
     }
 
-   
+
     private IEnumerator PerformDash(Vector3 dashDirection, string animName, float dashDistance)
     {
         if (!IsOwner) yield break;
@@ -875,8 +846,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         isDashing = true;
         canDash = false;
 
-        currentAnimName = "";
-        ChangeAnimationState(animName);
+        myAnimator.Play(animName);
 
         // float dashDistance = 3f;        // Distancia total en metros
         float dashTime = 0.35f;         // Duración total del dash
@@ -886,7 +856,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         Vector3 targetPos = startPos + dashDirection.normalized * dashDistance;
 
         // Desactivamos gravedad durante el dash
-        
+
 
         while (elapsedTime < dashTime)
         {
@@ -915,7 +885,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
         SetState(isGrounded ? States.Idle : States.Fall);
         ResetInputs();
-        
+
     }
 
 
@@ -929,55 +899,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     // CORRECCIÓN IMPORTANTE: MUERTE DEFINITIVA
     // ----------------------------
 
-    public void TakeHit(int damage, PlayerMovMultiplayer attacker)
-    {
-        if (!IsOwner) return;
-        SoundManager.PlaySound(SoundType.HitCulo);
-        lastAttacker = attacker;
-
-        // Actualizar UI y vida
-        if (uiHealth != null)
-        {
-            uiHealth.TakeDamage(damage);
-            vidas = uiHealth.health;
-        }
-        else
-        {
-            vidas -= damage;
-        }
-
-
-        Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
-
-        // 🔻 Si las vidas bajan a 0
-        if (vidas <= 0)
-        {
-            // Si aún tiene vida extra -> entrar a click battle
-            if (lives > 0)
-            {
-                FindFirstObjectByType<ClickGameManagerMultiplayer>().StartBattle(lastAttacker, this);
-            }
-            else
-            {
-                // MUERTE DEFINITIVA
-                isDefinitivelyDead = true;
-                SetState(States.Dead);
-
-                // Avisar al GameManager
-                FindFirstObjectByType<GameManageMultiplayer>().CheckRemainingPlayers();
-            }
-        }
-        else
-        {
-            myAnimator.SetBool("Hit", true);
-            StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
-        }
-    }
+   
 
 
 
 
-    
 
     private void OnDestroy()
     {
@@ -987,14 +913,14 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
 
     // --- BOOST TEMPORAL ---
-    public void ActivarSpeedBoost( float amountBoost, float duration)
+    public void ActivarSpeedBoost(float amountBoost, float duration)
     {
-        boost = amountBoost;       
-            boostGiven = false;
-        
+        boost = amountBoost;
+        boostGiven = false;
 
-        
-         StartCoroutine(SpeedBoostCoroutine(boost, 5f));
+
+
+        StartCoroutine(SpeedBoostCoroutine(boost, 5f));
     }
 
     private IEnumerator SpeedBoostCoroutine(float amount, float duration)
@@ -1021,13 +947,13 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             AttackDone = true;
             yield break;
         }
-            
+
         if (!boostGiven)
         {
             AttackDone = true;
             yield break;
         }
-           
+
 
 
         Debug.Log("hola2");
@@ -1049,9 +975,9 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             SetState(States.Idle);
 
         }
-        
+
         AttackDone = true;
-        
+
     }
 
 
@@ -1072,12 +998,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         if (currentCage != null) return; // ya hay una jaula en escena
 
         StopMove();
-        currentAnimName = "";
-        ChangeAnimationState("IDLE");
+        myAnimator.Play("IDLE");
         if (currentCage != null) return;
-        Vector3 spawnPos = transform.position  ;
+        Vector3 spawnPos = transform.position;
         currentCage = Instantiate(CagePrefab, spawnPos, transform.rotation);
-       
+
     }
     public void CageGone()
     {
@@ -1100,25 +1025,25 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         }
 
         // Optional: destroy cage after animation delay
-        
+
         currentCage = null;
     }
 
     private void PowerUp()
     {
-        
+
 
         if (isInPowerUp) return;
 
         isInPowerUp = true;
-       
+
         StartCoroutine(PowerSpeed());
-       
+
     }
     private IEnumerator PowerSpeed()
     {
         if (!IsOwner) yield break;
-        StopMove(); 
+        StopMove();
         moveSpeed = 15;
         CanMove();
         yield return new WaitForSeconds(3);
@@ -1136,6 +1061,93 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     }
 
     public bool CanReceiveInput => canReceiveInput;
+    public void ProcessDamageOnServer(int damage, ulong attackerId)
+    {
+        // Aquí puedes poner validaciones de servidor (ej: si es invencible por lag)
+        if (mystate == States.Dead || isDefinitivelyDead) return;
+
+        // Notificar a TODOS los clientes (incluido el dueño y el atacante) que hubo un golpe
+        TakeHitClientRpc(damage, attackerId);
+    }
+
+    public void ProcessStunOnServer(ulong attackerId)
+    {
+        if (mystate == States.Dead) return;
+        TakeStunClientRpc(attackerId);
+    }
+
+
+    // 2. El ClientRpc se ejecuta en TODOS los ordenadores conectados
+    [ClientRpc]
+    private void TakeHitClientRpc(int damage, ulong attackerId)
+    {
+        // Buscar al atacante localmente para tener la referencia
+        PlayerMovMultiplayer attackerScript = null;
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerId, out NetworkObject attackerObj))
+        {
+            attackerScript = attackerObj.GetComponent<PlayerMovMultiplayer>();
+        }
+
+        // Ejecutar la lógica visual y de datos localmente
+        TakeHitLocal(damage, attackerScript);
+    }
+
+    [ClientRpc]
+    private void TakeStunClientRpc(ulong attackerId)
+    {
+        TakeStunLocal();
+    }
+
+
+    // 3. Lógica Local (Visuales, UI, Sonido, Animación)
+    // Esta función es la que tenías antes como "TakeHit", pero ahora se llama desde el ClientRpc
+    private void TakeHitLocal(int damage, PlayerMovMultiplayer attacker)
+    {
+        SoundManager.PlaySound(SoundType.HitCulo);
+        lastAttacker = attacker;
+
+        // Actualizar UI y vida local
+        if (uiHealth != null)
+        {
+            uiHealth.TakeDamage(damage);
+            vidas = uiHealth.health;
+        }
+        else
+        {
+            vidas -= damage;
+        }
+
+        Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
+
+        if (vidas <= 0)
+        {
+            if (lives > 0)
+            {
+                // Solo el dueño debería iniciar la lógica compleja del ClickBattle o el Server
+                // Para simplificar, si es visual, lo hacemos todos, pero el trigger de lógica 
+                // importante debería estar protegido.
+                if (IsOwner) FindFirstObjectByType<ClickGameManagerMultiplayer>().StartBattle(lastAttacker, this);
+            }
+            else
+            {
+                isDefinitivelyDead = true;
+                SetState(States.Dead);
+            }
+        }
+        else
+        {
+            myAnimator.SetBool("Hit", true);
+            // El impulso físico es mejor que lo calcule solo el dueño para evitar jitter, 
+            // o usar NetworkTransform con interpolación.
+            if (IsOwner) StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
+        }
+    }
+
+    private void TakeStunLocal()
+    {
+        SoundManager.PlaySound(SoundType.HitBody);
+        SetState(States.Stunned);
+    }
 
 }
 
