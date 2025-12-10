@@ -11,27 +11,29 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     public Slider battleSlider;
     public float clickPower = 0.02f;
     public float decaySpeed = 0.3f;
+
     private float value = 0.5f;
     private bool active = false;
     public Text battleText;
 
-    public PlayerMovMultiplayer attacker;   // EL QUE HIZO KO
-    public PlayerMovMultiplayer knocked;    // EL KO
+    [Header("Players in battle")]
+    private NetworkObjectReference attackerRef;
+    private NetworkObjectReference knockedRef;
+
+    private PlayerMovMultiplayer attacker;
+    private PlayerMovMultiplayer knocked;
 
     [Header("Timer")]
-    public TimerClickGame timerClickGame;
+    public TimerClickGameMultiplayer timerClickGame;
 
     public GameManageMultiplayer gamemanagerlocal;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
+        if (Instance != null)
             Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
+        else
+            Instance = this;
 
         if (gamemanagerlocal == null)
             gamemanagerlocal = FindFirstObjectByType<GameManageMultiplayer>();
@@ -40,143 +42,172 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     private void Update()
     {
         if (!active) return;
+        if (!IsServer) return;   // 🔥 SOLO EL SERVER ACTUALIZA LA LÓGICA
 
         value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
-        battleSlider.value = value;
-        battleText.text = $"{value * 100f:F0}%";
+
+        UpdateSliderClientRpc(value);
 
         if (value <= 0.01f)
-            EndBattle(attacker);
+            EndBattleServer(attacker);
 
         else if (value >= 0.99f)
-            EndBattle(knocked);
+            EndBattleServer(knocked);
     }
 
-    // attacker = el que golpeó
-    // knocked = el que llegó a 0 HP
+    // ---------------------------------------------------------
+    // 🚀 LLAMADO DESDE PlayerMovMultiplayer (solo el owner)
+    // ---------------------------------------------------------
     public void StartBattle(PlayerMovMultiplayer atk, PlayerMovMultiplayer kn)
     {
-        MusicManager.StopMusic(MusicType.MainMenuBack);
-        MusicManager.StopMusic(MusicType.FightMusic);
-        MusicManager.StopMusic(MusicType.ClickerGameMusic);
-       // MusicManager.StopMusic(MusicType.EnterCharMusic);
-        MusicManager.PlayMusic(MusicType.ClickerGameMusic, 0.5f);
+        if (!IsServer)
+        {
+            StartBattleServerRpc(atk.NetworkObjectId, kn.NetworkObjectId);
+            return;
+        }
+
+        StartBattleServer(atk, kn);
+    }
+
+    // SERVER RPC
+    [ServerRpc(RequireOwnership = false)]
+    private void StartBattleServerRpc(ulong atkId, ulong knId)
+    {
+        PlayerMovMultiplayer atk = NetworkManager.Singleton.SpawnManager.SpawnedObjects[atkId].GetComponent<PlayerMovMultiplayer>();
+        PlayerMovMultiplayer kn = NetworkManager.Singleton.SpawnManager.SpawnedObjects[knId].GetComponent<PlayerMovMultiplayer>();
+
+        StartBattleServer(atk, kn);
+    }
+
+    // ---------------------------------------------------------
+    // 👑 SERVER INICIA LA BATALLA
+    // ---------------------------------------------------------
+    private void StartBattleServer(PlayerMovMultiplayer atk, PlayerMovMultiplayer kn)
+    {
         attacker = atk;
         knocked = kn;
 
-        // 🔥 Bloquear la lógica del GameManager
+        attackerRef = atk.NetworkObject;
+        knockedRef = kn.NetworkObject;
+
         gamemanagerlocal.SetClickerState(true);
 
         attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
         knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
 
-        StartCoroutine(CanvasApear(1f));
-    }
-
-    private IEnumerator CanvasApear(float duration)
-    {
-        yield return new WaitForSeconds(duration);
-
         value = 0.5f;
-        battleSlider.value = value;
-        active = true;
 
-        battleSlider.gameObject.SetActive(true);
-        battleText.gameObject.SetActive(true);
+        StartBattleClientRpc(attacker.NetworkObjectId, knocked.NetworkObjectId);
 
-        if (timerClickGame != null)
-        {
-            timerClickGame.OnTimerEnd = null;
-            timerClickGame.OnTimerEnd += HandleTimerEnded;
-            timerClickGame.gameObject.SetActive(true);
-            timerClickGame.ReiniciarTemporizador();
-        }
+        StartCoroutine(WaitStartBattle());
     }
 
-    public void RegisterClick(PlayerMovMultiplayer who)
+    private IEnumerator WaitStartBattle()
+    {
+        yield return new WaitForSeconds(1f);
+
+        active = true;
+        timerClickGame.OnTimerEnd = HandleTimerEndedServer;
+        timerClickGame.ReiniciarTemporizador();
+
+        ShowUIClientRpc(true, value);
+    }
+
+    // ---------------------------------------------------------
+    // 📡 CLIENT RPC = mostrar UI en todas las pantallas
+    // ---------------------------------------------------------
+    [ClientRpc]
+    private void StartBattleClientRpc(ulong atkId, ulong knId)
+    {
+        attacker = NetworkManager.Singleton.SpawnManager.SpawnedObjects[atkId].GetComponent<PlayerMovMultiplayer>();
+        knocked = NetworkManager.Singleton.SpawnManager.SpawnedObjects[knId].GetComponent<PlayerMovMultiplayer>();
+    }
+
+    [ClientRpc]
+    private void ShowUIClientRpc(bool show, float startValue)
+    {
+        battleSlider.gameObject.SetActive(show);
+        battleText.gameObject.SetActive(show);
+
+        battleSlider.value = startValue;
+        battleText.text = $"{startValue * 100f:F0}%";
+    }
+
+    // ---------------------------------------------------------
+    // 📡 ACTUALIZAR SLIDER EN TODAS LAS MÁQUINAS
+    // ---------------------------------------------------------
+    [ClientRpc]
+    private void UpdateSliderClientRpc(float v)
+    {
+        battleSlider.value = v;
+        battleText.text = $"{v * 100f:F0}%";
+    }
+
+    // ---------------------------------------------------------
+    // 📡 UN JUGADOR HACE CLICK → se manda al SERVER
+    // ---------------------------------------------------------
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterClickServerRpc(ulong playerId)
     {
         if (!active) return;
 
-        if (who == attacker) value -= clickPower;   // attacker empuja hacia 0%
-        else if (who == knocked) value += clickPower; // knocked empuja hacia 100%
+        if (attacker == null || knocked == null) return;
+
+        if (attacker.NetworkObjectId == playerId)
+            value -= clickPower;
+
+        if (knocked.NetworkObjectId == playerId)
+            value += clickPower;
 
         value = Mathf.Clamp01(value);
-        battleSlider.value = value;
-        battleText.text = $"{value * 100f:F0}%";
+        UpdateSliderClientRpc(value);
     }
 
-    public void EndBattle(PlayerMovMultiplayer winner)
+    // ---------------------------------------------------------
+    // 🏁 FIN DE BATALLA (solo el server decide)
+    // ---------------------------------------------------------
+    private void EndBattleServer(PlayerMovMultiplayer winner)
     {
-        if (timerClickGame != null)
-            timerClickGame.DetenerTemporizador();
+        active = false;
+        timerClickGame.DetenerTemporizador();
 
         PlayerMovMultiplayer loser = (winner == attacker) ? knocked : attacker;
 
-        // ------------------------------------
-        // SI GANA EL ATTACKER → KNOCKED MUERE
-        // ------------------------------------
         if (winner == attacker)
         {
-            knocked.isDefinitivelyDead = true;
-            knocked.SetState(PlayerMovMultiplayer.States.Dead);
+            loser.isDefinitivelyDead = true;
+            loser.SetState(PlayerMovMultiplayer.States.Dead);
 
-            Debug.Log($"❌ {knocked.name} murió definitivamente por perder el click battle.");
-
-            active = false;
-            battleSlider.gameObject.SetActive(false);
-            battleText.gameObject.SetActive(false);
-            attacker.SetState(PlayerMovMultiplayer.States.Idle);
-            //attacker.CanReceive();
-            winner.CageGone();
-
-            // 🔥 Desbloquear y revisar win condition
             gamemanagerlocal.SetClickerState(false);
             gamemanagerlocal.CheckRemainingPlayers();
-            MusicManager.StopMusic(MusicType.MainMenuBack);
-            MusicManager.StopMusic(MusicType.FightMusic);
-            MusicManager.StopMusic(MusicType.ClickerGameMusic);
-           
-            
-            return;
-           
-
         }
-
-        // ------------------------------------
-        // SI GANA EL KNOCKED → REVIVE
-        // ------------------------------------
-        if (winner == knocked)
+        else
         {
-            attacker.SetState(PlayerMovMultiplayer.States.Idle);
-            knocked.lives--;   
+            knocked.lives--;
             knocked.ResetVidas();
             knocked.SetState(PlayerMovMultiplayer.States.Idle);
-            //  knocked.CanReceive();
-            // attacker.CanReceive();
-            // knocked.ResetInputs();
-            //PlayerMovLocal g = GetComponentInChildren<PlayerMovLocal>();
-            attacker.AttackDone = true;
-            attacker.ResetInputs();
-
-            Debug.Log($"💖 {knocked.name} ganó su segunda oportunidad.");
-
-            active = false;
-            battleSlider.gameObject.SetActive(false);
-            battleText.gameObject.SetActive(false);
-
-            winner.CageGone();
-
-            // 🔥 Se desbloquea el GameManager
-            gamemanagerlocal.SetClickerState(false);
-            return;
         }
+
+        attacker.SetState(PlayerMovMultiplayer.States.Idle);
+
+        FinishBattleClientRpc();
+
+        ShowUIClientRpc(false, value);
     }
 
-    private void HandleTimerEnded()
+    [ClientRpc]
+    private void FinishBattleClientRpc()
     {
-        if (!active) return;
+        battleSlider.gameObject.SetActive(false);
+        battleText.gameObject.SetActive(false);
+    }
+
+    // Tiempo expiró → server decide ganador
+    private void HandleTimerEndedServer()
+    {
+        if (!IsServer) return;
 
         PlayerMovMultiplayer winner = (value >= 0.5f) ? knocked : attacker;
-        EndBattle(winner);
+        EndBattleServer(winner);
     }
 }

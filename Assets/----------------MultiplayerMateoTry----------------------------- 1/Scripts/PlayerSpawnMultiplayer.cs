@@ -11,26 +11,26 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
 
     [SerializeField] private Material[] outlineMaterials;
 
+    // Lista local por máquina: en cada cliente se llena con SUS instancias de players
     public static List<GameObject> joinedPlayers = new List<GameObject>();
-
 
     public override void OnNetworkSpawn()
     {
+        // 🔹 Cada vez que un Player se spawnea en esta máquina, lo registramos
+        if (!joinedPlayers.Contains(gameObject))
+            joinedPlayers.Add(gameObject);
+
+        // 🔹 Solo el server decide posición / material
         if (IsServer)
             StartCoroutine(DelayedSpawn());
-       
-
     }
 
     private IEnumerator DelayedSpawn()
     {
-        yield return null; // Esperar 1 frame para que el NetworkTransform se inicialice
+        // Esperar 1 frame para que el NetworkTransform se inicialice
+        yield return null;
         PlacePlayer();
     }
-
-
-        
-    
 
     private void PlacePlayer()
     {
@@ -42,8 +42,9 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
 
         ApplyOutlineMaterialClientRpc(index);
 
-        if (!joinedPlayers.Contains(gameObject))
-            joinedPlayers.Add(gameObject);
+        // 🔸 YA NO añadimos aquí a joinedPlayers porque se hace en OnNetworkSpawn
+        // if (!joinedPlayers.Contains(gameObject))
+        //     joinedPlayers.Add(gameObject);
     }
 
     private int GetUniqueRandomIndex()

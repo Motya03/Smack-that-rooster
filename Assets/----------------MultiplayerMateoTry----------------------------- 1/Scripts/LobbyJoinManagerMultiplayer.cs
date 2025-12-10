@@ -46,9 +46,9 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
         }
 
         playerCount.OnValueChanged += OnPlayerCountChanged;
+
+        // Registrar jugador en el servidor (host y clientes)
         StartCoroutine(WaitForSecondsTest());
-        // Registrar jugador en el servidor
-        
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -68,8 +68,8 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
         {
             localPlayerIndex = playerIndex;
         }
+
         OnPlayerJoinedVisual(playerIndex);
-       
     }
 
     public void OnPlayerJoinedVisual(int index)
@@ -87,14 +87,14 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
                 startButton.gameObject.SetActive(true);
             }
         }
-        
-        
     }
+
     private IEnumerator WaitForSecondsTest()
     {
         yield return new WaitForSeconds(3);
         RegisterPlayerServerRpc();
     }
+
     public void StartGame()
     {
         // Solo el host puede iniciar la partida
@@ -136,12 +136,12 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
             PlayerSpawnMultiplayer.TogglePlayerControl(playerObj, true);
         }
 
-        int playerCount = PlayerSpawnMultiplayer.joinedPlayers.Count;
+        int playerCountLocal = PlayerSpawnMultiplayer.joinedPlayers.Count;
 
         // ✅ ACTIVAR SOLO las barras necesarias y asignar salud
         for (int i = 0; i < healthBars.Length; i++)
         {
-            bool active = i < playerCount;
+            bool active = i < playerCountLocal;
             healthBars[i].SetActive(active);
 
             if (active)
@@ -160,7 +160,7 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
             }
         }
 
-        Debug.Log($"❤️ Activadas {playerCount} barras de vida.");
+        Debug.Log($"❤️ Activadas {playerCountLocal} barras de vida.");
 
         // ✅ ACTIVAR GAME MANAGER
         gm?.ActivateGame();
@@ -169,5 +169,12 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
     private void OnPlayerCountChanged(int oldValue, int newValue)
     {
         Debug.Log($"👥 Jugadores conectados: {newValue}");
+    }
+
+    // (Opcional) si algún día quieres que otros scripts pidan una barra concreta:
+    public GameObject GetHealthBar(int index)
+    {
+        if (index < 0 || index >= healthBars.Length) return null;
+        return healthBars[index];
     }
 }

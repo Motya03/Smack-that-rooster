@@ -27,7 +27,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     private Vector3 velocity;
     private Vector3 airMomentum;
     [SerializeField] private bool isGrounded;
-    //  public GameObject stunEffectPrefab;
+
     public GameObject dashFrontEffectPrefab;
     public GameObject dashBackEffectPrefab;
     public Transform dashPointFront;
@@ -36,7 +36,6 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public Text contadorVida;
     public GameObject kickWindPrefab;
     public Transform footTrigger;
-    //public Transform atttackPoint;
 
     public Slider sliderDance;
     public int dancePoints;
@@ -44,14 +43,13 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public GameObject canvasEscape; //canvas escape
 
     public bool AttackDone = true;
-    [Header("Ground Check")]
-    public Transform groundCheck;            // punto de comprobación (ponlo cerca de los pies)
-    public float groundDistance = 0.15f;     // radio de la esfera
-    public LayerMask groundMask;             // que capas cuentan como suelo
 
+    [Header("Ground Check")]
+    public Transform groundCheck;
+    public float groundDistance = 0.15f;
+    public LayerMask groundMask;
 
     [Header("Movement Settings")]
-
     public float gravity = -9.81f;
     public float jumpForce = 12f;
     public float airControl = 0.2f;
@@ -61,11 +59,10 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     private float defaultSpeed;
     private float speedBoostMultiplier = 1f; //Power Ups
-    private float animBoostMultiplier = 1f; //Otros Cambios de velocidad
+    private float animBoostMultiplier = 1f;  //Otros Cambios de velocidad
 
     public float moveSpeed = 5f;
     private float boost = 1f;
-
 
     [Header("Dash Settings")]
     public float dashSpeed = 2f;
@@ -78,10 +75,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public PlayerMovMultiplayer lastAttacker;
 
     private float currentVelocity;
-
     private Coroutine boostCoroutine;
-
-
 
     private bool isMoving;
     private bool isAttacking;
@@ -96,60 +90,59 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     private bool canReceiveInputAttack = true;
     private bool canReceiveInputMove = true;
 
-
-
-
-
-
-    public enum States { Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack, Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance, PowerUp }
+    public enum States
+    {
+        Idle, Run, AttackPatada, Jump, Fall, DashFront, DashBack,
+        Stunned, Dead, Crouch, AttackLow, ClickBattle, Dance, PowerUp
+    }
     public States mystate;
 
     public Transform model; // Para rotar solo el modelo visual
 
     [Header("Vida y Daño")]
     public int vidas = 3;
-
     public int lives = 1;
+
     // REFERENCIA AL HealthSystem del UI que se asignará en StartGame del LobbyJoinManager
     [HideInInspector] public HealthSystemMultiplayer uiHealth;
     [HideInInspector] public bool isDefinitivelyDead = false;
 
-
     [Header("Hitbox de Ataque")]
     public GameObject kickHitbox; // Asignar el objeto hijo con collider
     private HitboxMultiplayer hitboxScript;
+
     void Start()
     {
+        // 🔹 Inicialización que debe ocurrir SIEMPRE (host y clientes, owner o no)
+        controller = GetComponent<CharacterController>();
+        myAnimator = GetComponent<Animator>();
+        defaultSpeed = moveSpeed;
+        mystate = States.Idle;
+
+        if (kickHitbox != null)
+        {
+            hitboxScript = kickHitbox.GetComponent<HitboxMultiplayer>();
+            if (hitboxScript != null)
+                hitboxScript.ownerNetObj = GetComponent<NetworkObject>(); // importante en el SERVER también
+
+            kickHitbox.SetActive(false);
+        }
+
+        // 🔹 A partir de aquí, SOLO el dueño procesa inputs / UI local
         if (!IsOwner) return;
-        //DontDestroyOnLoad(gameObject);
 
         if (sliderDance != null)
         {
             sliderDance.value = dancePoints;
             sliderDance.gameObject.SetActive(false);
         }
+
         boostGiven = true;
-        controller = GetComponent<CharacterController>();
-        myAnimator = GetComponent<Animator>();
-        // defaultSpeed = moveSpeed * speedBoostMultiplier * animBoostMultiplier;
-        defaultSpeed = moveSpeed;
 
-
-        mystate = States.Idle;
-
-        if (kickHitbox != null)
-        {
-            hitboxScript = kickHitbox.GetComponent<HitboxMultiplayer>();
-            if (hitboxScript != null) hitboxScript.ownerNetObj = GetComponent<NetworkObject>();
- // <-- aquí ya es la instancia
-            kickHitbox.SetActive(false);
-        }
-        /*canvasEscape = GameObject.FindWithTag("PauseCanvas");
-
-        if (canvasEscape == null)
-            Debug.LogError("No encontré ningún objeto con tag PauseCanvas");
-        */
+        // Si tienes cosas especiales de canvas/pause, aquí
+        // canvasEscape = ...
     }
+
 
 
     private void Update()
@@ -259,6 +252,12 @@ public class PlayerMovMultiplayer : NetworkBehaviour
                 //case States.ClickBattle: ClickBattle(); break;
 
         }
+
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            ClickGameManagerMultiplayer.Instance.RegisterClickServerRpc(NetworkObjectId);
+        }
+
     }
 
 
@@ -327,11 +326,13 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     private void OnMash(InputValue value)
     {
         if (!IsOwner) return;
+
         if (mystate == States.ClickBattle && value.isPressed)
         {
-            ClickGameManagerMultiplayer.Instance.RegisterClick(this);
+            ClickGameManagerMultiplayer.Instance.RegisterClickServerRpc(NetworkObjectId);
         }
     }
+
     private void OnDance(InputValue value)
     {
         if (!IsOwner) return;
@@ -899,7 +900,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     // CORRECCIÓN IMPORTANTE: MUERTE DEFINITIVA
     // ----------------------------
 
-   
+
 
 
 
@@ -907,9 +908,10 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     private void OnDestroy()
     {
-        // Si tienes una lista global de players, quítate de ella en vez de destruirte otra vez.
-        PlayerSpawn.joinedPlayers?.Remove(gameObject);
+        // Quitar este player de la lista global MULTIPLAYER
+        PlayerSpawnMultiplayer.joinedPlayers?.Remove(gameObject);
     }
+
 
 
     // --- BOOST TEMPORAL ---
@@ -1061,30 +1063,28 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     }
 
     public bool CanReceiveInput => canReceiveInput;
+
+    // --------------------------
+    // DAÑO AUTORITATIVO EN SERVER
+    // --------------------------
     public void ProcessDamageOnServer(int damage, ulong attackerId)
     {
         if (!IsServer)
             return;
 
-       // int newHealth = Mathf.Clamp(NetworkHealth.Value - damage, 0, maxHealth);
-      //  NetworkHealth.Value = newHealth;  // Esto sincroniza automáticamente a TODOS
+        // Si quisieras usar NetworkHealth podrías descomentar esto:
+        // int newHealth = Mathf.Clamp(NetworkHealth.Value - damage, 0, maxHealth);
+        // NetworkHealth.Value = newHealth;  // sincroniza a todos
 
-        // RPC SOLO PARA EFECTOS (shake, sonido, animación)
-        TakeHitClientRpc(1,attackerId);
-
-     //   if (newHealth <= 0)
-        {
-            // Lógica de muerte
-        }
+        // Por ahora usamos el ClientRpc para actualizar UI y lógica local
+        TakeHitClientRpc(damage, attackerId);
     }
-
 
     public void ProcessStunOnServer(ulong attackerId)
     {
         if (mystate == States.Dead) return;
         TakeStunClientRpc(attackerId);
     }
-
 
     // 2. El ClientRpc se ejecuta en TODOS los ordenadores conectados
     [ClientRpc]
@@ -1107,9 +1107,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         TakeStunLocal();
     }
 
-
     // 3. Lógica Local (Visuales, UI, Sonido, Animación)
-    // Esta función es la que tenías antes como "TakeHit", pero ahora se llama desde el ClientRpc
     private void TakeHitLocal(int damage, PlayerMovMultiplayer attacker)
     {
         SoundManager.PlaySound(SoundType.HitCulo);
@@ -1118,7 +1116,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         // Actualizar UI y vida local
         if (uiHealth != null)
         {
-            uiHealth.TakeDamage(damage);
+            uiHealth.TakeDamage(damage);   // Cambia los corazones
             vidas = uiHealth.health;
         }
         else
@@ -1132,10 +1130,13 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         {
             if (lives > 0)
             {
-                // Solo el dueño debería iniciar la lógica compleja del ClickBattle o el Server
-                // Para simplificar, si es visual, lo hacemos todos, pero el trigger de lógica 
-                // importante debería estar protegido.
-                if (IsOwner) FindFirstObjectByType<ClickGameManagerMultiplayer>().StartBattle(lastAttacker, this);
+                // Solo el dueño debería iniciar la lógica compleja del ClickBattle
+                if (IsOwner)
+                {
+                    var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
+                    if (clickMgr != null)
+                        clickMgr.StartBattle(lastAttacker, this);
+                }
             }
             else
             {
@@ -1145,10 +1146,9 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         }
         else
         {
-            //myAnimator.SetBool("Hit", true);
-            // El impulso físico es mejor que lo calcule solo el dueño para evitar jitter, 
-            // o usar NetworkTransform con interpolación.
-            if (IsOwner) StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
+            // Pequeño dash hacia delante al recibir golpe (solo dueño para evitar jitter)
+            if (IsOwner)
+                StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
         }
     }
 
@@ -1157,11 +1157,21 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         SoundManager.PlaySound(SoundType.HitBody);
         SetState(States.Stunned);
     }
+
+    // --------------------------
+    // NETWORK HEALTH (opcional, por si lo quieres usar después)
+    // --------------------------
+    public NetworkVariable<int> NetworkHealth = new NetworkVariable<int>(
+        value: 3,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
 
-        // Cuando cambia la vida → actualizo la UI
+        // Cuando cambia la vida → actualizar la UI desde NetworkHealth (si lo usas)
         NetworkHealth.OnValueChanged += (oldValue, newValue) =>
         {
             if (uiHealth != null)
@@ -1171,15 +1181,12 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             }
         };
     }
-    public NetworkVariable<int> NetworkHealth = new NetworkVariable<int>(
-    value: 3,
-    NetworkVariableReadPermission.Everyone,
-    NetworkVariableWritePermission.Server
-);
-
-
-
 }
+
+
+
+
+
 
 
 
