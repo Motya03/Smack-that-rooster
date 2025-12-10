@@ -18,17 +18,7 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
     {
         if (IsServer)
             StartCoroutine(DelayedSpawn());
-        if (IsOwner)
-        {
-            // El dueño controla su player
-            GetComponent<PlayerInput>().enabled = true;
-        }
-        else
-        {
-            // Los demás NO deben controlar al player, pero sus scripts de movimiento
-            // deben seguir activos para que NetworkTransform los sincronice
-            GetComponent<PlayerInput>().enabled = false;
-        }
+       
 
     }
 
