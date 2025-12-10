@@ -1,39 +1,56 @@
-﻿using UnityEngine;
-using Unity.Netcode;
+﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerSpawnMultiplayer : NetworkBehaviour
 {
     [SerializeField] private Transform[] spawnPoints;
-    private List<int> usedIndexes = new List<int>();
+    private static List<int> usedIndexes = new List<int>();
 
     [SerializeField] private Material[] outlineMaterials;
 
     public static List<GameObject> joinedPlayers = new List<GameObject>();
 
+
     public override void OnNetworkSpawn()
     {
-        // Solo el servidor coloca jugadores
         if (IsServer)
+            StartCoroutine(DelayedSpawn());
+        if (IsOwner)
         {
-            PlacePlayerServerRpc();
+            // El dueño controla su player
+            GetComponent<PlayerInput>().enabled = true;
+        }
+        else
+        {
+            // Los demás NO deben controlar al player, pero sus scripts de movimiento
+            // deben seguir activos para que NetworkTransform los sincronice
+            GetComponent<PlayerInput>().enabled = false;
         }
 
-        // Solo el dueño controla su personaje
-        TogglePlayerControl(IsOwner);
     }
 
-    [ServerRpc]
-    private void PlacePlayerServerRpc(ServerRpcParams rpcParams = default)
+    private IEnumerator DelayedSpawn()
+    {
+        yield return null; // Esperar 1 frame para que el NetworkTransform se inicialice
+        PlacePlayer();
+    }
+
+
+        
+    
+
+    private void PlacePlayer()
     {
         int index = GetUniqueRandomIndex();
         Transform spawn = spawnPoints[index];
 
-        // Reposicionar al jugador
         transform.position = spawn.position;
         transform.rotation = spawn.rotation;
 
-        ApplyOutlineMaterialClientRpc(OwnerClientId, index);
+        ApplyOutlineMaterialClientRpc(index);
 
         if (!joinedPlayers.Contains(gameObject))
             joinedPlayers.Add(gameObject);
@@ -56,7 +73,7 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void ApplyOutlineMaterialClientRpc(ulong clientId, int materialIndex)
+    private void ApplyOutlineMaterialClientRpc(int materialIndex)
     {
         if (materialIndex >= outlineMaterials.Length)
             return;
@@ -76,14 +93,13 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
         }
     }
 
-    private void TogglePlayerControl(bool state)
+    public static void TogglePlayerControl(GameObject playerObj, bool state)
     {
-        // Solo el dueño controla inputs
-        foreach (var comp in GetComponentsInChildren<MonoBehaviour>())
-        {
-            // Evita desactivar scripts de Netcode
-            if (comp is NetworkBehaviour) continue;
+        if (!playerObj) return;
 
+        foreach (var comp in playerObj.GetComponentsInChildren<MonoBehaviour>())
+        {
+            if (comp is UnityEngine.InputSystem.PlayerInput) continue;
             comp.enabled = state;
         }
     }

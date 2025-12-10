@@ -3,45 +3,22 @@ using UnityEngine.UI;
 
 public class HealthSystemMultiplayer : MonoBehaviour
 {
-    [Header("Vida (UI)")]
     public int maxHealth = 3;
-   
+    public int health;
 
-
-    [HideInInspector] public int health;
-
-    [Header("Referencias UI")]
-    public Image[] hearts;         // arrastrar las 3 Image hijos en este UI
-    public Sprite fullHeart;      // sprite "corazón lleno" (color correspondiente)
-    public Sprite emptyHeart;     // sprite "corazón vacío"  (mismo color)
-    public HeartFlash heartFlash; // componente HeartFlash en este mismo GameObject (opcional)
+    public Image[] hearts;
+    public Sprite fullHeart;
+    public Sprite emptyHeart;
 
     private void Awake()
     {
-        // Inicializa la UI con full hearts por defecto (si se han asignado las imágenes)
         health = maxHealth;
         UpdateHearts();
     }
 
     public void TakeDamage(int amount)
     {
-        
-        
-        health -= amount;
-        health = Mathf.Clamp(health, 0, maxHealth);
-        UpdateHearts();
-
-        if (heartFlash != null)
-            heartFlash.FlashHearts();
-
-        
-
-    }
-
-    public void Heal(int amount)
-    {
-        health += amount;
-        health = Mathf.Clamp(health, 0, maxHealth);
+        health = Mathf.Clamp(health - amount, 0, maxHealth);
         UpdateHearts();
     }
 
@@ -54,15 +31,16 @@ public class HealthSystemMultiplayer : MonoBehaviour
     private void UpdateHearts()
     {
         if (hearts == null) return;
+
         for (int i = 0; i < hearts.Length; i++)
         {
-            if (i < health)
-                hearts[i].sprite = fullHeart;
-            else
-                hearts[i].sprite = emptyHeart;
+            hearts[i].sprite = i < health ? fullHeart : emptyHeart;
         }
     }
+
+    // <<< AGREGAR ESTO >>>
+    public void RefreshHeartsFromNetwork()
+    {
+        UpdateHearts();
+    }
 }
-
-
-

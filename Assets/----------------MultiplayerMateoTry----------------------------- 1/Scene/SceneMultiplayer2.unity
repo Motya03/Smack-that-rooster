@@ -11231,6 +11231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9714d34a7003c6469db983d4d5ebe94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   battleSlider: {fileID: 162820748}
   clickPower: 0.02
   decaySpeed: 0.3

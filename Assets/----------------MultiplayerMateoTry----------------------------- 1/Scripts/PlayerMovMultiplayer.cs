@@ -111,7 +111,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     public int lives = 1;
     // REFERENCIA AL HealthSystem del UI que se asignará en StartGame del LobbyJoinManager
-    [HideInInspector] public HealthSystem uiHealth;
+    [HideInInspector] public HealthSystemMultiplayer uiHealth;
     [HideInInspector] public bool isDefinitivelyDead = false;
 
 
@@ -1063,12 +1063,21 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     public bool CanReceiveInput => canReceiveInput;
     public void ProcessDamageOnServer(int damage, ulong attackerId)
     {
-        // Aquí puedes poner validaciones de servidor (ej: si es invencible por lag)
-        if (mystate == States.Dead || isDefinitivelyDead) return;
+        if (!IsServer)
+            return;
 
-        // Notificar a TODOS los clientes (incluido el dueño y el atacante) que hubo un golpe
-        TakeHitClientRpc(damage, attackerId);
+       // int newHealth = Mathf.Clamp(NetworkHealth.Value - damage, 0, maxHealth);
+      //  NetworkHealth.Value = newHealth;  // Esto sincroniza automáticamente a TODOS
+
+        // RPC SOLO PARA EFECTOS (shake, sonido, animación)
+        TakeHitClientRpc(1,attackerId);
+
+     //   if (newHealth <= 0)
+        {
+            // Lógica de muerte
+        }
     }
+
 
     public void ProcessStunOnServer(ulong attackerId)
     {
@@ -1148,6 +1157,27 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         SoundManager.PlaySound(SoundType.HitBody);
         SetState(States.Stunned);
     }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        // Cuando cambia la vida → actualizo la UI
+        NetworkHealth.OnValueChanged += (oldValue, newValue) =>
+        {
+            if (uiHealth != null)
+            {
+                uiHealth.health = newValue;
+                uiHealth.RefreshHeartsFromNetwork();
+            }
+        };
+    }
+    public NetworkVariable<int> NetworkHealth = new NetworkVariable<int>(
+    value: 3,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
+
+
 
 }
 

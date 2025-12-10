@@ -1,7 +1,9 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.InputSystem;
+﻿using System;
+using System.Collections;
 using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class LobbyJoinManagerMultiplayer : NetworkBehaviour
 {
@@ -44,9 +46,9 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
         }
 
         playerCount.OnValueChanged += OnPlayerCountChanged;
-
+        StartCoroutine(WaitForSecondsTest());
         // Registrar jugador en el servidor
-        RegisterPlayerServerRpc();
+        
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -66,8 +68,8 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
         {
             localPlayerIndex = playerIndex;
         }
-
         OnPlayerJoinedVisual(playerIndex);
+       
     }
 
     public void OnPlayerJoinedVisual(int index)
@@ -85,8 +87,14 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
                 startButton.gameObject.SetActive(true);
             }
         }
+        
+        
     }
-
+    private IEnumerator WaitForSecondsTest()
+    {
+        yield return new WaitForSeconds(3);
+        RegisterPlayerServerRpc();
+    }
     public void StartGame()
     {
         // Solo el host puede iniciar la partida
@@ -114,21 +122,21 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
         gameplayCanvas.SetActive(true);
 
         // ✅ REACTIVAR HUD del GameManager si estaba apagado
-        var gm = FindFirstObjectByType<GameManagerLocal>();
+        var gm = FindFirstObjectByType<GameManageMultiplayer>();
         if (gm != null && gm.canvasLocal != null)
             gm.canvasLocal.SetActive(true);
 
         // ✅ ELIMINAR jugadores destruidos de la lista
-        PlayerSpawn.joinedPlayers.RemoveAll(p => p == null);
+        PlayerSpawnMultiplayer.joinedPlayers.RemoveAll(p => p == null);
 
         // ✅ ACTIVAR control para jugadores existentes
-        foreach (var playerObj in PlayerSpawn.joinedPlayers)
+        foreach (var playerObj in PlayerSpawnMultiplayer.joinedPlayers)
         {
             if (playerObj == null) continue;
-            PlayerSpawn.TogglePlayerControl(playerObj, true);
+            PlayerSpawnMultiplayer.TogglePlayerControl(playerObj, true);
         }
 
-        int playerCount = PlayerSpawn.joinedPlayers.Count;
+        int playerCount = PlayerSpawnMultiplayer.joinedPlayers.Count;
 
         // ✅ ACTIVAR SOLO las barras necesarias y asignar salud
         for (int i = 0; i < healthBars.Length; i++)
@@ -138,13 +146,13 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
 
             if (active)
             {
-                var playerObj = PlayerSpawn.joinedPlayers[i];
+                var playerObj = PlayerSpawnMultiplayer.joinedPlayers[i];
                 if (playerObj == null) continue;
 
-                var player = playerObj.GetComponent<PlayerMovLocal>();
+                var player = playerObj.GetComponent<PlayerMovMultiplayer>();
                 if (player == null) continue;
 
-                var uiHealth = healthBars[i].GetComponent<HealthSystem>();
+                var uiHealth = healthBars[i].GetComponent<HealthSystemMultiplayer>();
                 if (uiHealth == null) continue;
 
                 player.uiHealth = uiHealth;

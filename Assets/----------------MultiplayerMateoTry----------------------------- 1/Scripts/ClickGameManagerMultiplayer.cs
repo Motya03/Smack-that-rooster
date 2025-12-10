@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Netcode;
 
-public class ClickGameManagerMultiplayer : MonoBehaviour
+public class ClickGameManagerMultiplayer : NetworkBehaviour
 {
     public static ClickGameManagerMultiplayer Instance { get; private set; }
 
