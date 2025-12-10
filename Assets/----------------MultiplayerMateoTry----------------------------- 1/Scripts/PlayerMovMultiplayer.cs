@@ -118,10 +118,6 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     [Header("Hitbox de Ataque")]
     public GameObject kickHitbox; // Asignar el objeto hijo con collider
     private HitboxMultiplayer hitboxScript;
-    // Añadir al principio de la clase (debes ajustar permisos si es necesario)
-    public Unity.Netcode.NetworkVariable<int> NetworkHealth = new Unity.Netcode.NetworkVariable<int>(3);
-    public int maxHealth = 3;
-
     void Start()
     {
         if (!IsOwner) return;
@@ -1065,72 +1061,43 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     }
 
     public bool CanReceiveInput => canReceiveInput;
-    public override void OnNetworkSpawn()
-    {
-        base.OnNetworkSpawn();
-
-        // Escuchamos los cambios de vida
-        NetworkHealth.OnValueChanged += (oldValue, newValue) =>
-        {
-            if (IsOwner && uiHealth != null)
-            {
-                uiHealth.SetHealth(newValue);
-            }
-        };
-    }
-
-    // ────────────────────────────────────────────────
-    //     DAÑO (SOLO SERVER)
-    // ────────────────────────────────────────────────
-
     public void ProcessDamageOnServer(int damage, ulong attackerId)
     {
         if (!IsServer)
             return;
 
-        int newHealth = Mathf.Clamp(NetworkHealth.Value - damage, 0, maxHealth);
-        NetworkHealth.Value = newHealth;
+       // int newHealth = Mathf.Clamp(NetworkHealth.Value - damage, 0, maxHealth);
+      //  NetworkHealth.Value = newHealth;  // Esto sincroniza automáticamente a TODOS
 
-        // RPC visual
-        TakeHitClientRpc(damage, attackerId);
+        // RPC SOLO PARA EFECTOS (shake, sonido, animación)
+        TakeHitClientRpc(1,attackerId);
 
-        if (newHealth <= 0)
+     //   if (newHealth <= 0)
         {
-            if (lives > 0)
-            {
-                // batalla de click (solo dueño)
-                if (IsOwner)
-                    FindFirstObjectByType<ClickGameManagerMultiplayer>().StartBattle(lastAttacker, this);
-            }
-            else
-            {
-                isDefinitivelyDead = true;
-                SetState(States.Dead);
-            }
+            // Lógica de muerte
         }
     }
 
+
     public void ProcessStunOnServer(ulong attackerId)
     {
-        if (!IsServer) return;
+        if (mystate == States.Dead) return;
         TakeStunClientRpc(attackerId);
     }
 
-    // ────────────────────────────────────────────────
-    //     RPCs
-    // ────────────────────────────────────────────────
 
+    // 2. El ClientRpc se ejecuta en TODOS los ordenadores conectados
     [ClientRpc]
     private void TakeHitClientRpc(int damage, ulong attackerId)
     {
-        // Buscar atacante
+        // Buscar al atacante localmente para tener la referencia
         PlayerMovMultiplayer attackerScript = null;
-
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerId, out NetworkObject attackerObj))
         {
             attackerScript = attackerObj.GetComponent<PlayerMovMultiplayer>();
         }
 
+        // Ejecutar la lógica visual y de datos localmente
         TakeHitLocal(damage, attackerScript);
     }
 
@@ -1140,38 +1107,79 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         TakeStunLocal();
     }
 
-    // ────────────────────────────────────────────────
-    //     LÓGICA LOCAL
-    // ────────────────────────────────────────────────
 
+    // 3. Lógica Local (Visuales, UI, Sonido, Animación)
+    // Esta función es la que tenías antes como "TakeHit", pero ahora se llama desde el ClientRpc
     private void TakeHitLocal(int damage, PlayerMovMultiplayer attacker)
     {
-        lastAttacker = attacker;
         SoundManager.PlaySound(SoundType.HitCulo);
+        lastAttacker = attacker;
 
+        // Actualizar UI y vida local
         if (uiHealth != null)
         {
-            uiHealth.FlashHearts(); 
+            uiHealth.TakeDamage(damage);
+            vidas = uiHealth.health;
+        }
+        else
+        {
+            vidas -= damage;
         }
 
-        if (NetworkHealth.Value <= 0 && lives <= 0)
+        Debug.Log($"{gameObject.name} recibió daño. Vidas restantes: {vidas}");
+
+        if (vidas <= 0)
         {
-            SetState(States.Dead);
+            if (lives > 0)
+            {
+                // Solo el dueño debería iniciar la lógica compleja del ClickBattle o el Server
+                // Para simplificar, si es visual, lo hacemos todos, pero el trigger de lógica 
+                // importante debería estar protegido.
+                if (IsOwner) FindFirstObjectByType<ClickGameManagerMultiplayer>().StartBattle(lastAttacker, this);
+            }
+            else
+            {
+                isDefinitivelyDead = true;
+                SetState(States.Dead);
+            }
+        }
+        else
+        {
+            //myAnimator.SetBool("Hit", true);
+            // El impulso físico es mejor que lo calcule solo el dueño para evitar jitter, 
+            // o usar NetworkTransform con interpolación.
+            if (IsOwner) StartCoroutine(PerformDash(transform.forward, "DashFront", 1.5f));
         }
     }
-
 
     private void TakeStunLocal()
     {
         SoundManager.PlaySound(SoundType.HitBody);
         SetState(States.Stunned);
     }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
 
-   
+        // Cuando cambia la vida → actualizo la UI
+        NetworkHealth.OnValueChanged += (oldValue, newValue) =>
+        {
+            if (uiHealth != null)
+            {
+                uiHealth.health = newValue;
+                uiHealth.RefreshHeartsFromNetwork();
+            }
+        };
+    }
+    public NetworkVariable<int> NetworkHealth = new NetworkVariable<int>(
+    value: 3,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);
+
+
+
 }
-
-
-
 
 
 

@@ -51875,7 +51875,6 @@ GameObject:
   - component: {fileID: 2882669649081422404}
   - component: {fileID: -1007998168151102141}
   - component: {fileID: 5467217648169062085}
-  - component: {fileID: 7701188512348735083}
   m_Layer: 6
   m_Name: RoosterPlayerPrefabMultiplayer
   m_TagString: Player
@@ -52125,9 +52124,6 @@ MonoBehaviour:
   uiHealth: {fileID: 0}
   isDefinitivelyDead: 0
   kickHitbox: {fileID: 0}
-  NetworkHealth:
-    m_InternalValue: 3
-  maxHealth: 3
 --- !u!114 &7427353647659202538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52285,29 +52281,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  spawnPoints:
+  - {fileID: 3905325127801749444}
+  - {fileID: 8383680787323791761}
   outlineMaterials:
   - {fileID: 2100000, guid: fb0773543fba86f4d808c0fff64e550e, type: 2}
   - {fileID: 2100000, guid: e57a2e593c512764b8be4126d024ac9d, type: 2}
   - {fileID: 2100000, guid: 8377a480df77528428f77b5f9d5b2030, type: 2}
   - {fileID: 2100000, guid: be7c91412fa4d094e84aa81cc54c00dc, type: 2}
---- !u!114 &7701188512348735083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8239303162948211347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c500529254984f47a68bb1bc3344adc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  maxHealth: 3
-  NetworkHealth:
-    m_InternalValue: 3
-  uiHealth: {fileID: 0}
-  isDefinitivelyDead: 0
 --- !u!1 &8251348622258787727
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,57 +2,41 @@
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerSpawnMultiplayer : NetworkBehaviour
 {
+    [SerializeField] private Transform[] spawnPoints;
     private static List<int> usedIndexes = new List<int>();
 
-    [Header("Outline / color (opcional)")]
     [SerializeField] private Material[] outlineMaterials;
 
     public static List<GameObject> joinedPlayers = new List<GameObject>();
 
-    private Transform[] spawnPoints;
 
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
-
-        // Obtener spawn points desde el manager (si existe)
-        if (SpawnManager.Instance != null)
-            spawnPoints = SpawnManager.Instance.spawnPoints;
-
-        // El servidor posiciona
         if (IsServer)
             StartCoroutine(DelayedSpawn());
+       
 
-        // Solo el dueño debe procesar input localmente (no desactivar otros componentes)
-        if (IsOwner)
-            EnableLocalInput(true);
-        else
-            EnableLocalInput(false);
     }
 
     private IEnumerator DelayedSpawn()
     {
-        // Esperar 1 frame para asegurar que NetworkTransform/NetworkObject esté listo en clientes
-        yield return null;
-
-        PlacePlayerOnServer();
+        yield return null; // Esperar 1 frame para que el NetworkTransform se inicialice
+        PlacePlayer();
     }
 
-    private void PlacePlayerOnServer()
-    {
-        if (spawnPoints == null || spawnPoints.Length == 0)
-        {
-            Debug.LogWarning("No spawn points asignados en SpawnManager.");
-            return;
-        }
 
+        
+    
+
+    private void PlacePlayer()
+    {
         int index = GetUniqueRandomIndex();
         Transform spawn = spawnPoints[index];
 
-        // Solo el server escribe transform
         transform.position = spawn.position;
         transform.rotation = spawn.rotation;
 
@@ -71,7 +55,8 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
         do
         {
             randomIndex = Random.Range(0, spawnPoints.Length);
-        } while (usedIndexes.Contains(randomIndex));
+        }
+        while (usedIndexes.Contains(randomIndex));
 
         usedIndexes.Add(randomIndex);
         return randomIndex;
@@ -80,26 +65,32 @@ public class PlayerSpawnMultiplayer : NetworkBehaviour
     [ClientRpc]
     private void ApplyOutlineMaterialClientRpc(int materialIndex)
     {
-        if (outlineMaterials == null || outlineMaterials.Length == 0) return;
-        if (materialIndex < 0 || materialIndex >= outlineMaterials.Length) return;
+        if (materialIndex >= outlineMaterials.Length)
+            return;
 
         Renderer renderer = GetComponentInChildren<Renderer>();
-        if (renderer == null) return;
 
-        var mats = new System.Collections.Generic.List<Material>(renderer.sharedMaterials);
-        if (mats.Count == 1)
-            mats.Add(outlineMaterials[materialIndex]);
-        else
-            mats[1] = outlineMaterials[materialIndex];
+        if (renderer != null)
+        {
+            List<Material> mats = new List<Material>(renderer.sharedMaterials);
 
-        renderer.materials = mats.ToArray();
+            if (mats.Count == 1)
+                mats.Add(outlineMaterials[materialIndex]);
+            else
+                mats[1] = outlineMaterials[materialIndex];
+
+            renderer.materials = mats.ToArray();
+        }
     }
 
-    private void EnableLocalInput(bool enable)
+    public static void TogglePlayerControl(GameObject playerObj, bool state)
     {
-        // Activa/desactiva solo el PlayerInput para evitar desactivar otros sistemas necesarios para sincronización.
-        var playerInput = GetComponent<UnityEngine.InputSystem.PlayerInput>();
-        if (playerInput != null)
-            playerInput.enabled = enable;
+        if (!playerObj) return;
+
+        foreach (var comp in playerObj.GetComponentsInChildren<MonoBehaviour>())
+        {
+            if (comp is UnityEngine.InputSystem.PlayerInput) continue;
+            comp.enabled = state;
+        }
     }
 }
