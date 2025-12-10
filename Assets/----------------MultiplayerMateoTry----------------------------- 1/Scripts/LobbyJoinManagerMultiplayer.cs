@@ -133,12 +133,12 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
         foreach (var playerObj in PlayerSpawnMultiplayer.joinedPlayers)
         {
             if (playerObj == null) continue;
-            PlayerSpawnMultiplayer.TogglePlayerControl(playerObj, true);
+           // No se puede ser importante PlayerSpawnMultiplayer.EnableLocalInput(true);
         }
 
+        // suponiendo PlayerSpawnMultiplayer.joinedPlayers está en el orden en que quieres mapear UI slots
         int playerCount = PlayerSpawnMultiplayer.joinedPlayers.Count;
 
-        // ✅ ACTIVAR SOLO las barras necesarias y asignar salud
         for (int i = 0; i < healthBars.Length; i++)
         {
             bool active = i < playerCount;
@@ -149,16 +149,21 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
                 var playerObj = PlayerSpawnMultiplayer.joinedPlayers[i];
                 if (playerObj == null) continue;
 
-                var player = playerObj.GetComponent<PlayerMovMultiplayer>();
-                if (player == null) continue;
-
+                var playerHealthNet = playerObj.GetComponent<PlayerHealthMultiplayer>();
                 var uiHealth = healthBars[i].GetComponent<HealthSystemMultiplayer>();
-                if (uiHealth == null) continue;
+                if (playerHealthNet != null && uiHealth != null)
+                {
+                    // Asignar la UI local a la referencia del player
+                    playerHealthNet.uiHealth = uiHealth;
 
-                player.uiHealth = uiHealth;
-                uiHealth.ResetHealth();
+                    // Forzar que UI muestre valor actual de la networkvar
+                    uiHealth.maxHealth = playerHealthNet.NetworkHealth.Value;
+                    uiHealth.health = playerHealthNet.NetworkHealth.Value;
+                    uiHealth.RefreshHeartsFromNetwork();
+                }
             }
         }
+
 
         Debug.Log($"❤️ Activadas {playerCount} barras de vida.");
 

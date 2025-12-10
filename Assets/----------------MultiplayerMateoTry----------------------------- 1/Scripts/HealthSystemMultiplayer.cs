@@ -1,14 +1,25 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class HealthSystemMultiplayer : MonoBehaviour
 {
+    [Header("Configuración UI")]
     public int maxHealth = 3;
-    public int health;
 
-    public Image[] hearts;
-    public Sprite fullHeart;
-    public Sprite emptyHeart;
+    [HideInInspector] public int health;
+
+    [Header("Referencias UI")]
+    public Image[] hearts;         // arrastra aquí las Image (ordenadas)
+    public Sprite fullHeart;      // sprite corazón lleno
+    public Sprite emptyHeart;     // sprite corazón vacío
+
+    [Header("Flash (opcional)")]
+    public HeartFlashMultiplayer heartFlash;
+    public void FlashHearts()
+    {
+        if (heartFlash != null)
+            heartFlash.FlashHearts();
+    }
 
     private void Awake()
     {
@@ -19,6 +30,13 @@ public class HealthSystemMultiplayer : MonoBehaviour
     public void TakeDamage(int amount)
     {
         health = Mathf.Clamp(health - amount, 0, maxHealth);
+        UpdateHearts();
+        if (heartFlash != null) heartFlash.FlashHearts();
+    }
+
+    public void Heal(int amount)
+    {
+        health = Mathf.Clamp(health + amount, 0, maxHealth);
         UpdateHearts();
     }
 
@@ -34,11 +52,19 @@ public class HealthSystemMultiplayer : MonoBehaviour
 
         for (int i = 0; i < hearts.Length; i++)
         {
-            hearts[i].sprite = i < health ? fullHeart : emptyHeart;
+            if (i < health)
+                hearts[i].sprite = fullHeart;
+            else
+                hearts[i].sprite = emptyHeart;
         }
     }
+    public void SetHealth(int value)
+    {
+        health = Mathf.Clamp(value, 0, maxHealth);
+        UpdateHearts();
+    }
 
-    // <<< AGREGAR ESTO >>>
+    // Método público para que el Player actualice la UI cuando NetworkVariable cambie
     public void RefreshHeartsFromNetwork()
     {
         UpdateHearts();
