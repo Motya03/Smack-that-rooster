@@ -1000,9 +1000,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         StopMove();
         myAnimator.Play("IDLE");
 
-        if (IsOwner)
+        // SOLO EL SERVER CREA LA CAJA UNA VEZ
+        if (IsServer)
             SpawnCageServerRpc(transform.position);
     }
+
 
     [ServerRpc(RequireOwnership = false)]
     private void SpawnCageServerRpc(Vector3 pos)
@@ -1030,7 +1032,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             return;
         }
 
-        CageScript script = currentCage.GetComponentInChildren<CageScript>();
+        CageScript script = currentCage.GetComponentInParent<CageScript>();
         if (script != null)
         {
             script.ClickBattleEnd();
@@ -1147,9 +1149,11 @@ public class PlayerMovMultiplayer : NetworkBehaviour
                 // Solo el dueño debería iniciar la lógica compleja del ClickBattle
                 if (IsOwner)
                 {
+                    
                     var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
                     if (clickMgr != null)
                         clickMgr.StartBattle(lastAttacker, this);
+                    
                 }
             }
             else

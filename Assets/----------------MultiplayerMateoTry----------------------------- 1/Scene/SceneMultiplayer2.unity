@@ -11074,10 +11074,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  clickBattleUIContainer: {fileID: 704347048}
   battleSlider: {fileID: 162820748}
   battleText: {fileID: 292255142}
   clickPower: 0.02
   decaySpeed: 0.3
+  CagePrefab: {fileID: 0}
   timerClickGame: {fileID: 704347055}
   gamemanagerlocal: {fileID: 1917437217}
 --- !u!4 &314281376

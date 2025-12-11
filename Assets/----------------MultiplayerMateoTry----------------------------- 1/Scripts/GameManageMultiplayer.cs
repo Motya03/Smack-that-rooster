@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 public class GameManageMultiplayer : MonoBehaviour
 {
@@ -14,13 +12,13 @@ public class GameManageMultiplayer : MonoBehaviour
     [SerializeField] private Text winnerText;
     [SerializeField] private GameObject canvasWinner;
 
-
     [Header("Jugador")]
     private GameObject enemy;
     private Transform enemyPoint;
     [SerializeField] private GameObject cajaRota;
 
     private bool throwCageBool = true;
+
     [Header("Canvas Gameplay (HUD Local)")]
     [SerializeField] public GameObject canvasLocal;
 
@@ -32,7 +30,6 @@ public class GameManageMultiplayer : MonoBehaviour
     private bool clickerActive = false;
     public void SetClickerState(bool state) => clickerActive = state;
 
-    // En la función Start(), cambiar:
     private void Start()
     {
         // Esperar a que NetworkManager esté listo
@@ -42,9 +39,27 @@ public class GameManageMultiplayer : MonoBehaviour
         }
     }
 
-    
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            ThrowCage();
+            Debug.Log("Рщдф");
+        }
 
+        if (!gameStarted || gameEnded)
+            return;
+
+        // ⛔ No revisar nada mientras haya click battle
+        if (clickerActive)
+            return;
+
+        CheckRemainingPlayers();
+    }
+
+    // --------------------------------------------------------------------
     // 🔥 Activado desde LobbyJoinManager cuando presionan START
+    // --------------------------------------------------------------------
     public void ActivateGame()
     {
         MusicManager.PlayMusic(MusicType.ChickenMusic, 0.05f);
@@ -53,7 +68,6 @@ public class GameManageMultiplayer : MonoBehaviour
 
         if (gameStarted) return;
 
-        // Preparar UI y jugadores antes de arrancar
         PrepareForNewMatch();
         ResetPlayersForNewMatch();
 
@@ -67,49 +81,79 @@ public class GameManageMultiplayer : MonoBehaviour
         }
     }
 
+    // --------------------------------------------------------------------
+    // Espera a que el juego empiece
+    // --------------------------------------------------------------------
     IEnumerator WaitForGameStart()
     {
         GameManageMultiplayer check = GetComponent<GameManageMultiplayer>();
 
-        // Espera hasta que el juego empiece
         yield return new WaitUntil(() => check.gameStarted);
 
         FindEnemy();  // ya hay players en escena
     }
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            ThrowCage();
-            Debug.Log("Рщдф");
-        }
 
-
-        //float DistanceToEnemy = Vector3.Distance(transform.position, enemyPoint.position);
-        if (!gameStarted || gameEnded)
-            return;
-
-        // ⛔ No revisar nada mientras haya click battle
-        if (clickerActive)
-            return;
-
-        CheckRemainingPlayers();
-    }
+    // --------------------------------------------------------------------
+    // Preparar la caja
+    // --------------------------------------------------------------------
     public void PrepareCage()
     {
-        if (throwCageBool == true)
+        if (!NetworkManager.Singleton.IsServer) return;
+
+        if (throwCageBool)
         {
             ThrowCage();
             throwCageBool = false;
         }
-
-
-
     }
 
-    // -----------------------------------------------------
-    // 🔍 Revisa cuántos jugadores siguen vivos
-    // -----------------------------------------------------
+
+    // --------------------------------------------------------------------
+    // Tirar la caja
+    // --------------------------------------------------------------------
+    public void ThrowCage()
+    {
+        if (!NetworkManager.Singleton.IsServer) return;
+        StartCoroutine(ThrowCageCorutina());
+    }
+
+
+    private IEnumerator ThrowCageCorutina()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (enemy == null)
+            FindEnemy();
+
+        if (enemy == null)
+        {
+            Debug.LogWarning("❌ No hay enemigo para tirar la caja");
+            yield break;
+        }
+
+        Vector3 spawnPos = enemy.transform.position + Vector3.up * 10f;
+        Instantiate(cajaRota, spawnPos, Quaternion.identity);
+        Debug.Log("🔥 Caja lanzada correctamente");
+    }
+
+    // --------------------------------------------------------------------
+    // Buscar enemigo
+    // --------------------------------------------------------------------
+    public void FindEnemy()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+
+        if (players.Length > 0)
+            enemy = players[UnityEngine.Random.Range(0, players.Length)];
+
+        GameObject enemy2 = GameObject.FindWithTag("Player");
+        PlayerMovMultiplayer p2 = enemy2.GetComponent<PlayerMovMultiplayer>();
+        enemyPoint = p2.GallinaApunta;
+    }
+
+    // --------------------------------------------------------------------
+    // Revisar cuántos jugadores siguen vivos
+    // --------------------------------------------------------------------
     public void CheckRemainingPlayers()
     {
         int alive = 0;
@@ -118,13 +162,12 @@ public class GameManageMultiplayer : MonoBehaviour
         for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
         {
             GameObject obj = PlayerSpawn.joinedPlayers[i];
-            if (obj == null) continue; // muy importante
+            if (obj == null) continue;
+
             PlayerMovMultiplayer p = obj.GetComponent<PlayerMovMultiplayer>();
             if (p == null) continue;
 
-            if (p.uiHealth != null &&
-                p.uiHealth.health > 0 &&
-                !p.isDefinitivelyDead)
+            if (p.uiHealth != null && p.uiHealth.health > 0 && !p.isDefinitivelyDead)
             {
                 alive++;
                 lastAlive = i;
@@ -135,9 +178,9 @@ public class GameManageMultiplayer : MonoBehaviour
             EndGame(lastAlive);
     }
 
-    // -----------------------------------------------------
-    // ⏳ Cuando el timer llega a 0
-    // -----------------------------------------------------
+    // --------------------------------------------------------------------
+    // Timer llegó a 0
+    // --------------------------------------------------------------------
     private void OnTimerFinished()
     {
         if (gameEnded || clickerActive)
@@ -158,9 +201,6 @@ public class GameManageMultiplayer : MonoBehaviour
         }
 
         EndGame(GetWinnerIndexByHealth());
-
-
-
     }
 
     private int CountAlivePlayers()
@@ -174,18 +214,16 @@ public class GameManageMultiplayer : MonoBehaviour
             PlayerMovMultiplayer p = obj.GetComponent<PlayerMovMultiplayer>();
             if (!p) continue;
 
-            if (p.uiHealth != null &&
-                p.uiHealth.health > 0 &&
-                !p.isDefinitivelyDead)
+            if (p.uiHealth != null && p.uiHealth.health > 0 && !p.isDefinitivelyDead)
                 count++;
         }
 
         return count;
     }
 
-    // -----------------------------------------------------
-    // ❤️ Ganador por salud (sin empates)
-    // -----------------------------------------------------
+    // --------------------------------------------------------------------
+    // Winner por salud
+    // --------------------------------------------------------------------
     private int GetWinnerIndexByHealth()
     {
         int maxHealth = -1;
@@ -213,17 +251,15 @@ public class GameManageMultiplayer : MonoBehaviour
             }
         }
 
-        // 🔥 Si hay empate → elegir uno aleatorio (sin empates finales)
         if (candidates.Count > 1)
             return candidates[UnityEngine.Random.Range(0, candidates.Count)];
-
 
         return candidates.Count == 1 ? candidates[0] : 0;
     }
 
-    // -----------------------------------------------------
-    // ⚡ Activar muerte súbita
-    // -----------------------------------------------------
+    // --------------------------------------------------------------------
+    // Activar muerte súbita
+    // --------------------------------------------------------------------
     private void ActivateSuddenDeath()
     {
         isSuddenDeath = true;
@@ -241,35 +277,29 @@ public class GameManageMultiplayer : MonoBehaviour
         }
     }
 
-    // -----------------------------------------------------
-    // 🏆 Final de partida
-    // -----------------------------------------------------
+    // --------------------------------------------------------------------
+    // Final del juego
+    // --------------------------------------------------------------------
     private void EndGame(int winnerIndex)
     {
         if (gameEnded) return;
 
         gameEnded = true;
 
-        // Desactivar control de jugadores
         foreach (var obj in PlayerSpawn.joinedPlayers)
             PlayerSpawn.TogglePlayerControl(obj, false);
 
-        // Apagar popups individuales
         foreach (var p in playerPopups)
             p.SetActive(false);
 
-        // Mensaje ganador
         string msg = $"Ganador: Jugador {winnerIndex + 1}";
 
-        // Mostrar popup del ganador
         if (winnerIndex >= 0 && winnerIndex < playerPopups.Length)
             playerPopups[winnerIndex].SetActive(true);
 
-        // 🔥 DESACTIVAR HUD LOCAL
         if (canvasLocal != null)
             canvasLocal.SetActive(false);
 
-        // 🔥 ACTIVAR CANVAS GANADOR
         if (winnerText != null)
             winnerText.text = msg;
 
@@ -277,78 +307,40 @@ public class GameManageMultiplayer : MonoBehaviour
             canvasWinner.SetActive(true);
 
         Debug.Log("🎉 FIN DE PARTIDA → " + msg);
+
         MusicManager.StopMusic(MusicType.MainMenuBack);
         MusicManager.StopMusic(MusicType.FightMusic);
         MusicManager.StopMusic(MusicType.ChickenMusic);
         MusicManager.StopMusic(MusicType.ClickerGameMusic);
         MusicManager.PlayMusic(MusicType.EnterCharMusic, 0.5f);
     }
-    public void ThrowCage()
-    {
 
-        StartCoroutine(ThrowCageCorutina());
-    }
-    private IEnumerator ThrowCageCorutina()
-    {
-        yield return new WaitForSeconds(1f);
-
-        if (enemy == null)
-            FindEnemy();
-
-        if (enemy == null)
-        {
-            Debug.LogWarning("❌ No hay enemigo para tirar la caja");
-            yield break;
-        }
-
-        Vector3 spawnPos = enemy.transform.position + Vector3.up * 10f;
-        Instantiate(cajaRota, spawnPos, Quaternion.identity);
-        Debug.Log("🔥 Caja lanzada correctamente");
-    }
-
-    public void FindEnemy()
-    {
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
-        if (players.Length > 0) enemy = players[UnityEngine.Random.Range(0, players.Length)];
-
-        GameObject enemy2 = GameObject.FindWithTag("Player");
-        PlayerMovMultiplayer p2 = enemy2.GetComponent<PlayerMovMultiplayer>();
-        enemyPoint = p2.GallinaApunta;
-
-    }
-
-
-    // Llamar al empezar una nueva partida para rearmar el HUD / estado
+    // --------------------------------------------------------------------
+    // Preparar HUD para una nueva partida
+    // --------------------------------------------------------------------
     public void PrepareForNewMatch()
     {
-        // Reiniciar flags
         gameEnded = false;
         isSuddenDeath = false;
-        // Asegurar HUD local activo
+
         if (canvasLocal != null)
             canvasLocal.SetActive(true);
 
-        // Ocultar popup ganador
         if (canvasWinner != null)
             canvasWinner.SetActive(false);
 
-        // Resetear texto ganador
         if (winnerText != null)
             winnerText.text = "";
 
-        // Apagar popups individuales
         for (int i = 0; i < playerPopups.Length; i++)
             playerPopups[i].SetActive(false);
 
-        // Si tienes timer: resetearlo para la nueva partida
         if (timer != null)
         {
             timer.StopAllCoroutines();
             timer.ResetTimer();
         }
 
-        // (Opcional) volver a suscribirse al evento si fue removido
         if (timer != null)
         {
             timer.onFinished.RemoveListener(OnTimerFinished);
@@ -356,24 +348,23 @@ public class GameManageMultiplayer : MonoBehaviour
         }
     }
 
-    // Resetear vida / estado de cada jugador al iniciar partida
+    // --------------------------------------------------------------------
+    // Reset jugadores para nueva partida
+    // --------------------------------------------------------------------
     public void ResetPlayersForNewMatch()
     {
         for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
         {
             var obj = PlayerSpawn.joinedPlayers[i];
             if (obj == null) continue;
+
             var p = obj.GetComponent<PlayerMovMultiplayer>();
             if (p == null) continue;
 
             p.isDefinitivelyDead = false;
-            p.vidas = 3;           // ajusta si tu max es otro
-            p.lives = 1;           // reinicia vidas adicionales si hace falta
-            p.ResetVidas();        // esto resetea también la UI si está asignada
-                                   // habilitar control si lo quieres aquí:
-                                   // PlayerSpawn.TogglePlayerControl(obj, true);
+            p.vidas = 3;
+            p.lives = 1;
+            p.ResetVidas();
         }
     }
-
-
 }

@@ -40,6 +40,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
     private void Update()
     {
+        // Solo el servidor gestiona el valor y el tiempo
         if (!active || !IsServer) return;
 
         value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
@@ -68,10 +69,15 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void StartBattleServerRpc(ulong atkId, ulong knId)
     {
-        attacker = NetworkManager.Singleton.SpawnManager.SpawnedObjects[atkId].GetComponent<PlayerMovMultiplayer>();
-        knocked = NetworkManager.Singleton.SpawnManager.SpawnedObjects[knId].GetComponent<PlayerMovMultiplayer>();
+        // Obtenemos referencias en el servidor para lógica interna
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(atkId, out NetworkObject atkObj))
+            attacker = atkObj.GetComponent<PlayerMovMultiplayer>();
 
-        StartBattleServer(attacker, knocked);
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knId, out NetworkObject knObj))
+            knocked = knObj.GetComponent<PlayerMovMultiplayer>();
+
+        if (attacker != null && knocked != null)
+            StartBattleServer(attacker, knocked);
     }
 
     private void StartBattleServer(PlayerMovMultiplayer atk, PlayerMovMultiplayer kn)
@@ -79,13 +85,14 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         attacker = atk;
         knocked = kn;
 
-        attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
-        knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
+        // IMPORTANTE: NO llamamos a SetState aquí directamente porque fallará si no somos el Owner.
+        // Lo delegamos al ClientRpc para que cada cliente lo haga.
 
         gamemanagerlocal.SetClickerState(true);
         value = 0.5f;
 
-        StartBattleClientRpc();
+        // Enviamos la orden a los clientes con los IDs
+        StartBattleClientRpc(atk.NetworkObjectId, kn.NetworkObjectId);
 
         StartCoroutine(BeginAfterDelay());
     }
@@ -97,15 +104,32 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         active = true;
 
         // TIMER LOCAL
-        timerClickGame.StartTimer();
+        if (timerClickGame != null)
+            timerClickGame.StartTimer();
 
         ShowUIClientRpc(true, value);
     }
 
+    // MODIFICADO: Ahora recibe los IDs para configurar a los jugadores en los clientes
     [ClientRpc]
-    private void StartBattleClientRpc()
+    private void StartBattleClientRpc(ulong atkId, ulong knId)
     {
-        // Clientes ya tienen refs via RPC
+        // Buscar objetos por ID
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(atkId, out NetworkObject atkObj))
+            attacker = atkObj.GetComponent<PlayerMovMultiplayer>();
+
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knId, out NetworkObject knObj))
+            knocked = knObj.GetComponent<PlayerMovMultiplayer>();
+
+        // Ahora que tenemos las referencias locales, cambiamos el estado.
+        // El 'SetState' tiene un check 'if (!IsOwner) return'.
+        // Al ejecutarse este RPC en TODOS los clientes:
+        // - El cliente dueño del Atacante ejecutará SetState(ClickBattle) con éxito.
+        // - El cliente dueño del Golpeado ejecutará SetState(ClickBattle) con éxito.
+        // - Los terceros (observadores) no cambiarán el estado lógico, pero verán la UI del slider.
+
+        if (attacker != null) attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
+        if (knocked != null) knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
     }
 
     // =====================================================
@@ -114,17 +138,17 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     [ClientRpc]
     private void ShowUIClientRpc(bool show, float startValue)
     {
-        battleSlider.gameObject.SetActive(show);
-        battleText.gameObject.SetActive(show);
+        if (battleSlider != null) battleSlider.gameObject.SetActive(show);
+        if (battleText != null) battleText.gameObject.SetActive(show);
 
-        battleSlider.value = startValue;
+        if (battleSlider != null) battleSlider.value = startValue;
     }
 
     [ClientRpc]
     private void UpdateSliderClientRpc(float v)
     {
-        battleSlider.value = v;
-        battleText.text = $"{v * 100f:F0}%";
+        if (battleSlider != null) battleSlider.value = v;
+        if (battleText != null) battleText.text = $"{v * 100f:F0}%";
     }
 
     // =====================================================
@@ -134,6 +158,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     public void RegisterClickServerRpc(ulong playerId)
     {
         if (!active) return;
+        if (attacker == null || knocked == null) return;
 
         if (playerId == attacker.NetworkObjectId)
             value -= clickPower;
@@ -142,7 +167,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
             value += clickPower;
 
         value = Mathf.Clamp01(value);
-        UpdateSliderClientRpc(value);
+        UpdateSliderClientRpc(value); // Actualizar UI visualmente a todos
     }
 
     // =====================================================
@@ -161,33 +186,84 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     private void EndBattleServer(PlayerMovMultiplayer winner)
     {
         active = false;
-        timerClickGame.StopTimer();
+        if (timerClickGame != null) timerClickGame.StopTimer();
 
         PlayerMovMultiplayer loser = (winner == attacker) ? knocked : attacker;
+        bool loserDies = false;
 
+        // Lógica de juego en el servidor (Autoridad)
         if (winner == attacker)
         {
             loser.isDefinitivelyDead = true;
-            loser.SetState(PlayerMovMultiplayer.States.Dead);
+            // No seteamos el estado aquí directamente, lo mandamos por RPC
             gamemanagerlocal.CheckRemainingPlayers();
+            loserDies = true;
         }
         else
         {
             knocked.lives--;
+            // Si gestionas las vidas con NetworkVariable se actualiza solo, 
+            // si no, deberías sincronizarlo, pero asumiremos que el estado basta.
             knocked.ResetVidas();
-            knocked.SetState(PlayerMovMultiplayer.States.Idle);
         }
 
-        attacker.SetState(PlayerMovMultiplayer.States.Idle);
+        // Notificar a todos que terminó y qué hacer con los estados
+        FinishBattleClientRpc(attacker.NetworkObjectId, knocked.NetworkObjectId, winner.NetworkObjectId, loserDies);
 
-        FinishBattleClientRpc();
         ShowUIClientRpc(false, value);
     }
 
     [ClientRpc]
-    private void FinishBattleClientRpc()
+    private void FinishBattleClientRpc(ulong atkId, ulong knId, ulong winnerId, bool loserDies)
     {
-        battleSlider.gameObject.SetActive(false);
-        battleText.gameObject.SetActive(false);
+        // Apagar UI
+        if (battleSlider != null) battleSlider.gameObject.SetActive(false);
+        if (battleText != null) battleText.gameObject.SetActive(false);
+
+        // Recuperar referencias locales por seguridad
+        PlayerMovMultiplayer atkLocal = null;
+        PlayerMovMultiplayer knLocal = null;
+
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(atkId, out NetworkObject atkObj))
+            atkLocal = atkObj.GetComponent<PlayerMovMultiplayer>();
+
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knId, out NetworkObject knObj))
+            knLocal = knObj.GetComponent<PlayerMovMultiplayer>();
+
+        if (atkLocal == null || knLocal == null) return;
+
+        PlayerMovMultiplayer loser = (winnerId == atkId) ? knLocal : atkLocal;
+        PlayerMovMultiplayer winner = (winnerId == atkId) ? atkLocal : knLocal;
+
+        // APLICAR ESTADOS (Cada cliente aplicará el cambio si es Owner gracias al check en SetState)
+
+        // 1. El ganador vuelve a Idle
+        winner.SetState(PlayerMovMultiplayer.States.Idle);
+
+        // 2. El perdedor muere o vuelve a Idle
+        if (loserDies)
+        {
+            loser.isDefinitivelyDead = true;
+            loser.SetState(PlayerMovMultiplayer.States.Dead);
+        }
+        else
+        {
+            // Caso donde el defensor gana (no muere nadie, el defensor pierde una vida "extra" pero sigue vivo)
+            // Ojo: Ajusta esta lógica según tus reglas exactas. 
+            // Tu código original hacía: knocked.lives--; knocked.ResetVidas(); knocked.SetState(Idle);
+
+            // Si el que perdió NO muere definitivamente (ej. era el atacante y falló, o el defensor ganó)
+            // En tu lógica original:
+            // Si gana Atacante -> Defensor muere.
+            // Si gana Defensor -> Defensor pierde vida (lives--) y resetea corazones? 
+            // (Esto era un poco raro en tu código original, pero lo replico aquí para sincronización).
+
+            // Asumiendo que ambos vuelven a Idle si nadie muere definitivamente:
+            loser.SetState(PlayerMovMultiplayer.States.Idle);
+        }
+
+        // Limpiar jaula si existe
+        if (atkLocal.IsOwner) atkLocal.CageGone();
+        if (knLocal.IsOwner) knLocal.CageGone();
     }
 }
