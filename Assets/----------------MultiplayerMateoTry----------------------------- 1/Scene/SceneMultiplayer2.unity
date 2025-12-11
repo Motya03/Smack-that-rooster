@@ -10881,7 +10881,6 @@ GameObject:
   - component: {fileID: 306294725}
   - component: {fileID: 306294724}
   - component: {fileID: 306294723}
-  - component: {fileID: 306294722}
   m_Layer: 5
   m_Name: Canvas Local
   m_TagString: Untagged
@@ -10889,36 +10888,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &306294722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 306294721}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56691974a082e22429e43b1404ace214, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timerText: {fileID: 758069744}
-  duration: 60
-  startOnAwake: 1
-  onFinished:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &306294723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14084,6 +14053,8 @@ GameObject:
   - component: {fileID: 758069746}
   - component: {fileID: 758069745}
   - component: {fileID: 758069744}
+  - component: {fileID: 758069747}
+  - component: {fileID: 758069748}
   m_Layer: 5
   m_Name: TimerText (Legacy)
   m_TagString: Untagged
@@ -14152,6 +14123,60 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -41}
   m_SizeDelta: {x: 173.41, y: 58.528397}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &758069747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758069743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2602038009
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &758069748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758069743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4847067df4b1e2945a4c74b2622e748a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timerText: {fileID: 758069744}
+  duration: 60
+  onFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &771075259 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e9eaa6541871d444b9a7c7f6f77f111d, type: 3}
@@ -58489,7 +58514,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e517a8bed30a6dd44971d6ebf451fdf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timer: {fileID: 0}
+  timer: {fileID: 758069748}
   playerPopups:
   - {fileID: 232381851}
   - {fileID: 2072494504}
@@ -58497,7 +58522,6 @@ MonoBehaviour:
   - {fileID: 1676865428}
   winnerText: {fileID: 2032340477}
   canvasWinner: {fileID: 1299676152}
-  cajaRota: {fileID: 2093462843581810379, guid: 608261cef30c05344ba8338b2954c798, type: 3}
   canvasLocal: {fileID: 306294721}
   gameStarted: 0
 --- !u!4 &1917437218

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class LobbyJoinManagerMultiplayer : NetworkBehaviour
@@ -22,6 +20,8 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
 
     private void Awake()
     {
+        Debug.Log("🔥 [Lobby] Awake ejecutado");
+
         lobbyCanvas.SetActive(true);
         gameplayCanvas.SetActive(false);
         startButton.gameObject.SetActive(false);
@@ -35,110 +35,125 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
-
+        Debug.Log("🔥 [Lobby] OnNetworkSpawn | IsHost = " + IsHost);
         isHost = IsHost;
 
-        // Solo el host ve el botón de inicio
         if (!isHost)
-        {
             startButton.gameObject.SetActive(false);
-        }
 
-        playerCount.OnValueChanged += OnPlayerCountChanged;
-
-        // Registrar jugador en el servidor (host y clientes)
-        StartCoroutine(WaitForSecondsTest());
+        StartCoroutine(RegisterLate());
     }
 
+    private IEnumerator RegisterLate()
+    {
+        yield return new WaitForSeconds(1);
+        RegisterPlayerServerRpc();
+    }
+
+    // ----------------------------------------
+    // SERVER REGISTRA JUGADORES
+    // ----------------------------------------
     [ServerRpc(RequireOwnership = false)]
     private void RegisterPlayerServerRpc(ServerRpcParams rpcParams = default)
     {
         playerCount.Value++;
 
-        // Notificar a todos los clientes sobre el nuevo jugador
-        int newPlayerIndex = playerCount.Value - 1;
-        OnPlayerJoinedClientRpc(newPlayerIndex, rpcParams.Receive.SenderClientId);
+        Debug.Log($"👥 [Lobby] Jugador registrado. Total = {playerCount.Value}");
+
+        OnPlayerJoinedClientRpc(
+            playerCount.Value - 1,
+            rpcParams.Receive.SenderClientId
+        );
     }
 
+    // ----------------------------------------
+    // CLIENTE RECIBE LA NOTIFICACIÓN
+    // ----------------------------------------
     [ClientRpc]
     private void OnPlayerJoinedClientRpc(int playerIndex, ulong clientId)
     {
+        Debug.Log($"📨 [Lobby] OnPlayerJoinedClientRpc ejecutado | index={playerIndex} | clientId={clientId}");
+
         if (NetworkManager.Singleton.LocalClientId == clientId)
         {
             localPlayerIndex = playerIndex;
+            Debug.Log($"📌 [Lobby] Este cliente es el jugador {localPlayerIndex + 1}");
         }
 
         OnPlayerJoinedVisual(playerIndex);
     }
 
+    // ----------------------------------------
+    // ACTUALIZACIÓN VISUAL DEL LOBBY
+    // ----------------------------------------
     public void OnPlayerJoinedVisual(int index)
     {
+        Debug.Log("🎉 [Lobby] OnPlayerJoinedVisual → " + index);
+
         if (index < playerSlots.Length)
         {
-            SoundManager.PlaySound(SoundType.CharEnter);
             playerSlots[index].SetActive(true);
+            SoundManager.PlaySound(SoundType.CharEnter);
+        }
 
-            Debug.Log($"🎮 Jugador {index + 1} se unió");
-
-            // Solo el host puede iniciar y solo si hay al menos 2 jugadores
-            if (isHost && playerCount.Value >= 2)
-            {
-                startButton.gameObject.SetActive(true);
-            }
+        if (isHost && playerCount.Value >= 2)
+        {
+            Debug.Log("🎮 [Lobby] Host puede iniciar, mostrando botón START");
+            startButton.gameObject.SetActive(true);
         }
     }
 
-    private IEnumerator WaitForSecondsTest()
-    {
-        yield return new WaitForSeconds(3);
-        RegisterPlayerServerRpc();
-    }
-
+    // ----------------------------------------
+    // HOST INICIA LA PARTIDA
+    // ----------------------------------------
     public void StartGame()
     {
-        // Solo el host puede iniciar la partida
-        if (!isHost) return;
+        if (!isHost)
+        {
+            Debug.Log("⚠️ [Lobby] Cliente intentó iniciar la partida. Bloqueado.");
+            return;
+        }
+
+        Debug.Log("🚀 [Lobby] HOST ha presionado START");
 
         StartGameServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void StartGameServerRpc(ServerRpcParams rpcParams = default)
+    private void StartGameServerRpc()
     {
-        // Solo permitir al host iniciar el juego
-        if (!IsHost) return;
+        Debug.Log("⚡ [Lobby] StartGameServerRpc ejecutado (HOST)");
 
         StartGameClientRpc();
     }
 
+    // ----------------------------------------
+    // TODOS LOS CLIENTES ENTRAN AL COMBATE
+    // ----------------------------------------
     [ClientRpc]
     private void StartGameClientRpc()
     {
-        SoundManager.PlaySound(SoundType.SelectionButtonChar);
-        Debug.Log("🎮 Empieza la partida");
+        Debug.Log("🎮 [Lobby] StartGameClientRpc ejecutado en TODOS");
 
         lobbyCanvas.SetActive(false);
         gameplayCanvas.SetActive(true);
 
-        // ✅ REACTIVAR HUD del GameManager si estaba apagado
-        var gm = FindFirstObjectByType<GameManageMultiplayer>();
-        if (gm != null && gm.canvasLocal != null)
-            gm.canvasLocal.SetActive(true);
-
-        // ✅ ELIMINAR jugadores destruidos de la lista
+        // --------------------------------------------
+        // REACTIVAR CONTROL DE JUGADORES
+        // --------------------------------------------
         PlayerSpawnMultiplayer.joinedPlayers.RemoveAll(p => p == null);
 
-        // ✅ ACTIVAR control para jugadores existentes
         foreach (var playerObj in PlayerSpawnMultiplayer.joinedPlayers)
         {
             if (playerObj == null) continue;
             PlayerSpawnMultiplayer.TogglePlayerControl(playerObj, true);
         }
 
+        // --------------------------------------------
+        // ACTIVAR BARRAS DE VIDA
+        // --------------------------------------------
         int playerCountLocal = PlayerSpawnMultiplayer.joinedPlayers.Count;
 
-        // ✅ ACTIVAR SOLO las barras necesarias y asignar salud
         for (int i = 0; i < healthBars.Length; i++)
         {
             bool active = i < playerCountLocal;
@@ -155,26 +170,32 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
                 var uiHealth = healthBars[i].GetComponent<HealthSystemMultiplayer>();
                 if (uiHealth == null) continue;
 
+                // Enlazar barra con jugador
                 player.uiHealth = uiHealth;
+
+                // Reset visual de salud
                 uiHealth.ResetHealth();
             }
         }
 
-        Debug.Log($"❤️ Activadas {playerCountLocal} barras de vida.");
+        Debug.Log($"❤️ [Lobby] Barras de vida activadas: {playerCountLocal}");
 
-        // ✅ ACTIVAR GAME MANAGER
-        gm?.ActivateGame();
-    }
+        // --------------------------------------------
+        // ACTIVAR GAME MANAGER
+        // --------------------------------------------
+        Debug.Log("🔎 [Lobby] Buscando GameManager…");
 
-    private void OnPlayerCountChanged(int oldValue, int newValue)
-    {
-        Debug.Log($"👥 Jugadores conectados: {newValue}");
-    }
+        var gm = FindFirstObjectByType<GameManageMultiplayer>();
 
-    // (Opcional) si algún día quieres que otros scripts pidan una barra concreta:
-    public GameObject GetHealthBar(int index)
-    {
-        if (index < 0 || index >= healthBars.Length) return null;
-        return healthBars[index];
+        Debug.Log("Resultado GM = " + gm);
+
+        if (gm == null)
+        {
+            Debug.LogError("❌❌❌ [Lobby] ERROR: GameManageMultiplayer NO existe en la escena");
+            return;
+        }
+
+        Debug.Log("🔥 [Lobby] Llamando a gm.ActivateGame()");
+        gm.ActivateGame();
     }
 }
