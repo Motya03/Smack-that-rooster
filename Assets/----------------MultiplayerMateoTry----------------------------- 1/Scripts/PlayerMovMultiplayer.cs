@@ -1144,13 +1144,14 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         {
             if (lives > 0)
             {
+                SetState(States.Dead);
                 // Solo el dueño debería iniciar la lógica compleja del ClickBattle
-                if (IsOwner)
-                {
-                    var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
-                    if (clickMgr != null)
-                        clickMgr.StartBattle(lastAttacker, this);
-                }
+                // if (IsOwner)
+                //  {
+                //      var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
+                //      if (clickMgr != null)
+                //         clickMgr.StartBattle(lastAttacker, this);
+                // }
             }
             else
             {
