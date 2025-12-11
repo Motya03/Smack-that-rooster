@@ -4,78 +4,71 @@ using UnityEngine.UI;
 public class TimerClickGameMultiplayer : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private Text timerText;
+    public Text timerText;
 
-    [Header("Configuración")]
-    [SerializeField] private float duration = 15f; // segundos
+    [Header("Config")]
+    public float duration = 15f;
 
-    private float tiempoRestante;
-    private bool temporizadorActivo = false;
+    private float timeRemaining;
+    private bool active = false;
 
-    private void OnEnable()
+    private void Awake()
     {
-        // Reinicia automáticamente si se activa
-        ReiniciarTemporizador();
+        HideUI();
+    }
+
+    public void StartTimer()
+    {
+        timeRemaining = duration;
+        active = true;
+
+        ShowUI();
+        UpdateTimer(Mathf.CeilToInt(timeRemaining));
+    }
+
+    public void StopTimer()
+    {
+        active = false;
+        HideUI();
     }
 
     private void Update()
     {
-        if (!temporizadorActivo) return;
+        if (!active) return;
 
-        tiempoRestante -= Time.deltaTime;
-        if (tiempoRestante <= 0)
+        timeRemaining -= Time.deltaTime;
+
+        int t = Mathf.CeilToInt(timeRemaining);
+        UpdateTimer(t);
+
+        if (timeRemaining <= 0f)
         {
-            tiempoRestante = 0;
-            temporizadorActivo = false;
-            TemporizadorFinalizado();
-        }
+            active = false;
+            HideUI();
 
-        ActualizarTextoTemporizador();
+            // Avisar al manager local
+            ClickGameManagerMultiplayer.Instance.HandleTimerEndedServer();
+        }
     }
 
-    public void ReiniciarTemporizador()
+    public void UpdateTimer(int seconds)
     {
-        tiempoRestante = duration;
-        temporizadorActivo = true;
+        if (timerText != null)
+        {
+            timerText.gameObject.SetActive(true);
+            timerText.text = seconds.ToString("00");
+        }
+    }
 
-        // 🔹 Aseguramos que el texto esté visible
+    private void ShowUI()
+    {
         if (timerText != null)
             timerText.gameObject.SetActive(true);
-
-        ActualizarTextoTemporizador();
     }
 
-    private void ActualizarTextoTemporizador()
+    private void HideUI()
     {
-        int segundos = Mathf.CeilToInt(tiempoRestante); // redondea hacia arriba para que no muestre 59.9 → 59
-
-        if (timerText != null)
-            timerText.text = segundos.ToString("00"); // muestra por ejemplo: 05, 14, 32...
-    }
-
-    public System.Action OnTimerEnd; // <- Evento público para avisar cuando termina el tiempo
-
-    private void TemporizadorFinalizado()
-    {
-        Debug.Log("¡El temporizador ha finalizado!");
-
-        // 🔹 Avisamos al GameManager que terminó el tiempo
-        OnTimerEnd?.Invoke();
-
-        // 🔹 Ocultamos el texto
         if (timerText != null)
             timerText.gameObject.SetActive(false);
     }
-    public void DetenerTemporizador()
-    {
-        temporizadorActivo = false;
-
-        // Ocultamos el texto
-        if (timerText != null)
-            timerText.gameObject.SetActive(false);
-
-        Debug.Log("Temporizador detenido manualmente.");
-    }
-
-
 }

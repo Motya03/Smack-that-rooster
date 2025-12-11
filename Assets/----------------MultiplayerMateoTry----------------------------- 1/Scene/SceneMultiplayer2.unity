@@ -11075,10 +11075,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   battleSlider: {fileID: 162820748}
+  battleText: {fileID: 292255142}
   clickPower: 0.02
   decaySpeed: 0.3
-  battleText: {fileID: 292255142}
-  timerClickGame: {fileID: 704347054}
+  timerClickGame: {fileID: 704347055}
   gamemanagerlocal: {fileID: 1917437217}
 --- !u!4 &314281376
 Transform:
@@ -13391,7 +13391,7 @@ GameObject:
   - component: {fileID: 704347052}
   - component: {fileID: 704347051}
   - component: {fileID: 704347050}
-  - component: {fileID: 704347054}
+  - component: {fileID: 704347055}
   m_Layer: 5
   m_Name: ClickBattle
   m_TagString: Untagged
@@ -13484,7 +13484,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &704347054
+--- !u!114 &704347055
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

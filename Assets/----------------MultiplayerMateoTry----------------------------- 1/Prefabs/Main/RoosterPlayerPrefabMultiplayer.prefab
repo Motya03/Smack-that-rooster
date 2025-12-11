@@ -52088,7 +52088,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   GallinaApunta: {fileID: 4682378294767445713}
   PatadaEffectPrefab: {fileID: 8442901411129158963, guid: e306a0b5c32f46948a7adde594860852, type: 3}
-  CagePrefab: {fileID: 1383231037179557638, guid: c91f570ca8e447e4ba3bde1f2199cfb7, type: 3}
+  CagePrefab: {fileID: 1383231037179557638, guid: 8763a856ecc7f444694f54c14a741416, type: 3}
   isGrounded: 0
   dashFrontEffectPrefab: {fileID: 7304561259499901744, guid: 12772a34ba0f2a84c8fe6acc6ac1e57e, type: 3}
   dashBackEffectPrefab: {fileID: 7304561259499901744, guid: 2513ef303eece7e4ea2dea51910bb7ab, type: 3}
@@ -52124,6 +52124,8 @@ MonoBehaviour:
   uiHealth: {fileID: 0}
   isDefinitivelyDead: 0
   kickHitbox: {fileID: 0}
+  NetworkHealth:
+    m_InternalValue: 3
 --- !u!114 &7427353647659202538
 MonoBehaviour:
   m_ObjectHideFlags: 0

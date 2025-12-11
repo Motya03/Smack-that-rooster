@@ -997,15 +997,29 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     }*/
     public void ClickBattle()
     {
-        if (currentCage != null) return; // ya hay una jaula en escena
-
         StopMove();
         myAnimator.Play("IDLE");
-        if (currentCage != null) return;
-        Vector3 spawnPos = transform.position;
-        currentCage = Instantiate(CagePrefab, spawnPos, transform.rotation);
 
+        if (IsOwner)
+            SpawnCageServerRpc(transform.position);
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SpawnCageServerRpc(Vector3 pos)
+    {
+        var cage = Instantiate(CagePrefab, pos, Quaternion.identity);
+        var no = cage.GetComponent<NetworkObject>();
+        no.Spawn(true);
+
+        SpawnCageClientRpc(no.NetworkObjectId);
+    }
+
+    [ClientRpc]
+    private void SpawnCageClientRpc(ulong id)
+    {
+        currentCage = NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].gameObject;
+    }
+
     public void CageGone()
     {
         Debug.Log($"CageGone called by: {name}");

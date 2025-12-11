@@ -1,35 +1,26 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using Unity.Netcode.Components;
+using UnityEngine;
 
-public class CageScriptMultiplayer : MonoBehaviour
+public class CageScriptMultiplayer : NetworkBehaviour
 {
-    public Animator myAnimator;
+    public NetworkAnimator netAnimator;
 
+    private void Awake()
+    {
+        if (netAnimator == null)
+            netAnimator = GetComponent<NetworkAnimator>();
+    }
 
     private void Start()
     {
-         SoundManager.PlaySound(SoundType.BoxGoingDown);
+        if (IsServer)
+            netAnimator.SetTrigger("Fall");
     }
+
     public void ClickBattleEnd()
     {
-        Debug.Log("LALAL");
-
-        // Si el objeto está inactivo, lo activamos
-        if (!myAnimator.gameObject.activeInHierarchy)
-        {
-            myAnimator.gameObject.SetActive(true);
-        }
-
-        // Ahora sí, reproducimos la animación
-        myAnimator.Play("CageBack");
+        if (IsServer)
+            netAnimator.SetTrigger("Back");
     }
-    public void CageImpactSound()
-    {
-        SoundManager.PlaySound(SoundType.CageImpact);
-    }
-
-    private void OnDestroy()
-    {
-        Destroy(this.gameObject);
-    }
-
 }
