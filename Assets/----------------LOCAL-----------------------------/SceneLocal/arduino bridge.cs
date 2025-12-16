@@ -1,55 +1,109 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 
 public class ArduinoBridge : MonoBehaviour
 {
-    // Esta función la llama Ardity automáticamente
-    void OnMessageArrived(string msg)
-    {
-        string cleanMsg = msg.Trim(); // Limpiar espacios
+    private SerialController serialController;
+    private int lastSentPosition = -100;
 
-        if (cleanMsg == "BLUE")
+    void Start()
+    {
+        serialController = GetComponent<SerialController>();
+
+        // 1. PRUEBA DE CONEXIÃ“N AL INICIAR
+        // Esto envÃ­a una seÃ±al de prueba nada mÃ¡s darle al Play.
+        // Si las luces cambian al iniciar, la conexiÃ³n estÃ¡ perfecta.
+        if (serialController != null)
         {
-            // BLUE es el Jugador 1 (Índice 0 en la lista de spawn)
-            SimularClickJugador(0);
+            Debug.Log("ðŸ”Œ Intentando enviar prueba de luces (SET:4)...");
+            serialController.SendSerialMessage("SET:4\n");
         }
-        else if (cleanMsg == "RED")
+        else
         {
-            // RED es el Jugador 2 (Índice 1 en la lista de spawn)
-            SimularClickJugador(1);
+            Debug.LogError("âŒ ERROR GRAVE: No encuentro el script SerialController. Â¿EstÃ¡ en el mismo objeto?");
         }
     }
 
-    void SimularClickJugador(int playerIndex)
+    void Update()
     {
-        // 1. Verificamos que el GameManager exista
-        if (ClickGameManager.Instance == null) return;
+        // ---------------------------------------------------------
+        // PROTECCIÃ“N CONTRA ERRORES (NULL CHECK)
+        // ---------------------------------------------------------
 
-        // 2. Buscamos al jugador en la lista estática del Spawn
-        // Usamos PlayerSpawn.joinedPlayers porque ahí se guardan al crearse en el Lobby
-        if (PlayerSpawn.joinedPlayers == null || playerIndex >= PlayerSpawn.joinedPlayers.Count)
+        // 1. Â¿Existe el GameManager?
+        if (ClickGameManager.Instance == null)
+        {
+            // Si no existe, no hacemos nada y esperamos al siguiente frame
             return;
+        }
+
+        // 2. Â¿Tiene asignado el Slider? (Esta es la causa de tu error)
+        if (ClickGameManager.Instance.battleSlider == null)
+        {
+            // Si llegamos aquÃ­, es que se te olvidÃ³ arrastrar el Slider en el Inspector
+            Debug.LogWarning("âš ï¸ AVISO: La variable 'Battle Slider' en ClickGameManager estÃ¡ vacÃ­a.");
+            return;
+        }
+
+        // ---------------------------------------------------------
+        // LÃ“GICA DEL JUEGO
+        // ---------------------------------------------------------
+
+        // Ahora es seguro acceder a .gameObject porque ya comprobamos que no es null
+        bool isSliderActive = ClickGameManager.Instance.battleSlider.gameObject.activeInHierarchy;
+
+        if (!isSliderActive)
+        {
+            // Si el slider estÃ¡ apagado, mandamos RESET (apagar luces) una vez
+            if (lastSentPosition != -1)
+            {
+                if (serialController != null)
+                    serialController.SendSerialMessage("RESET\n");
+
+                lastSentPosition = -1;
+            }
+            return;
+        }
+
+        // Si el slider estÃ¡ activo, calculamos la luz
+        float val = ClickGameManager.Instance.battleSlider.value;
+        int ledIndex = Mathf.RoundToInt(val * 9);
+        ledIndex = Mathf.Clamp(ledIndex, 0, 9);
+
+        if (ledIndex != lastSentPosition)
+        {
+            string mensaje = "SET:" + ledIndex + "\n";
+
+            if (serialController != null)
+            {
+                serialController.SendSerialMessage(mensaje);
+                Debug.Log("âœ… [ARDUINO] Enviando: " + mensaje.Trim());
+            }
+
+            lastSentPosition = ledIndex;
+        }
+    }
+
+    // --- RECEPCIÃ“N DE INPUTS ---
+    void OnMessageArrived(string msg)
+    {
+        string cleanMsg = msg.Trim();
+        if (cleanMsg == "BLUE") TryClickPlayer(0);
+        else if (cleanMsg == "RED") TryClickPlayer(1);
+    }
+
+    void TryClickPlayer(int playerIndex)
+    {
+        if (ClickGameManager.Instance == null || PlayerSpawn.joinedPlayers == null) return;
+        if (playerIndex >= PlayerSpawn.joinedPlayers.Count) return;
 
         GameObject playerObj = PlayerSpawn.joinedPlayers[playerIndex];
-
         if (playerObj == null) return;
 
-        // 3. Obtenemos su script
         PlayerMovLocal playerScript = playerObj.GetComponent<PlayerMovLocal>();
-
-        if (playerScript == null) return;
-
-        // 4. LÓGICA CLAVE: Solo enviamos el click si están en el minijuego
-        // Si el jugador está corriendo o saltando, el botón del Arduino no hará nada.
-        // Si está en 'States.ClickBattle', empujará el slider.
-        if (playerScript.mystate == PlayerMovLocal.States.ClickBattle)
+        if (playerScript != null && playerScript.mystate == PlayerMovLocal.States.ClickBattle)
         {
             ClickGameManager.Instance.RegisterClick(playerScript);
         }
-    }
-
-    void OnConnectionEvent(bool success)
-    {
-        Debug.Log(success ? "Arduino Conectado" : "Error de conexión Arduino");
     }
 }
