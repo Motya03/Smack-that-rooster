@@ -1,7 +1,7 @@
 ﻿using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Netcode;
 
 public class ClickGameManagerMultiplayer : NetworkBehaviour
 {
@@ -15,17 +15,22 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     public float clickPower = 0.02f;
     public float decaySpeed = 0.3f;
 
-    private float value = 0.5f;
+    private NetworkVariable<float> netValue = new NetworkVariable<float>(0.5f);
+
     private bool active = false;
 
     [Header("Players")]
     private PlayerMovMultiplayer attacker;
     private PlayerMovMultiplayer knocked;
 
-    [Header("Timer (LOCAL UI, NO NETWORKOBJECT)")]
+    [Header("Timer")]
     public TimerClickGameMultiplayer timerClickGame;
-
     public GameManageMultiplayer gamemanagerlocal;
+
+    [SerializeField] private GameObject cagePrefab;
+
+    // --- NUEVA VARIABLE PARA GUARDAR LA JAULA ACTUAL ---
+    private GameObject currentCageInstance;
 
     private void Awake()
     {
@@ -36,132 +41,138 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     {
         if (gamemanagerlocal == null)
             gamemanagerlocal = FindFirstObjectByType<GameManageMultiplayer>();
+
+        if (battleSlider) battleSlider.gameObject.SetActive(false);
+        if (battleText) battleText.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        if (!active || !IsServer) return;
+        if (active)
+        {
+            battleSlider.value = netValue.Value;
+        }
 
-        value = Mathf.MoveTowards(value, 0.5f, decaySpeed * Time.deltaTime);
-        UpdateSliderClientRpc(value);
+        if (!IsServer || !active) return;
 
-        if (value <= 0.01f)
+        float newValue = Mathf.MoveTowards(netValue.Value, 0.5f, decaySpeed * Time.deltaTime);
+        netValue.Value = newValue;
+
+        if (netValue.Value <= 0.01f)
             EndBattleServer(attacker);
-        else if (value >= 0.99f)
+        else if (netValue.Value >= 0.99f)
             EndBattleServer(knocked);
     }
 
-    // =====================================================
-    // START BATTLE
-    // =====================================================
     public void StartBattle(PlayerMovMultiplayer atk, PlayerMovMultiplayer kn)
     {
-        if (!IsServer)
-        {
-            StartBattleServerRpc(atk.NetworkObjectId, kn.NetworkObjectId);
-            return;
-        }
+        MusicManager.StopMusic(MusicType.MainMenuBack);
+        MusicManager.StopMusic(MusicType.FightMusic);
+        MusicManager.StopMusic(MusicType.ClickerGameMusic);
+        MusicManager.PlayMusic(MusicType.ClickerGameMusic, 0.5f);
 
-        StartBattleServer(atk, kn);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void StartBattleServerRpc(ulong atkId, ulong knId)
-    {
-        attacker = NetworkManager.Singleton.SpawnManager.SpawnedObjects[atkId].GetComponent<PlayerMovMultiplayer>();
-        knocked = NetworkManager.Singleton.SpawnManager.SpawnedObjects[knId].GetComponent<PlayerMovMultiplayer>();
-
-        StartBattleServer(attacker, knocked);
-    }
-
-    private void StartBattleServer(PlayerMovMultiplayer atk, PlayerMovMultiplayer kn)
-    {
         attacker = atk;
         knocked = kn;
 
-        attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
-        knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
-
-        gamemanagerlocal.SetClickerState(true);
-        value = 0.5f;
-
-        StartBattleClientRpc();
-
-        StartCoroutine(BeginAfterDelay());
+        StartBattleServerRpc();
     }
 
-    private IEnumerator BeginAfterDelay()
+    [ServerRpc(RequireOwnership = false)]
+    private void StartBattleServerRpc(ServerRpcParams serverRpcParams = default)
     {
-        yield return new WaitForSeconds(1f);
+        // Guardamos la referencia en la variable global de la clase 'currentCageInstance'
+        currentCageInstance = Instantiate(cagePrefab, attacker.transform.position, Quaternion.identity);
 
+        NetworkObject netObj = currentCageInstance.GetComponent<NetworkObject>();
+        if (netObj != null) netObj.Spawn();
+
+        if (attacker != null)
+            attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
+
+        if (knocked != null)
+            knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
+
+        StartCoroutine(CanvasApearServerCoroutine(1));
+    }
+
+    private IEnumerator CanvasApearServerCoroutine(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+
+        netValue.Value = 0.5f;
         active = true;
 
-        // TIMER LOCAL
-        timerClickGame.StartTimer();
+        ShowUIClientRpc(true);
 
-        ShowUIClientRpc(true, value);
+        if (timerClickGame != null) timerClickGame.StartTimer();
     }
 
     [ClientRpc]
-    private void StartBattleClientRpc()
+    private void ShowUIClientRpc(bool state)
     {
-        // Clientes ya tienen refs via RPC
+        active = state;
+        if (battleSlider) battleSlider.gameObject.SetActive(state);
+        if (battleText) battleText.gameObject.SetActive(state);
+
+        if (state && battleSlider) battleSlider.value = 0.5f;
     }
 
-    // =====================================================
-    // UI SYNC RPC
-    // =====================================================
-    [ClientRpc]
-    private void ShowUIClientRpc(bool show, float startValue)
+    public void PlayerClick(ulong myPlayerId)
     {
-        battleSlider.gameObject.SetActive(show);
-        battleText.gameObject.SetActive(show);
-
-        battleSlider.value = startValue;
+        if (active) RegisterClickServerRpc(myPlayerId);
     }
 
-    [ClientRpc]
-    private void UpdateSliderClientRpc(float v)
-    {
-        battleSlider.value = v;
-        battleText.text = $"{v * 100f:F0}%";
-    }
-
-    // =====================================================
-    // CLICK INPUT
-    // =====================================================
     [ServerRpc(RequireOwnership = false)]
     public void RegisterClickServerRpc(ulong playerId)
     {
         if (!active) return;
 
+        float currentValue = netValue.Value;
+
         if (playerId == attacker.NetworkObjectId)
-            value -= clickPower;
+            currentValue -= clickPower;
 
         if (playerId == knocked.NetworkObjectId)
-            value += clickPower;
+            currentValue += clickPower;
 
-        value = Mathf.Clamp01(value);
-        UpdateSliderClientRpc(value);
+        netValue.Value = Mathf.Clamp01(currentValue);
     }
 
-    // =====================================================
-    // END BATTLE (SERVER DECIDES)
-    // =====================================================
     public void HandleTimerEndedServer()
     {
         if (!IsServer) return;
-
-        PlayerMovMultiplayer winner =
-            (value >= 0.5f) ? knocked : attacker;
-
+        PlayerMovMultiplayer winner = (netValue.Value >= 0.5f) ? knocked : attacker;
         EndBattleServer(winner);
     }
 
     private void EndBattleServer(PlayerMovMultiplayer winner)
     {
         active = false;
-        timerClickGame.StopTimer();
+        if (timerClickGame) timerClickGame.StopTimer();
+
+        // --- AQUÍ ACCEDEMOS A LA JAULA GUARDADA ---
+        if (currentCageInstance != null)
+        {
+            // Asegúrate de cambiar 'CageScript' por el nombre REAL de tu script en la jaula
+            var cageScript = currentCageInstance.GetComponentInChildren<CageScriptMultiplayer>();
+
+            if (cageScript != null)
+            {
+                // Llamamos a un ClientRpc dentro de la jaula o a la función directa
+                // Si ClickBattleEnd hace cosas visuales, dentro de esa función 
+                // en la jaula deberías llamar a un ClientRpc.
+                cageScript.ClickBattleEnd();
+            }
+            else
+            {
+                Debug.LogError("No se encontró el script en la jaula instanciada");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No hay una instancia de jaula guardada");
+        }
+        // ------------------------------------------
 
         PlayerMovMultiplayer loser = (winner == attacker) ? knocked : attacker;
 
@@ -180,14 +191,6 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
         attacker.SetState(PlayerMovMultiplayer.States.Idle);
 
-        FinishBattleClientRpc();
-        ShowUIClientRpc(false, value);
-    }
-
-    [ClientRpc]
-    private void FinishBattleClientRpc()
-    {
-        battleSlider.gameObject.SetActive(false);
-        battleText.gameObject.SetActive(false);
+        ShowUIClientRpc(false);
     }
 }

@@ -45,7 +45,7 @@ public class GameManageMultiplayer : NetworkBehaviour
         {
             // En lugar de llamar a una corrutina local o ClientRpc, 
             // pedimos al Servidor que tire la caja.
-            RequestThrowCageServerRpc();
+            RequestThrowBoxServerRpc();
 
             // Opcional: Bloquear para no spamear
             // throwCageBool = false; 
@@ -57,13 +57,13 @@ public class GameManageMultiplayer : NetworkBehaviour
     // RequireOwnership = false permite que cualquier cliente llame a este RPC 
     // (necesario si el GameManager es propiedad del Host/Server).
     [ServerRpc(RequireOwnership = false)]
-    private void RequestThrowCageServerRpc(ServerRpcParams serverRpcParams = default)
+    private void RequestThrowBoxServerRpc(ServerRpcParams serverRpcParams = default)
     {
         // El servidor inicia la corrutina
-        StartCoroutine(ServerThrowCageCoroutine());
+        StartCoroutine(ServerThrowBoxCoroutine());
     }
 
-    private IEnumerator ServerThrowCageCoroutine()
+    private IEnumerator ServerThrowBoxCoroutine()
     {
         // Esperamos el segundo que querías
         yield return new WaitForSeconds(1f);

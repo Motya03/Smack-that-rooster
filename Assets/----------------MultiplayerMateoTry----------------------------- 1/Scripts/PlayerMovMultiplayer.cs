@@ -249,7 +249,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             case States.Crouch: Crouch(); break;
             case States.Dance: Dance(); break;
             case States.PowerUp: PowerUp(); break;
-                //case States.ClickBattle: ClickBattle(); break;
+                case States.ClickBattle: ClickBattle(); break;
 
         }
 
@@ -907,11 +907,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
 
 
-    private void OnDestroy()
-    {
-        // Quitar este player de la lista global MULTIPLAYER
-        PlayerSpawnMultiplayer.joinedPlayers?.Remove(gameObject);
-    }
+
 
 
 
@@ -1001,50 +997,14 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         StopMove();
         myAnimator.Play("IDLE");
 
-        if (IsOwner)
-            SpawnCageServerRpc(transform.position);
+        //if (IsOwner)
+           // SpawnCageServerRpc(transform.position);
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void SpawnCageServerRpc(Vector3 pos)
-    {
-        var cage = Instantiate(CagePrefab, pos, Quaternion.identity);
-        var no = cage.GetComponent<NetworkObject>();
-        no.Spawn(true);
+   
+   
 
-        SpawnCageClientRpc(no.NetworkObjectId);
-    }
-
-    [ClientRpc]
-    private void SpawnCageClientRpc(ulong id)
-    {
-        currentCage = NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].gameObject;
-    }
-
-    public void CageGone()
-    {
-        Debug.Log($"CageGone called by: {name}");
-
-        if (currentCage == null)
-        {
-            Debug.LogWarning("No active cage in scene!");
-            return;
-        }
-
-        CageScript script = currentCage.GetComponentInChildren<CageScript>();
-        if (script != null)
-        {
-            script.ClickBattleEnd();
-        }
-        else
-        {
-            Debug.LogWarning("No CageScript found on current cage!");
-        }
-
-        // Optional: destroy cage after animation delay
-
-        currentCage = null;
-    }
+  
 
     private void PowerUp()
     {
@@ -1145,14 +1105,14 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         {
             if (lives > 0)
             {
-                SetState(States.Dead);
+               // SetState(States.Dead);
                 // Solo el dueño debería iniciar la lógica compleja del ClickBattle
-                // if (IsOwner)
-                //  {
-                //      var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
-                //      if (clickMgr != null)
-                //         clickMgr.StartBattle(lastAttacker, this);
-                // }
+                 
+                 {
+                      var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
+                      if (clickMgr != null)
+                       clickMgr.StartBattle(lastAttacker, this);
+                 }
             }
             else
             {

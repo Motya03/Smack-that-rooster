@@ -9850,7 +9850,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.19
+  m_Value: 0.503
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -11049,6 +11049,7 @@ MonoBehaviour:
   decaySpeed: 0.3
   timerClickGame: {fileID: 704347055}
   gamemanagerlocal: {fileID: 1917437217}
+  cagePrefab: {fileID: 1383231037179557638, guid: 8763a856ecc7f444694f54c14a741416, type: 3}
 --- !u!4 &314281376
 Transform:
   m_ObjectHideFlags: 0
@@ -13367,7 +13368,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &704347050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24687,7 +24688,7 @@ MonoBehaviour:
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 0.19
+  m_FillAmount: 0.503
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -55735,8 +55736,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 620079401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.19, y: 0}
-  m_AnchorMax: {x: 0.19, y: 1}
+  m_AnchorMin: {x: 0.503, y: 0}
+  m_AnchorMax: {x: 0.503, y: 1}
   m_AnchoredPosition: {x: 23, y: 2.7000122}
   m_SizeDelta: {x: 2402, y: 1800.3271}
   m_Pivot: {x: 0.5, y: 0.5}
