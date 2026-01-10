@@ -16,7 +16,7 @@ public class TimerMultiplayer : MonoBehaviour
     private float remaining;
     private bool isRunning;
     private Coroutine countdownCoroutine;
-
+    private bool timePassed = false;
     private void Awake()
     {
         remaining = duration;
@@ -92,5 +92,13 @@ public class TimerMultiplayer : MonoBehaviour
         int s = Mathf.FloorToInt(t % 60f);
 
         timerText.text = $"{m:00}:{s:00}";
+        if (s == 30.0f && !timePassed)
+        {
+
+            //throwCageBool = true;
+            FindAnyObjectByType<GameManageMultiplayer>().PrepareCage();
+            timePassed = true;
+
+        }
     }
 }

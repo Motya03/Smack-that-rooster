@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class GajaProyectile : MonoBehaviour
+public class GajaProyectile1 : MonoBehaviour
 {
     public GameObject prefabCruz;   // ← Tu cruz
     public float distanciaRaycast = 10f;

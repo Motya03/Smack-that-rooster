@@ -1,7 +1,10 @@
 ﻿using System;
+using Unity.Netcode;
 using UnityEngine;
+using System.Collections;
+using UnityEngine.UIElements;
 
-public class GajaProyectileMultiplayer : MonoBehaviour
+public class GajaProyectileMultiplayer : NetworkBehaviour
 {
     public GameObject prefabCruz;   // ← Tu cruz
     public float distanciaRaycast = 10f;
@@ -20,11 +23,13 @@ public class GajaProyectileMultiplayer : MonoBehaviour
 
         {
             Debug.Log("Colisionó con Player (hijo o padre)");
-            PlayerMovLocal player = col.gameObject.GetComponent<PlayerMovLocal>();
-            player.TakeStun();
+            PlayerMovMultiplayer player = col.gameObject.GetComponent<PlayerMovMultiplayer>();
+            player.TakeStunLocal();
             GameObject exp = Instantiate(cajaRota, this.transform.position, Quaternion.identity);
             GameObject explol = Instantiate(EfectoCajaRota, this.transform.position, Quaternion.identity);
-            GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
+            RequestThrowPowerServerRpc();
+            // GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
+
             Destroy(exp, 0.5f);
             Destroy(this.gameObject);
         }
@@ -32,13 +37,64 @@ public class GajaProyectileMultiplayer : MonoBehaviour
         {
             GameObject exp = Instantiate(cajaRota, this.transform.position, Quaternion.identity);
             GameObject explol = Instantiate(EfectoCajaRota, this.transform.position, Quaternion.identity);
-            GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
+            //  GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
+            RequestThrowPowerServerRpc();
             SoundManager.PlaySound(SoundType.BoxDestroyed);
-            Destroy(this.gameObject);
+            //Destroy(this.gameObject);
+            DestroyCageServerRpc();
+        }
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestThrowPowerServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        // El servidor inicia la corrutina
+
+        // 1. INSTANCIAR (Solo ocurre en el servidor)
+        //   GameObject cajaInstance = Instantiate(Box, spawnPos, Quaternion.identity);
+        GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
+
+        // 2. SPAWNEAR (Esto es lo que hace que se vea en todos los clientes)
+        NetworkObject netObj = powerUp.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn();
+            Debug.Log("🔥 Caja spawneada en red correctamente");
+        }
+        else
+        {
+            Debug.LogError("❌ El prefab de la caja NO tiene el componente NetworkObject");
         }
     }
 
-    
+    private IEnumerator ServerThrowPowerCoroutine()
+    {
+
+        yield return new WaitForSeconds(0.1f);
+       // Vector3 spawnPos = transform.position + Vector3.up * 10f;
+
+        // 1. INSTANCIAR (Solo ocurre en el servidor)
+     //   GameObject cajaInstance = Instantiate(Box, spawnPos, Quaternion.identity);
+        GameObject powerUp = Instantiate(prefabPowerUp, this.transform.position, Quaternion.identity);
+
+        // 2. SPAWNEAR (Esto es lo que hace que se vea en todos los clientes)
+        NetworkObject netObj = powerUp.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn();
+            Debug.Log("🔥 Caja spawneada en red correctamente");
+        }
+        else
+        {
+            Debug.LogError("❌ El prefab de la caja NO tiene el componente NetworkObject");
+        }
+    }
+    [ServerRpc]
+    public void DestroyCageServerRpc()
+    {
+        Destroy(this.gameObject);
+    }
+   // [ServerRpc]
+   
     void Start()
     {
         rb = GetComponent<Rigidbody>();

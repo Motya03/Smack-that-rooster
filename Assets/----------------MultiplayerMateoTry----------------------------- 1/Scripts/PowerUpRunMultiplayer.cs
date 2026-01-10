@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Unity.Netcode;
 
-public class PowerUpRunMultiplayer : MonoBehaviour
+public class PowerUpRunMultiplayer : NetworkBehaviour
 {
     public float runSpeed = 2.0f;
     public float tiempoEntreCambios = 4f;
@@ -69,15 +70,17 @@ public class PowerUpRunMultiplayer : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // Verifica si el objeto que toca es un player
-        PlayerMovLocal player = other.GetComponentInParent<PlayerMovLocal>();
+        PlayerMovMultiplayer player = other.GetComponentInParent<PlayerMovMultiplayer>();
 
-     
-        if (other.CompareTag("Hitbox"))
+        
+        if (other.CompareTag("HitboxMulti"))
         {
+            
             if (player != null)
             {
+                
                 // player.ActivarSpeedBoost( amountBoost, boostDuration);
-                player.SetState(PlayerMovLocal.States.PowerUp);
+                player.SetState(PlayerMovMultiplayer.States.PowerUp);
                 Instantiate(ParticleAbimalitoPrefab, transform.position, Quaternion.identity);
                 // Destruye el maнz al ser recogido
                 SoundManager.PlaySound(SoundType.AbimalitoDead);

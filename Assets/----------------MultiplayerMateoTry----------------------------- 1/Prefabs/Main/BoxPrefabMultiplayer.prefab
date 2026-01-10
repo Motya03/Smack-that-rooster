@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 436151168864085790}
   - component: {fileID: 1253335147276138536}
   - component: {fileID: 7951436325716129688}
-  - component: {fileID: 346563791810180071}
   - component: {fileID: 8019914888651123504}
+  - component: {fileID: 6702135219686831307}
   m_Layer: 0
   m_Name: BoxPrefabMultiplayer
   m_TagString: Untagged
@@ -138,23 +138,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.7196503, y: 2.8412209, z: 2.7196465}
   m_Center: {x: 0.85927296, y: 0.14222926, z: -0.74791116}
---- !u!114 &346563791810180071
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2093462843581810379}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56ddcbda9e638314d8042f3d5d594e02, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prefabCruz: {fileID: 1327326115253452367, guid: bc9a958ec1139774b961f22459bf14d8, type: 3}
-  distanciaRaycast: 15
-  cajaRota: {fileID: 7488710796284484375, guid: 9b3869926c83ee049ba2f3d54f4b0e2d, type: 3}
-  prefabPowerUp: {fileID: 965898438306465777, guid: fd58ea1c3cbad0241b2c4618c6c6461d, type: 3}
-  EfectoCajaRota: {fileID: 6227742362455859646, guid: 1dbafbdb641c28642a084c471a26e2e6, type: 3}
 --- !u!114 &8019914888651123504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 0
+  GlobalObjectIdHash: 2241957037
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -180,3 +163,21 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &6702135219686831307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2093462843581810379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14aa1a3d9b77f8542bc5658809d24eea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  prefabCruz: {fileID: 1327326115253452367, guid: 8e426d53c0afa48429271e4090319709, type: 3}
+  distanciaRaycast: 15
+  cajaRota: {fileID: 7488710796284484375, guid: 8d79bb42b1b7a7144aca158a85d45656, type: 3}
+  prefabPowerUp: {fileID: 965898438306465777, guid: 8028cdc5b4d2ba644989593117d38a6a, type: 3}
+  EfectoCajaRota: {fileID: 1137823006678478666, guid: 0eb877f8424e6314db30863bd8470c2e, type: 3}

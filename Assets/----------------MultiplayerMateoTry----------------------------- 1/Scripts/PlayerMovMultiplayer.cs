@@ -380,6 +380,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
 
         myAnimator.SetBool("RUN", false);
+        //myAnimator.Play("IDLE");
         myAnimator.SetBool("Hit", false);
         //  myAnimator.SetBool("Falling", false);
 
@@ -1167,7 +1168,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         }
     }
 
-    private void TakeStunLocal()
+    public void TakeStunLocal()
     {
         SoundManager.PlaySound(SoundType.HitBody);
         SetState(States.Stunned);
