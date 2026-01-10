@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+
 //using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -137,5 +139,94 @@ public class GameManageMultiplayer : NetworkBehaviour
     public void CheckRemainingPlayers()
     {
         Debug.Log("🧮 [GM] CheckRemainingPlayers llamado");
+    }
+    public void TimeEnded()
+    {
+        if (canvasLocal != null) canvasWinner.SetActive(true);
+        //if (gameEnded || clickerActive)
+        //  return;
+
+        EndGame(GetWinnerIndexByHealth());
+
+    }
+    private void EndGame(int winnerIndex)
+    {
+       // if (gameEnded) return;
+
+       // gameEnded = true;
+
+        // Desactivar control de jugadores
+        foreach (var obj in PlayerSpawnMultiplayer.joinedPlayers)
+            PlayerSpawnMultiplayer.TogglePlayerControl(obj, false);
+
+        // Apagar popups individuales
+        foreach (var p in playerPopups)
+            p.SetActive(false);
+
+        // Mensaje ganador
+        string msg = $"Ganador: Jugador {winnerIndex + 1}";
+
+        // Mostrar popup del ganador
+        if (winnerIndex >= 0 && winnerIndex < playerPopups.Length)
+            playerPopups[winnerIndex].SetActive(true);
+
+        // 🔥 DESACTIVAR HUD LOCAL
+        if (canvasLocal != null)
+            canvasLocal.SetActive(false);
+
+        // 🔥 ACTIVAR CANVAS GANADOR
+        if (winnerText != null)
+            winnerText.text = msg;
+
+        if (canvasWinner != null)
+            canvasWinner.SetActive(true);
+
+        Debug.Log("🎉 FIN DE PARTIDA → " + msg);
+        MusicManager.StopMusic(MusicType.MainMenuBack);
+        MusicManager.StopMusic(MusicType.FightMusic);
+        MusicManager.StopMusic(MusicType.ChickenMusic);
+        MusicManager.StopMusic(MusicType.ClickerGameMusic);
+        MusicManager.PlayMusic(MusicType.EnterCharMusic, 0.5f);
+    }
+   
+
+   
+
+    // -----------------------------------------------------
+    // ❤️ Ganador por salud (sin empates)
+    // -----------------------------------------------------
+    private int GetWinnerIndexByHealth()
+    {
+        int maxHealth = -1;
+        List<int> candidates = new List<int>();
+
+        for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
+        {
+            GameObject obj = PlayerSpawn.joinedPlayers[i];
+            if (!obj) continue;
+
+            PlayerMovMultiplayer p = obj.GetComponent<PlayerMovMultiplayer>();
+            if (!p || p.isDefinitivelyDead || p.uiHealth == null) continue;
+
+            int h = p.uiHealth.health;
+
+            if (h > maxHealth)
+            {
+                maxHealth = h;
+                candidates.Clear();
+                candidates.Add(i);
+            }
+            else if (h == maxHealth)
+            {
+                candidates.Add(i);
+            }
+        }
+
+        // 🔥 Si hay empate → elegir uno aleatorio (sin empates finales)
+        if (candidates.Count > 1)
+            return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+
+
+        return candidates.Count == 1 ? candidates[0] : 0;
     }
 }

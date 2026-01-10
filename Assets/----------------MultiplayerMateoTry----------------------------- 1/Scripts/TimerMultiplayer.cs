@@ -100,5 +100,9 @@ public class TimerMultiplayer : MonoBehaviour
             timePassed = true;
 
         }
+        if (s == 01.0f )
+        {
+            FindAnyObjectByType<GameManageMultiplayer>().TimeEnded();
+        }
     }
 }
