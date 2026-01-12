@@ -802,6 +802,19 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         myAnimator.Play("Dead");
         SoundManager.PlaySound(SoundType.Dead);
         StopMove();
+        PlayerIsDeadServerRpc();
+    }
+    [ServerRpc]
+    private void PlayerIsDeadServerRpc()
+    {
+        // Busamos el Manager
+        var clickMgr = FindFirstObjectByType<GameManageMultiplayer>();
+
+        if (clickMgr != null)
+        {
+            // Le pasamos el ID del cliente dueño de este personaje (el que murió)
+            clickMgr.HandlePlayerDeathServer(this.OwnerClientId);
+        }
     }
 
     // --- UTILIDADES ---
@@ -1034,7 +1047,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     {
         vidas = 3;
         if (uiHealth != null)
-            uiHealth.ResetHealth();
+            uiHealth.ResetHealthFromNetwork();
+        lives--;
     }
 
     public bool CanReceiveInput => canReceiveInput;
@@ -1112,6 +1126,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
                       var clickMgr = FindFirstObjectByType<ClickGameManagerMultiplayer>();
                       if (clickMgr != null)
                        clickMgr.StartBattle(lastAttacker, this);
+                    
                  }
             }
             else

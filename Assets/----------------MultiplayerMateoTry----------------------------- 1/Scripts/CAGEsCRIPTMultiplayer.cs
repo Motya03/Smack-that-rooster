@@ -17,10 +17,16 @@ public class CageScriptMultiplayer : NetworkBehaviour
         if (IsServer)
             netAnimator.SetTrigger("Fall");
     }
-
-    public void ClickBattleEnd()
+    [ClientRpc]
+    public void ClickBattleEndClientRpc()
     {
         if (IsServer)
-            netAnimator.SetTrigger("Back");
+            Debug.Log("Mateo");
+       // Destroy(this.gameObject);
+            netAnimator.SetTrigger("BatEn");
+    }
+    public void Destroy()
+    {
+        Destroy(this.gameObject);
     }
 }

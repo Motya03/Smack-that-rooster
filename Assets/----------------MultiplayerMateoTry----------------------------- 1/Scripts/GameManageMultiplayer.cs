@@ -188,9 +188,60 @@ public class GameManageMultiplayer : NetworkBehaviour
         MusicManager.StopMusic(MusicType.ClickerGameMusic);
         MusicManager.PlayMusic(MusicType.EnterCharMusic, 0.5f);
     }
-   
 
-   
+
+    public void HandlePlayerDeathServer(ulong loserClientId)
+    {
+        if (gameEnded) return; // Evitar que se llame dos veces
+
+        int winnerIndex = -1;
+
+        // Recorremos la lista de jugadores conectados para ver quién NO es el perdedor
+        for (int i = 0; i < PlayerSpawnMultiplayer.joinedPlayers.Count; i++)
+        {
+            GameObject playerObj = PlayerSpawnMultiplayer.joinedPlayers[i];
+
+            if (playerObj == null) continue;
+
+            NetworkObject netObj = playerObj.GetComponent<NetworkObject>();
+
+            // Si el ID de este jugador es DISTINTO al que murió, este es el ganador
+            if (netObj != null && netObj.OwnerClientId != loserClientId)
+            {
+                winnerIndex = i;
+                break; // Ya encontramos al ganador (asumiendo 1vs1)
+            }
+        }
+
+        // Si encontramos un ganador válido, avisamos a TODOS los clientes
+        if (winnerIndex != -1)
+        {
+            EndGameClientRpc(winnerIndex);
+        }
+    }
+
+    // Usamos ClientRpc porque mostrar la UI (CanvasWinner) debe ocurrir en las pantallas de todos
+    [ClientRpc]
+    private void EndGameClientRpc(int winnerIndex)
+    {
+        EndGame(winnerIndex);
+    }
+    public void PauseMainTimer(bool shouldPause)
+    {
+        if (IsServer)
+        {
+            PauseMainTimerClientRpc(shouldPause);
+        }
+    }
+
+    [ClientRpc]
+    private void PauseMainTimerClientRpc(bool shouldPause)
+    {
+        if (timer != null)
+        {
+            timer.SetPause(shouldPause);
+        }
+    }
 
     // -----------------------------------------------------
     // ❤️ Ganador por salud (sin empates)

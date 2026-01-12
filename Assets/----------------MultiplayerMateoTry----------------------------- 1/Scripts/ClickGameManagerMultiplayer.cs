@@ -28,6 +28,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     public GameManageMultiplayer gamemanagerlocal;
 
     [SerializeField] private GameObject cagePrefab;
+    private bool cageDown = false;
 
     // --- NUEVA VARIABLE PARA GUARDAR LA JAULA ACTUAL ---
     private GameObject currentCageInstance;
@@ -74,27 +75,42 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         attacker = atk;
         knocked = kn;
 
-        StartBattleServerRpc();
+        StartBattleServerRpc(attacker.NetworkObjectId, knocked.NetworkObjectId);
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void StartBattleServerRpc(ServerRpcParams serverRpcParams = default)
+    private void StartBattleServerRpc(ulong attackerId, ulong knockedId)
     {
+        if (cageDown) return;
         // Guardamos la referencia en la variable global de la clase 'currentCageInstance'
         currentCageInstance = Instantiate(cagePrefab, attacker.transform.position, Quaternion.identity);
-
+        if (gamemanagerlocal != null)
+            gamemanagerlocal.PauseMainTimer(true);
         NetworkObject netObj = currentCageInstance.GetComponent<NetworkObject>();
         if (netObj != null) netObj.Spawn();
+        // 1. UPDATE SERVER STATE
+        if (attacker != null) attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
+        if (knocked != null) knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
 
-        if (attacker != null)
-            attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
-
-        if (knocked != null)
-            knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
-
+        // 2. TELL CLIENTS TO UPDATE STATE
+        SetPlayersStateClientRpc(attackerId, knockedId, PlayerMovMultiplayer.States.ClickBattle);
+        cageDown = true;
         StartCoroutine(CanvasApearServerCoroutine(1));
     }
+    [ClientRpc]
+    private void SetPlayersStateClientRpc(ulong atkId, ulong knId, PlayerMovMultiplayer.States newState)
+    {
+        // Find the objects on the Client side using the Network ID
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(atkId, out NetworkObject atkObj))
+        {
+            atkObj.GetComponent<PlayerMovMultiplayer>().SetState(newState);
+        }
 
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knId, out NetworkObject knObj))
+        {
+            knObj.GetComponent<PlayerMovMultiplayer>().SetState(newState);
+        }
+    }
     private IEnumerator CanvasApearServerCoroutine(float duration)
     {
         yield return new WaitForSeconds(duration);
@@ -104,12 +120,17 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
         ShowUIClientRpc(true);
 
-        if (timerClickGame != null) timerClickGame.StartTimer();
+      
     }
 
     [ClientRpc]
     private void ShowUIClientRpc(bool state)
     {
+        // FIX: Only start the timer if we are activating the battle (state is true)
+        if (state && timerClickGame != null)
+        {
+            timerClickGame.StartTimer();
+        }
         active = state;
         if (battleSlider) battleSlider.gameObject.SetActive(state);
         if (battleText) battleText.gameObject.SetActive(state);
@@ -147,50 +168,68 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
     private void EndBattleServer(PlayerMovMultiplayer winner)
     {
+        cageDown = false;
         active = false;
-        if (timerClickGame) timerClickGame.StopTimer();
+        if (timerClickGame) timerClickGame.StopTimerServerRpc();
 
-        // --- AQUÍ ACCEDEMOS A LA JAULA GUARDADA ---
+        // --- Lógica de la Jaula (Tu código existente) ---
         if (currentCageInstance != null)
         {
-            // Asegúrate de cambiar 'CageScript' por el nombre REAL de tu script en la jaula
             var cageScript = currentCageInstance.GetComponentInChildren<CageScriptMultiplayer>();
-
-            if (cageScript != null)
-            {
-                // Llamamos a un ClientRpc dentro de la jaula o a la función directa
-                // Si ClickBattleEnd hace cosas visuales, dentro de esa función 
-                // en la jaula deberías llamar a un ClientRpc.
-                cageScript.ClickBattleEnd();
-            }
-            else
-            {
-                Debug.LogError("No se encontró el script en la jaula instanciada");
-            }
+            if (cageScript != null) cageScript.ClickBattleEndClientRpc();
         }
-        else
-        {
-            Debug.LogWarning("No hay una instancia de jaula guardada");
-        }
-        // ------------------------------------------
+        // ----------------------------------------------
 
+        // Identificar perdedor
         PlayerMovMultiplayer loser = (winner == attacker) ? knocked : attacker;
 
         if (winner == attacker)
         {
+            // El atacante ganó, el otro muere definitivamente
             loser.isDefinitivelyDead = true;
+
+            // IMPORTANTE: Asegúrate de sincronizar también el estado de muerte si no es NetworkVariable
+            SetPlayersStateClientRpc(attacker.NetworkObjectId, loser.NetworkObjectId, PlayerMovMultiplayer.States.Idle);
+            // (Ojo: Arriba pongo Idle para el atacante, necesitarías otro RPC o lógica para poner al loser en Dead en el cliente)
+
             loser.SetState(PlayerMovMultiplayer.States.Dead);
             gamemanagerlocal.CheckRemainingPlayers();
         }
         else
         {
-            knocked.lives--;
+            // El jugador "knocked" ganó la batalla (sobrevivió)
+
+            // 1. Lógica en Servidor
             knocked.ResetVidas();
             knocked.SetState(PlayerMovMultiplayer.States.Idle);
+
+            // 2. Lógica en Cliente (LA SOLUCIÓN A TU PROBLEMA)
+            ResetPlayerLivesClientRpc(knocked.NetworkObjectId);
+           // knocked.lives--;
         }
 
         attacker.SetState(PlayerMovMultiplayer.States.Idle);
 
+        // Sincronizar estado Idle del atacante en clientes también
+        SetPlayersStateClientRpc(attacker.NetworkObjectId, 99999, PlayerMovMultiplayer.States.Idle); // Usamos un ID falso para el segundo parámetro o creamos un RPC individual
+        if (gamemanagerlocal != null)
+            gamemanagerlocal.PauseMainTimer(false);
         ShowUIClientRpc(false);
+    }
+    [ClientRpc]
+    private void ResetPlayerLivesClientRpc(ulong playerId)
+    {
+        // Buscamos el objeto en el cliente usando su NetworkId
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerId, out NetworkObject playerObj))
+        {
+            var player = playerObj.GetComponent<PlayerMovMultiplayer>();
+            if (player != null)
+            {
+                // Esto actualiza las vidas y la UI en el cliente local
+                player.ResetVidas();
+                // Aseguramos que el estado visual también se reinicie
+                player.SetState(PlayerMovMultiplayer.States.Idle);
+            }
+        }
     }
 }

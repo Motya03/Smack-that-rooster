@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Unity.Netcode;
 
-public class TimerMultiplayer : MonoBehaviour
+public class TimerMultiplayer : NetworkBehaviour
 {
     [Header("UI")]
     [SerializeField] private Text timerText;
@@ -14,95 +15,90 @@ public class TimerMultiplayer : MonoBehaviour
     public UnityEvent onFinished;
 
     private float remaining;
-    private bool isRunning;
-    private Coroutine countdownCoroutine;
-    private bool timePassed = false;
+    private bool isRunning = false;
+    private bool isPaused = false;
+
+    // Variables de control para eventos
+    private bool event30Triggered = false;
+    private GameManageMultiplayer gameManager;
+
     private void Awake()
     {
         remaining = duration;
-        UpdateDisplay();
-        Debug.Log("⏱ [TimerMultiplayer] Awake, duración = " + duration);
+        UpdateDisplay(remaining);
+
+        // Cacheamos el manager al inicio para no buscarlo cada frame (Mejora rendimiento)
+        gameManager = FindFirstObjectByType<GameManageMultiplayer>();
     }
 
     public void StartTimer()
     {
-        Debug.Log("▶️ [TimerMultiplayer] StartTimer() llamado");
-
-        if (countdownCoroutine != null)
-            StopCoroutine(countdownCoroutine);
-
         remaining = duration;
         isRunning = true;
-        countdownCoroutine = StartCoroutine(Countdown());
-    }
+        isPaused = false;
 
-    private System.Collections.IEnumerator Countdown()
-    {
-        Debug.Log("🔁 [TimerMultiplayer] Empieza la cuenta regresiva");
+        // Reseteamos los flags de eventos
+        event30Triggered = false;
 
-        while (remaining > 0f)
-        {
-            remaining -= Time.deltaTime;
-            UpdateDisplay();
-            yield return null;
-        }
-
-        remaining = 0f;
-        isRunning = false;
-        UpdateDisplay();
-
-        Debug.Log("⏰ [TimerMultiplayer] Tiempo terminado, disparando onFinished");
-        onFinished?.Invoke();
+        UpdateDisplay(remaining);
+        Debug.Log("▶️ [TimerMultiplayer] Timer iniciado");
     }
 
     public void ResetTimer()
     {
-        Debug.Log("🔄 [TimerMultiplayer] ResetTimer() llamado");
-
-        if (countdownCoroutine != null)
-            StopCoroutine(countdownCoroutine);
-
         remaining = duration;
         isRunning = false;
-        UpdateDisplay();
+        isPaused = false;
+        event30Triggered = false;
+        UpdateDisplay(remaining);
     }
 
-    public void StartSuddenDeath()
+    public void SetPause(bool state)
     {
-        Debug.Log("⚡ [TimerMultiplayer] StartSuddenDeath()");
-
-        if (countdownCoroutine != null)
-            StopCoroutine(countdownCoroutine);
-
-        remaining = duration;
-        isRunning = true;
-        countdownCoroutine = StartCoroutine(Countdown());
+        isPaused = state;
+        Debug.Log(state ? "⏸️ Timer PAUSADO" : "▶️ Timer REANUDADO");
     }
 
-    private void UpdateDisplay()
+    private void Update()
     {
-        if (!timerText)
+        // 1. Si no está corriendo o está pausado, no hacemos nada.
+        if (!isRunning || isPaused) return;
+
+        // 2. Restamos tiempo
+        remaining -= Time.deltaTime;
+
+        // 3. Lógica de eventos (30 segundos)
+        // Usamos un flag para que solo se llame UNA vez
+        if (remaining <= 30f && !event30Triggered)
         {
-            Debug.LogWarning("⚠️ [TimerMultiplayer] timerText es NULL");
-            return;
+            event30Triggered = true;
+            if (gameManager != null) gameManager.PrepareCage();
+            Debug.Log("📦 Evento 30s disparado");
         }
 
-        float t = Mathf.Max(remaining, 0);
+        // 4. Fin del tiempo
+        if (remaining <= 0f)
+        {
+            remaining = 0;
+            isRunning = false;
+            onFinished?.Invoke();
+
+            if (gameManager != null) gameManager.TimeEnded();
+            Debug.Log("⏰ Tiempo terminado");
+        }
+
+        // 5. Actualizar UI
+        UpdateDisplay(remaining);
+    }
+
+    private void UpdateDisplay(float currentTime)
+    {
+        if (timerText == null) return;
+
+        float t = Mathf.Max(currentTime, 0);
         int m = Mathf.FloorToInt(t / 60f);
         int s = Mathf.FloorToInt(t % 60f);
 
         timerText.text = $"{m:00}:{s:00}";
-        if (s == 30.0f && !timePassed)
-        {
-
-            //throwCageBool = true;
-            FindAnyObjectByType<GameManageMultiplayer>().PrepareCage();
-            timePassed = true;
-
-        }
-        if (s == 01.0f )
-        {
-            FindAnyObjectByType<GameManageMultiplayer>().TimeEnded();
-        }
     }
 }

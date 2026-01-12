@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class TimerClickGameMultiplayer : MonoBehaviour
@@ -14,7 +15,7 @@ public class TimerClickGameMultiplayer : MonoBehaviour
 
     private void Awake()
     {
-        HideUI();
+        HideUIClientRpc();
     }
 
     public void StartTimer()
@@ -25,11 +26,11 @@ public class TimerClickGameMultiplayer : MonoBehaviour
         ShowUI();
         UpdateTimer(Mathf.CeilToInt(timeRemaining));
     }
-
-    public void StopTimer()
+    [ServerRpc(RequireOwnership = false)]
+    public void StopTimerServerRpc()
     {
         active = false;
-        HideUI();
+        HideUIClientRpc();
     }
 
     private void Update()
@@ -44,7 +45,7 @@ public class TimerClickGameMultiplayer : MonoBehaviour
         if (timeRemaining <= 0f)
         {
             active = false;
-            HideUI();
+            HideUIClientRpc();
 
             // Avisar al manager local
             ClickGameManagerMultiplayer.Instance.HandleTimerEndedServer();
@@ -65,8 +66,8 @@ public class TimerClickGameMultiplayer : MonoBehaviour
         if (timerText != null)
             timerText.gameObject.SetActive(true);
     }
-
-    private void HideUI()
+    [ClientRpc]
+    private void HideUIClientRpc()
     {
         if (timerText != null)
             timerText.gameObject.SetActive(false);

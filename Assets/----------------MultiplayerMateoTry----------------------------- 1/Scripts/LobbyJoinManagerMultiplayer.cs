@@ -174,7 +174,7 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
                 player.uiHealth = uiHealth;
 
                 // Reset visual de salud
-                uiHealth.ResetHealth();
+                uiHealth.ResetHealthFromNetwork();
             }
         }
 

@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Unity.Netcode;
 
-public class HealthSystemMultiplayer : MonoBehaviour
+public class HealthSystemMultiplayer : NetworkBehaviour
 {
     public int maxHealth = 3;
     public int health;
@@ -22,7 +23,7 @@ public class HealthSystemMultiplayer : MonoBehaviour
         UpdateHearts();
     }
 
-    public void ResetHealth()
+    public void ResetHealthFromNetwork()
     {
         health = maxHealth;
         UpdateHearts();
@@ -41,6 +42,7 @@ public class HealthSystemMultiplayer : MonoBehaviour
     // <<< AGREGAR ESTO >>>
     public void RefreshHeartsFromNetwork()
     {
+        
         UpdateHearts();
     }
 }
