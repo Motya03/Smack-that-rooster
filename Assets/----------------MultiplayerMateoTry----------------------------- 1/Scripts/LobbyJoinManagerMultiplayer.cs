@@ -9,6 +9,7 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
     [SerializeField] private GameObject[] playerSlots;
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject lobbyCanvas;
+    [SerializeField] private GameObject joinCanvas;
     [SerializeField] private GameObject gameplayCanvas;
 
     [Header("Gameplay UI")]
@@ -131,12 +132,13 @@ public class LobbyJoinManagerMultiplayer : NetworkBehaviour
     // TODOS LOS CLIENTES ENTRAN AL COMBATE
     // ----------------------------------------
     [ClientRpc]
-    private void StartGameClientRpc()
+    public void StartGameClientRpc()
     {
         Debug.Log("🎮 [Lobby] StartGameClientRpc ejecutado en TODOS");
 
         lobbyCanvas.SetActive(false);
         gameplayCanvas.SetActive(true);
+        joinCanvas.SetActive(false);
 
         // --------------------------------------------
         // REACTIVAR CONTROL DE JUGADORES
