@@ -59379,6 +59379,10 @@ PrefabInstance:
       propertyPath: nombreEscena
       value: Menu
       objectReference: {fileID: 0}
+    - target: {fileID: 8726610833462051959, guid: ab0a09288065a2940ae57dd906555453, type: 3}
+      propertyPath: endMatchBeforeLoad
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
