@@ -76,4 +76,42 @@ public class MatchApi : MonoBehaviour
         while (j < json.Length && char.IsDigit(json[j])) j++;
         return long.TryParse(json.Substring(i, j - i), out var v) ? v : -1;
     }
+
+    public IEnumerator AddPlayerToMatch(long matchId, int userId, string role)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("match_id", matchId.ToString());
+        form.AddField("user_id", userId);
+        form.AddField("role", role);
+
+        using var req = UnityWebRequest.Post(baseUrl + "add_player_to_match.php", form);
+        yield return req.SendWebRequest();
+
+        if (req.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("AddPlayerToMatch error: " + req.error);
+            yield break;
+        }
+
+        Debug.Log("AddPlayerToMatch response: " + req.downloadHandler.text);
+    }
+
+    public IEnumerator JoinMatchByCode(string joinCode, int userId)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("relay_join_code", joinCode);
+        form.AddField("user_id", userId);
+
+        using var req = UnityWebRequest.Post(baseUrl + "join_match_by_code.php", form);
+        yield return req.SendWebRequest();
+
+        if (req.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("JoinMatchByCode error: " + req.error);
+            yield break;
+        }
+
+        Debug.Log("JoinMatchByCode response: " + req.downloadHandler.text);
+    }
+
 }

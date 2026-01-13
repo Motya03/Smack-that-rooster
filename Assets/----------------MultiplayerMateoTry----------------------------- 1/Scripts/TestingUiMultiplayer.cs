@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Collections; // ✅ necesario para IEnumerator
+using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
@@ -17,7 +18,7 @@ public class RelayManager : MonoBehaviour
     [SerializeField] Text codeText;
 
     [Header("DB")]
-    [SerializeField] private MatchApi matchApi; // arrastra el GO DB (MatchApi) aquí
+    [SerializeField] private MatchApi matchApi; // arrastra el MatchApi (DB) aquí
 
     async void Start()
     {
@@ -38,17 +39,36 @@ public class RelayManager : MonoBehaviour
         var relayServerData = new RelayServerData(allocation, "dtls");
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
-        // ✅ Crear match en BD (online + joinCode + host_user_id = Session.UserId)
+        // ✅ asegurarnos de tener MatchApi
         if (matchApi == null) matchApi = FindFirstObjectByType<MatchApi>();
-        if (matchApi != null)
+
+        // ✅ Un solo flujo: crea match -> registra host -> StartHost
+        StartCoroutine(HostFlow(joinCode));
+    }
+
+    private IEnumerator HostFlow(string joinCode)
+    {
+        if (matchApi == null)
         {
-            StartCoroutine(matchApi.CreateMatch("online", joinCode));
+            Debug.LogWarning("RelayManager: No se encontró MatchApi. Se inicia host sin guardar match en BD.");
+            NetworkManager.Singleton.StartHost();
+            yield break;
+        }
+
+        // 1) Crear match (online + joinCode)
+        yield return StartCoroutine(matchApi.CreateMatch("online", joinCode));
+
+        // 2) Registrar host como jugador del match
+        if (Session.CurrentMatchId > 0 && Session.UserId > 0)
+        {
+            yield return StartCoroutine(matchApi.AddPlayerToMatch(Session.CurrentMatchId, Session.UserId, "host"));
         }
         else
         {
-            Debug.LogWarning("RelayManager: No se encontró MatchApi. No se guardará el match en BD.");
+            Debug.LogWarning($"RelayManager: No se pudo registrar host. MatchId={Session.CurrentMatchId}, UserId={Session.UserId}");
         }
 
+        // 3) Arrancar Host
         NetworkManager.Singleton.StartHost();
     }
 
@@ -60,5 +80,16 @@ public class RelayManager : MonoBehaviour
         NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 
         NetworkManager.Singleton.StartClient();
+
+        // ✅ Registrar cliente en match_players por joinCode
+        if (matchApi == null) matchApi = FindFirstObjectByType<MatchApi>();
+        if (matchApi != null && Session.UserId > 0)
+        {
+            StartCoroutine(matchApi.JoinMatchByCode(joinCode, Session.UserId));
+        }
+        else
+        {
+            Debug.LogWarning($"RelayManager: No se pudo registrar client. MatchApi={(matchApi != null)}, UserId={Session.UserId}");
+        }
     }
 }
