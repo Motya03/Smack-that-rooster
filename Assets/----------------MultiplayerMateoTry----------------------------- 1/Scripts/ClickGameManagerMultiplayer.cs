@@ -187,16 +187,29 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
         if (winner == attacker)
         {
-            // El atacante ganó, el otro muere definitivamente
+            // El atacante ganó, el otro muere definitivamente (SERVER)
             loser.isDefinitivelyDead = true;
 
-            // IMPORTANTE: Asegúrate de sincronizar también el estado de muerte si no es NetworkVariable
-            SetPlayersStateClientRpc(attacker.NetworkObjectId, loser.NetworkObjectId, PlayerMovMultiplayer.States.Idle);
-            // (Ojo: Arriba pongo Idle para el atacante, necesitarías otro RPC o lógica para poner al loser en Dead en el cliente)
+            // IMPORTANTE: marcar que el clicker ya no está activo
+            if (gamemanagerlocal != null)
+                gamemanagerlocal.SetClickerState(false);
 
-            loser.SetState(PlayerMovMultiplayer.States.Dead);
-            gamemanagerlocal.CheckRemainingPlayers();
+            // Terminar partida de forma autoritativa y fiable
+            var loserNetObj = loser.GetComponent<NetworkObject>();
+            if (loserNetObj != null && gamemanagerlocal != null)
+            {
+                gamemanagerlocal.HandlePlayerDeathServer(loserNetObj.OwnerClientId);
+            }
+            else
+            {
+                Debug.LogError("❌ EndBattleServer: loserNetObj o gamemanagerlocal es null");
+            }
+
+            // (Opcional) para no dejar estados raros visualmente, puedes esconder UI del clicker
+            ShowUIClientRpc(false);
+            return; // IMPORTANTÍSIMO: evitamos que siga ejecutando código abajo
         }
+
         else
         {
             // El jugador "knocked" ganó la batalla (sobrevivió)

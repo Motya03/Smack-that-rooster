@@ -1,7 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-
-//using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,8 +12,6 @@ public class GameManageMultiplayer : NetworkBehaviour
     [SerializeField] private Text winnerText;
     [SerializeField] private GameObject canvasWinner;
 
-    // No necesitamos guardar 'enemy' como variable global si lo buscamos al momento, 
-    // pero lo dejaré si lo usas en otro lado.
     private GameObject enemy;
 
     private bool throwCageBool = true;
@@ -27,97 +23,27 @@ public class GameManageMultiplayer : NetworkBehaviour
     [Header("Canvas Gameplay")]
     public GameObject canvasLocal;
 
-    private bool gameEnded = false;
+    private bool gameEndedServer = false;
+    private bool gameEndedClient = false;
+
     public bool gameStarted = false;
     private bool clickerActive = false;
-
-    private void Update()
-    {
-        // Solo permitimos que el jugador local presione la tecla
-        // Si este script está en un objeto de la escena (no en el jugador), 
-        // cualquiera puede llamar al Update, así que cuidado.
-       
-    }
-
-    public void PrepareCage()
-    {
-        if (throwCageBool && IsServer)
-        {
-            // En lugar de llamar a una corrutina local o ClientRpc, 
-            // pedimos al Servidor que tire la caja.
-            RequestThrowBoxServerRpc();
-
-            // Opcional: Bloquear para no spamear
-            // throwCageBool = false; 
-        }
-    }
-
-    // [ServerRpc] indica que este código se ejecutará EN EL SERVIDOR,
-    // aunque lo llame un cliente.
-    // RequireOwnership = false permite que cualquier cliente llame a este RPC 
-    // (necesario si el GameManager es propiedad del Host/Server).
-    [ServerRpc(RequireOwnership = false)]
-    private void RequestThrowBoxServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        // El servidor inicia la corrutina
-        StartCoroutine(ServerThrowBoxCoroutine());
-    }
-
-    private IEnumerator ServerThrowBoxCoroutine()
-    {
-        // Esperamos el segundo que querías
-        yield return new WaitForSeconds(1f);
-
-        // Buscamos al enemigo (Lógica ejecutada en el Servidor)
-        GameObject target = FindEnemyLogic();
-
-        if (target == null)
-        {
-            Debug.LogWarning("❌ [Server] No hay enemigo para tirar la caja");
-            yield break;
-        }
-
-        Vector3 spawnPos = target.transform.position + Vector3.up * 10f;
-
-        // 1. INSTANCIAR (Solo ocurre en el servidor)
-        GameObject cajaInstance = Instantiate(Box, spawnPos, Quaternion.identity);
-
-        // 2. SPAWNEAR (Esto es lo que hace que se vea en todos los clientes)
-        NetworkObject netObj = cajaInstance.GetComponent<NetworkObject>();
-        if (netObj != null)
-        {
-            netObj.Spawn();
-            Debug.Log("🔥 Caja spawneada en red correctamente");
-        }
-        else
-        {
-            Debug.LogError("❌ El prefab de la caja NO tiene el componente NetworkObject");
-        }
-    }
-
-    // He separado la lógica de buscar enemigo para que devuelva el objeto
-    public GameObject FindEnemyLogic()
-    {
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-
-        if (players.Length == 0) return null;
-
-        // Aquí puedes mejorar la lógica para que no se tire la caja a sí mismo
-        // pero por ahora uso tu lógica aleatoria.
-        GameObject selectedEnemy = players[Random.Range(0, players.Length)];
-
-        // Actualizamos la variable global por si la usas en otro lado
-        enemy = selectedEnemy;
-
-        return selectedEnemy;
-    }
 
     private void Start()
     {
         Debug.Log("🔥 [GM] Start ejecutado");
     }
 
-    // ... Resto de tu código (SetClickerState, ActivateGame, etc) se mantiene igual ...
+    private void Update()
+    {
+        // ✅ El servidor decide cuándo termina la partida.
+        if (!IsServer) return;
+        if (!gameStarted || gameEndedServer) return;
+
+        if (clickerActive) return; // mientras el clicker está activo, no cerramos por “queda 1 vivo” aquí
+
+        CheckRemainingPlayers();
+    }
 
     public void SetClickerState(bool state)
     {
@@ -134,47 +60,138 @@ public class GameManageMultiplayer : NetworkBehaviour
             timer.ResetTimer();
             timer.StartTimer();
         }
+
         if (canvasLocal != null) canvasLocal.SetActive(true);
     }
+
+    // ------------------------------------------------------------------
+    // Caja / Cage
+    // ------------------------------------------------------------------
+    public void PrepareCage()
+    {
+        if (throwCageBool && IsServer)
+        {
+            RequestThrowBoxServerRpc();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestThrowBoxServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        StartCoroutine(ServerThrowBoxCoroutine());
+    }
+
+    private IEnumerator ServerThrowBoxCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
+
+        GameObject target = FindEnemyLogic();
+        if (target == null)
+        {
+            Debug.LogWarning("❌ [Server] No hay enemigo para tirar la caja");
+            yield break;
+        }
+
+        Vector3 spawnPos = target.transform.position + Vector3.up * 10f;
+
+        GameObject cajaInstance = Instantiate(Box, spawnPos, Quaternion.identity);
+
+        NetworkObject netObj = cajaInstance.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.Spawn();
+            Debug.Log("🔥 Caja spawneada en red correctamente");
+        }
+        else
+        {
+            Debug.LogError("❌ El prefab de la caja NO tiene el componente NetworkObject");
+        }
+    }
+
+    public GameObject FindEnemyLogic()
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        if (players.Length == 0) return null;
+
+        GameObject selectedEnemy = players[Random.Range(0, players.Length)];
+        enemy = selectedEnemy;
+        return selectedEnemy;
+    }
+
+    // ------------------------------------------------------------------
+    // ✅ NUEVO: Cierre por “queda 1 vivo”
+    // ------------------------------------------------------------------
     public void CheckRemainingPlayers()
     {
-        Debug.Log("🧮 [GM] CheckRemainingPlayers llamado");
+        if (!IsServer || gameEndedServer) return;
+
+        int alive = 0;
+        int lastAliveIndex = -1;
+
+        for (int i = 0; i < PlayerSpawnMultiplayer.joinedPlayers.Count; i++)
+        {
+            GameObject obj = PlayerSpawnMultiplayer.joinedPlayers[i];
+            if (obj == null) continue;
+
+            PlayerMovMultiplayer p = obj.GetComponent<PlayerMovMultiplayer>();
+            if (p == null) continue;
+
+            if (!p.isDefinitivelyDead)
+            {
+                alive++;
+                lastAliveIndex = i;
+            }
+        }
+
+        if (alive == 1 && lastAliveIndex != -1)
+        {
+            gameEndedServer = true;
+            EndGameClientRpc(lastAliveIndex);
+        }
     }
+
+    // ------------------------------------------------------------------
+    // Tiempo terminado
+    // ------------------------------------------------------------------
     public void TimeEnded()
     {
-        if (canvasLocal != null) canvasWinner.SetActive(true);
-        //if (gameEnded || clickerActive)
-        //  return;
+        if (!IsServer || gameEndedServer) return;
+        if (clickerActive) return;
 
-        EndGame(GetWinnerIndexByHealth());
-
+        gameEndedServer = true;
+        EndGameClientRpc(GetWinnerIndexByHealth());
     }
+
+
+    // ------------------------------------------------------------------
+    // UI / End Game
+    // ------------------------------------------------------------------
     private void EndGame(int winnerIndex)
     {
-       // if (gameEnded) return;
+        if (gameEndedClient) return;
+        gameEndedClient = true;
 
-       // gameEnded = true;
 
-        // Desactivar control de jugadores
         foreach (var obj in PlayerSpawnMultiplayer.joinedPlayers)
-            PlayerSpawnMultiplayer.TogglePlayerControl(obj, false);
+        {
+            if (obj != null)
+                PlayerSpawnMultiplayer.TogglePlayerControl(obj, false);
+        }
 
-        // Apagar popups individuales
         foreach (var p in playerPopups)
-            p.SetActive(false);
+        {
+            if (p != null)
+                p.SetActive(false);
+        }
 
-        // Mensaje ganador
         string msg = $"Ganador: Jugador {winnerIndex + 1}";
 
-        // Mostrar popup del ganador
-        if (winnerIndex >= 0 && winnerIndex < playerPopups.Length)
+        if (winnerIndex >= 0 && winnerIndex < playerPopups.Length && playerPopups[winnerIndex] != null)
             playerPopups[winnerIndex].SetActive(true);
 
-        // 🔥 DESACTIVAR HUD LOCAL
         if (canvasLocal != null)
             canvasLocal.SetActive(false);
 
-        // 🔥 ACTIVAR CANVAS GANADOR
         if (winnerText != null)
             winnerText.text = msg;
 
@@ -182,6 +199,7 @@ public class GameManageMultiplayer : NetworkBehaviour
             canvasWinner.SetActive(true);
 
         Debug.Log("🎉 FIN DE PARTIDA → " + msg);
+
         MusicManager.StopMusic(MusicType.MainMenuBack);
         MusicManager.StopMusic(MusicType.FightMusic);
         MusicManager.StopMusic(MusicType.ChickenMusic);
@@ -189,43 +207,42 @@ public class GameManageMultiplayer : NetworkBehaviour
         MusicManager.PlayMusic(MusicType.EnterCharMusic, 0.5f);
     }
 
-
     public void HandlePlayerDeathServer(ulong loserClientId)
     {
-        if (gameEnded) return; // Evitar que se llame dos veces
+        if (!IsServer) return;
+        if (gameEndedServer) return;
+
 
         int winnerIndex = -1;
 
-        // Recorremos la lista de jugadores conectados para ver quién NO es el perdedor
         for (int i = 0; i < PlayerSpawnMultiplayer.joinedPlayers.Count; i++)
         {
             GameObject playerObj = PlayerSpawnMultiplayer.joinedPlayers[i];
-
             if (playerObj == null) continue;
 
             NetworkObject netObj = playerObj.GetComponent<NetworkObject>();
-
-            // Si el ID de este jugador es DISTINTO al que murió, este es el ganador
             if (netObj != null && netObj.OwnerClientId != loserClientId)
             {
                 winnerIndex = i;
-                break; // Ya encontramos al ganador (asumiendo 1vs1)
+                break;
             }
         }
 
-        // Si encontramos un ganador válido, avisamos a TODOS los clientes
         if (winnerIndex != -1)
         {
+            gameEndedServer = true;
             EndGameClientRpc(winnerIndex);
+
         }
     }
 
-    // Usamos ClientRpc porque mostrar la UI (CanvasWinner) debe ocurrir en las pantallas de todos
+
     [ClientRpc]
     private void EndGameClientRpc(int winnerIndex)
     {
         EndGame(winnerIndex);
     }
+
     public void PauseMainTimer(bool shouldPause)
     {
         if (IsServer)
@@ -243,17 +260,14 @@ public class GameManageMultiplayer : NetworkBehaviour
         }
     }
 
-    // -----------------------------------------------------
-    // ❤️ Ganador por salud (sin empates)
-    // -----------------------------------------------------
     private int GetWinnerIndexByHealth()
     {
         int maxHealth = -1;
         List<int> candidates = new List<int>();
 
-        for (int i = 0; i < PlayerSpawn.joinedPlayers.Count; i++)
+        for (int i = 0; i < PlayerSpawnMultiplayer.joinedPlayers.Count; i++)
         {
-            GameObject obj = PlayerSpawn.joinedPlayers[i];
+            GameObject obj = PlayerSpawnMultiplayer.joinedPlayers[i];
             if (!obj) continue;
 
             PlayerMovMultiplayer p = obj.GetComponent<PlayerMovMultiplayer>();
@@ -273,10 +287,8 @@ public class GameManageMultiplayer : NetworkBehaviour
             }
         }
 
-        // 🔥 Si hay empate → elegir uno aleatorio (sin empates finales)
         if (candidates.Count > 1)
             return candidates[UnityEngine.Random.Range(0, candidates.Count)];
-
 
         return candidates.Count == 1 ? candidates[0] : 0;
     }
