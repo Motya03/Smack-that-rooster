@@ -67,7 +67,7 @@ public class TimerClickGameMultiplayer : MonoBehaviour
             timerText.gameObject.SetActive(true);
     }
     [ClientRpc]
-    private void HideUIClientRpc()
+    public void HideUIClientRpc()
     {
         if (timerText != null)
             timerText.gameObject.SetActive(false);

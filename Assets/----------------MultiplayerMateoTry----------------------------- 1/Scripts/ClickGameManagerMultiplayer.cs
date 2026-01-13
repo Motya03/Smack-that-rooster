@@ -26,6 +26,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     [Header("Timer")]
     public TimerClickGameMultiplayer timerClickGame;
     public GameManageMultiplayer gamemanagerlocal;
+  
 
     [SerializeField] private GameObject cagePrefab;
     private bool cageDown = false;
@@ -42,6 +43,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     {
         if (gamemanagerlocal == null)
             gamemanagerlocal = FindFirstObjectByType<GameManageMultiplayer>();
+           
 
         if (battleSlider) battleSlider.gameObject.SetActive(false);
         if (battleText) battleText.gameObject.SetActive(false);
@@ -56,8 +58,8 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
         if (!IsServer || !active) return;
 
-        float newValue = Mathf.MoveTowards(netValue.Value, 0.5f, decaySpeed * Time.deltaTime);
-        netValue.Value = newValue;
+       // float newValue = Mathf.MoveTowards(netValue.Value, 0.5f, decaySpeed * Time.deltaTime);
+        //netValue.Value = newValue;
 
         if (netValue.Value <= 0.01f)
             EndBattleServer(attacker);
@@ -215,6 +217,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         if (gamemanagerlocal != null)
             gamemanagerlocal.PauseMainTimer(false);
         ShowUIClientRpc(false);
+        
     }
     [ClientRpc]
     private void ResetPlayerLivesClientRpc(ulong playerId)
