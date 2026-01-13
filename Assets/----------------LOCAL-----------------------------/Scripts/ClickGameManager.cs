@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -71,6 +72,7 @@ public class ClickGameManager : MonoBehaviour
 
         StartCoroutine(CanvasApear(1f));
     }
+    
 
     private IEnumerator CanvasApear(float duration)
     {

@@ -2,6 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
 public class ClickGameManagerMultiplayer : NetworkBehaviour
 {
@@ -49,15 +50,15 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
     private void Update()
     {
-        if (active)
+        if (active )
         {
             battleSlider.value = netValue.Value;
         }
 
         if (!IsServer || !active) return;
 
-        float newValue = Mathf.MoveTowards(netValue.Value, 0.5f, decaySpeed * Time.deltaTime);
-        netValue.Value = newValue;
+      //  float newValue = Mathf.MoveTowards(netValue.Value, 0.5f, decaySpeed * Time.deltaTime);
+       // netValue.Value = newValue;
 
         if (netValue.Value <= 0.01f)
             EndBattleServer(attacker);
@@ -78,25 +79,62 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         StartBattleServerRpc(attacker.NetworkObjectId, knocked.NetworkObjectId);
     }
 
+    // --- DENTRO DE ClickGameManagerMultiplayer.cs ---
+
     [ServerRpc(RequireOwnership = false)]
     private void StartBattleServerRpc(ulong attackerId, ulong knockedId)
     {
         if (cageDown) return;
-        // Guardamos la referencia en la variable global de la clase 'currentCageInstance'
+
+        // 🔥 CRUCIAL: El Servidor debe encontrar las referencias locales de los scripts
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerId, out NetworkObject atkObj))
+            attacker = atkObj.GetComponent<PlayerMovMultiplayer>();
+
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knockedId, out NetworkObject knObj))
+            knocked = knObj.GetComponent<PlayerMovMultiplayer>();
+
+        if (attacker == null || knocked == null)
+        {
+            Debug.LogError("No se pudieron encontrar los jugadores en el Servidor");
+            return;
+        }
+
+        // Ahora el servidor ya sabe quiénes son 'attacker' y 'knocked'
         currentCageInstance = Instantiate(cagePrefab, attacker.transform.position, Quaternion.identity);
+
         if (gamemanagerlocal != null)
             gamemanagerlocal.PauseMainTimer(true);
+
         NetworkObject netObj = currentCageInstance.GetComponent<NetworkObject>();
         if (netObj != null) netObj.Spawn();
-        // 1. UPDATE SERVER STATE
-        if (attacker != null) attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
-        if (knocked != null) knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
 
-        // 2. TELL CLIENTS TO UPDATE STATE
+        // Actualizar estados
+        attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
+        knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
+
         SetPlayersStateClientRpc(attackerId, knockedId, PlayerMovMultiplayer.States.ClickBattle);
         cageDown = true;
         StartCoroutine(CanvasApearServerCoroutine(1));
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void RegisterClickServerRpc(ulong playerId)
+    {
+        if (!active || attacker == null || knocked == null) return;
+
+        // Ahora estas comparaciones funcionarán porque el servidor tiene los objetos asignados
+        if (playerId == attacker.NetworkObjectId)
+        {
+            netValue.Value += clickPower;
+            Debug.Log("Atacante clickeó: " + playerId);
+        }
+      else if (playerId == knocked.NetworkObjectId)
+        {
+            netValue.Value -= clickPower;
+            Debug.Log("Knocked clickeó: " + playerId);
+        }
+    }
+
     [ClientRpc]
     private void SetPlayersStateClientRpc(ulong atkId, ulong knId, PlayerMovMultiplayer.States newState)
     {
@@ -138,26 +176,13 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         if (state && battleSlider) battleSlider.value = 0.5f;
     }
 
-    public void PlayerClick(ulong myPlayerId)
-    {
-        if (active) RegisterClickServerRpc(myPlayerId);
-    }
+   // public void PlayerClick(ulong myPlayerId)
+   // {
+   //     if (active) RegisterClickServerRpc(myPlayerId);
+   // }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void RegisterClickServerRpc(ulong playerId)
-    {
-        if (!active) return;
-
-        float currentValue = netValue.Value;
-
-        if (playerId == attacker.NetworkObjectId)
-            currentValue -= clickPower;
-
-        if (playerId == knocked.NetworkObjectId)
-            currentValue += clickPower;
-
-        netValue.Value = Mathf.Clamp01(currentValue);
-    }
+ 
+   
 
     public void HandleTimerEndedServer()
     {

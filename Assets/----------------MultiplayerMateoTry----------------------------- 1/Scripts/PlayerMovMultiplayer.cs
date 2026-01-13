@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerMovMultiplayer : NetworkBehaviour
 {
@@ -253,10 +254,9 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
         }
 
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            ClickGameManagerMultiplayer.Instance.RegisterClickServerRpc(NetworkObjectId);
-        }
+       
+        
+        
 
     }
 
@@ -330,6 +330,7 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         if (mystate == States.ClickBattle && value.isPressed)
         {
             ClickGameManagerMultiplayer.Instance.RegisterClickServerRpc(NetworkObjectId);
+            Debug.Log("id salido de player" + NetworkObjectId);
         }
     }
 
