@@ -819,14 +819,31 @@ public class PlayerMovMultiplayer : NetworkBehaviour
             if (deadUserId > 0)
                 StartCoroutine(statsApi.AddCombatStats(deadUserId, 0, 1, 0));
 
+            // 🩸 Kill event API (opcional pero recomendado)
+            var killApi = FindFirstObjectByType<KillEventsApi>();
+            long matchId = Session.CurrentMatchId; // asegúrate que tu Session tenga este campo
+            int killerUserIdForEvent = 0;
+
             if (attackerNetObjId != 0 &&
                 NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerNetObjId, out var attackerNO))
             {
                 int killerUserId = attackerNO.GetComponent<PlayerDbIdentity>()?.DbUserId.Value ?? 0;
                 if (killerUserId > 0)
                     StartCoroutine(statsApi.AddCombatStats(killerUserId, 1, 0, 0));
+
+                killerUserIdForEvent = killerUserId;
+            }
+
+            // ✅ Insertar evento "kill" (muerte definitiva sin clicker)
+            if (killApi != null && matchId > 0 && deadUserId > 0)
+            {
+                float t = Time.timeSinceLevelLoad;
+                StartCoroutine(killApi.InsertKillEvent(matchId, killerUserIdForEvent, deadUserId, t, "kill"));
+                // Si quieres diferenciarlo explícito:
+                // StartCoroutine(killApi.InsertKillEvent(matchId, killerUserIdForEvent, deadUserId, t, "kill_no_clicker"));
             }
         }
+
 
         // Lógica de fin de partida (la que ya tenías)
         var gm = FindFirstObjectByType<GameManageMultiplayer>();

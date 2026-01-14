@@ -33,6 +33,10 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     // --- NUEVA VARIABLE PARA GUARDAR LA JAULA ACTUAL ---
     private GameObject currentCageInstance;
 
+    // ✅ Cache de APIs para no estar buscando en runtime cada vez
+    private StatsApi statsApiCached;
+    private KillEventsApi killEventsApiCached;
+
     // -------------------------------------------------------
     // 📈 Stats helpers (server only)
     // -------------------------------------------------------
@@ -46,30 +50,32 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     private void AddKnockoutStat(PlayerMovMultiplayer atk)
     {
         if (!IsServer) return;
-        var statsApi = FindFirstObjectByType<StatsApi>();
-        if (statsApi == null) return;
+
+        if (statsApiCached == null) statsApiCached = FindFirstObjectByType<StatsApi>();
+        if (statsApiCached == null) return;
 
         int attackerUserId = GetDbUserId(atk);
         if (attackerUserId <= 0) return;
 
         // KO = mandar al clicker
-        StartCoroutine(statsApi.AddCombatStats(attackerUserId, 0, 0, 1));
+        StartCoroutine(statsApiCached.AddCombatStats(attackerUserId, 0, 0, 1));
     }
 
     private void AddKillDeathStats(PlayerMovMultiplayer killer, PlayerMovMultiplayer dead)
     {
         if (!IsServer) return;
-        var statsApi = FindFirstObjectByType<StatsApi>();
-        if (statsApi == null) return;
+
+        if (statsApiCached == null) statsApiCached = FindFirstObjectByType<StatsApi>();
+        if (statsApiCached == null) return;
 
         int killerUserId = GetDbUserId(killer);
         int deadUserId = GetDbUserId(dead);
 
         if (killerUserId > 0)
-            StartCoroutine(statsApi.AddCombatStats(killerUserId, 1, 0, 0));
+            StartCoroutine(statsApiCached.AddCombatStats(killerUserId, 1, 0, 0));
 
         if (deadUserId > 0)
-            StartCoroutine(statsApi.AddCombatStats(deadUserId, 0, 1, 0));
+            StartCoroutine(statsApiCached.AddCombatStats(deadUserId, 0, 1, 0));
     }
 
     // Evitar duplicar stats si llega el RPC 2 veces
@@ -81,8 +87,9 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     private void LogKillEvent_Server(string cause, PlayerMovMultiplayer killer, PlayerMovMultiplayer victim)
     {
         if (!IsServer) return;
-        var api = FindFirstObjectByType<KillEventsApi>();
-        if (api == null) return;
+
+        if (killEventsApiCached == null) killEventsApiCached = FindFirstObjectByType<KillEventsApi>();
+        if (killEventsApiCached == null) return;
 
         long matchId = Session.CurrentMatchId; // <- si tu Session usa otro nombre, cambia esto
         if (matchId <= 0) return;
@@ -92,7 +99,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         if (victimId <= 0) return;
 
         float t = Time.timeSinceLevelLoad;
-        StartCoroutine(api.InsertKillEvent(matchId, killerId, victimId, t, cause));
+        StartCoroutine(killEventsApiCached.InsertKillEvent(matchId, killerId, victimId, t, cause));
     }
 
     private void Awake()
@@ -105,6 +112,10 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         if (gamemanagerlocal == null)
             gamemanagerlocal = FindFirstObjectByType<GameManageMultiplayer>();
 
+        // ✅ precache (opcional, pero ayuda)
+        if (statsApiCached == null) statsApiCached = FindFirstObjectByType<StatsApi>();
+        if (killEventsApiCached == null) killEventsApiCached = FindFirstObjectByType<KillEventsApi>();
+
         if (battleSlider) battleSlider.gameObject.SetActive(false);
         if (battleText) battleText.gameObject.SetActive(false);
     }
@@ -113,7 +124,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     {
         if (active)
         {
-            battleSlider.value = netValue.Value;
+            if (battleSlider) battleSlider.value = netValue.Value;
         }
 
         if (!IsServer || !active) return;
@@ -202,6 +213,17 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knId, out NetworkObject knObj))
         {
             knObj.GetComponent<PlayerMovMultiplayer>().SetState(newState);
+        }
+    }
+
+    // ✅ RPC auxiliar para evitar usar IDs falsos
+    [ClientRpc]
+    private void SetSinglePlayerStateClientRpc(ulong playerId, PlayerMovMultiplayer.States newState)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerId, out NetworkObject obj))
+        {
+            var p = obj.GetComponent<PlayerMovMultiplayer>();
+            if (p != null) p.SetState(newState);
         }
     }
 
@@ -322,8 +344,11 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
         attacker.SetState(PlayerMovMultiplayer.States.Idle);
 
-        // Sincronizar estado Idle del atacante en clientes también
+        // Mantengo tu llamada original (no borro nada)
         SetPlayersStateClientRpc(attacker.NetworkObjectId, 99999, PlayerMovMultiplayer.States.Idle);
+
+        // ✅ y además forzamos el estado del atacante con RPC seguro
+        SetSinglePlayerStateClientRpc(attacker.NetworkObjectId, PlayerMovMultiplayer.States.Idle);
 
         if (gamemanagerlocal != null)
             gamemanagerlocal.PauseMainTimer(false);
