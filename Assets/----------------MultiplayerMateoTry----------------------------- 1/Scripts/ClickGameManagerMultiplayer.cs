@@ -26,15 +26,12 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     [Header("Timer")]
     public TimerClickGameMultiplayer timerClickGame;
     public GameManageMultiplayer gamemanagerlocal;
-  
 
     [SerializeField] private GameObject cagePrefab;
     private bool cageDown = false;
 
     // --- NUEVA VARIABLE PARA GUARDAR LA JAULA ACTUAL ---
     private GameObject currentCageInstance;
-
-
 
     // -------------------------------------------------------
     // 📈 Stats helpers (server only)
@@ -78,6 +75,26 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     // Evitar duplicar stats si llega el RPC 2 veces
     private bool statsCountedThisBattle = false;
 
+    // -------------------------------------------------------
+    // 🩸 Kill events helpers (server only)
+    // -------------------------------------------------------
+    private void LogKillEvent_Server(string cause, PlayerMovMultiplayer killer, PlayerMovMultiplayer victim)
+    {
+        if (!IsServer) return;
+        var api = FindFirstObjectByType<KillEventsApi>();
+        if (api == null) return;
+
+        long matchId = Session.CurrentMatchId; // <- si tu Session usa otro nombre, cambia esto
+        if (matchId <= 0) return;
+
+        int killerId = GetDbUserId(killer); // puede ser 0 (si quieres permitir null)
+        int victimId = GetDbUserId(victim);
+        if (victimId <= 0) return;
+
+        float t = Time.timeSinceLevelLoad;
+        StartCoroutine(api.InsertKillEvent(matchId, killerId, victimId, t, cause));
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -87,7 +104,6 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     {
         if (gamemanagerlocal == null)
             gamemanagerlocal = FindFirstObjectByType<GameManageMultiplayer>();
-           
 
         if (battleSlider) battleSlider.gameObject.SetActive(false);
         if (battleText) battleText.gameObject.SetActive(false);
@@ -101,9 +117,6 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         }
 
         if (!IsServer || !active) return;
-
-       // float newValue = Mathf.MoveTowards(netValue.Value, 0.5f, decaySpeed * Time.deltaTime);
-        //netValue.Value = newValue;
 
         if (netValue.Value <= 0.01f)
             EndBattleServer(attacker);
@@ -129,7 +142,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
     {
         if (cageDown || active) return;
 
-        // ✅ Resolver referencias reales en el SERVIDOR (muy importante en multiplayer)
+        // ✅ Resolver referencias reales en el SERVIDOR
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerId, out NetworkObject atkObj))
             attacker = atkObj.GetComponent<PlayerMovMultiplayer>();
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(knockedId, out NetworkObject knObj))
@@ -140,15 +153,18 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
             Debug.LogError("❌ StartBattleServerRpc: attacker o knocked es null (no encontrados por NetworkObjectId)");
             return;
         }
-        
+
         statsCountedThisBattle = false;
 
         // Guardamos la referencia en la variable global de la clase 'currentCageInstance'
         currentCageInstance = Instantiate(cagePrefab, attacker.transform.position, Quaternion.identity);
+
         if (gamemanagerlocal != null)
             gamemanagerlocal.PauseMainTimer(true);
+
         NetworkObject netObj = currentCageInstance.GetComponent<NetworkObject>();
         if (netObj != null) netObj.Spawn();
+
         // 1. UPDATE SERVER STATE
         if (attacker != null) attacker.SetState(PlayerMovMultiplayer.States.ClickBattle);
         if (knocked != null) knocked.SetState(PlayerMovMultiplayer.States.ClickBattle);
@@ -160,20 +176,24 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         // ✅ Avisar al GameManager que el clicker está activo
         if (gamemanagerlocal != null)
             gamemanagerlocal.SetClickerState(true);
-        
+
         // ✅ KO = mandar al clicker (solo si aún tenía "ticket")
         if (!statsCountedThisBattle && knocked.lives > 0)
         {
             AddKnockoutStat(attacker);
+
+            // 🩸 Evento KO
+            LogKillEvent_Server("knockout", attacker, knocked);
+
             statsCountedThisBattle = true;
         }
 
         StartCoroutine(CanvasApearServerCoroutine(1));
     }
+
     [ClientRpc]
     private void SetPlayersStateClientRpc(ulong atkId, ulong knId, PlayerMovMultiplayer.States newState)
     {
-        // Find the objects on the Client side using the Network ID
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(atkId, out NetworkObject atkObj))
         {
             atkObj.GetComponent<PlayerMovMultiplayer>().SetState(newState);
@@ -184,6 +204,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
             knObj.GetComponent<PlayerMovMultiplayer>().SetState(newState);
         }
     }
+
     private IEnumerator CanvasApearServerCoroutine(float duration)
     {
         yield return new WaitForSeconds(duration);
@@ -192,18 +213,16 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         active = true;
 
         ShowUIClientRpc(true);
-
-      
     }
 
     [ClientRpc]
     private void ShowUIClientRpc(bool state)
     {
-        // FIX: Only start the timer if we are activating the battle (state is true)
         if (state && timerClickGame != null)
         {
             timerClickGame.StartTimer();
         }
+
         active = state;
         if (battleSlider) battleSlider.gameObject.SetActive(state);
         if (battleText) battleText.gameObject.SetActive(state);
@@ -264,6 +283,9 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
             // ✅ Stats: Kill para attacker + Death para loser
             AddKillDeathStats(attacker, loser);
 
+            // 🩸 Evento kill por ganar clicker
+            LogKillEvent_Server("kill_clicker", attacker, loser);
+
             // IMPORTANTE: marcar que el clicker ya no está activo
             if (gamemanagerlocal != null)
                 gamemanagerlocal.SetClickerState(false);
@@ -281,9 +303,8 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
 
             // (Opcional) para no dejar estados raros visualmente, puedes esconder UI del clicker
             ShowUIClientRpc(false);
-            return; // IMPORTANTÍSIMO: evitamos que siga ejecutando código abajo
+            return;
         }
-
         else
         {
             // El jugador "knocked" ganó la batalla (sobrevivió)
@@ -292,7 +313,7 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
             knocked.ResetVidas();
             knocked.SetState(PlayerMovMultiplayer.States.Idle);
 
-            // 2. Lógica en Cliente (LA SOLUCIÓN A TU PROBLEMA)
+            // 2. Lógica en Cliente
             ResetPlayerLivesClientRpc(knocked.NetworkObjectId);
 
             // ✅ Consume su única segunda oportunidad
@@ -302,7 +323,8 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         attacker.SetState(PlayerMovMultiplayer.States.Idle);
 
         // Sincronizar estado Idle del atacante en clientes también
-        SetPlayersStateClientRpc(attacker.NetworkObjectId, 99999, PlayerMovMultiplayer.States.Idle); // Usamos un ID falso para el segundo parámetro o creamos un RPC individual
+        SetPlayersStateClientRpc(attacker.NetworkObjectId, 99999, PlayerMovMultiplayer.States.Idle);
+
         if (gamemanagerlocal != null)
             gamemanagerlocal.PauseMainTimer(false);
 
@@ -315,20 +337,17 @@ public class ClickGameManagerMultiplayer : NetworkBehaviour
         // limpiar refs por seguridad
         attacker = null;
         knocked = null;
-
     }
+
     [ClientRpc]
     private void ResetPlayerLivesClientRpc(ulong playerId)
     {
-        // Buscamos el objeto en el cliente usando su NetworkId
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerId, out NetworkObject playerObj))
         {
             var player = playerObj.GetComponent<PlayerMovMultiplayer>();
             if (player != null)
             {
-                // Esto actualiza las vidas y la UI en el cliente local
                 player.ResetVidas();
-                // Aseguramos que el estado visual también se reinicie
                 player.SetState(PlayerMovMultiplayer.States.Idle);
             }
         }
