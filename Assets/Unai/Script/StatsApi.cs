@@ -33,8 +33,9 @@ public class StatsApi : MonoBehaviour
         using var req = UnityWebRequest.Post(baseUrl + "update_player_combat_stats.php", form);
         yield return req.SendWebRequest();
 
-        Debug.Log($"[STATS API] AddCombatStats HTTP={(int)req.responseCode} result={req.result} error={req.error} body={req.downloadHandler.text}");
+        Debug.Log($"[STATS API] AddCombatStats userId={userId} HTTP={(int)req.responseCode} body={req.downloadHandler.text}");
     }
+
 
 
 }

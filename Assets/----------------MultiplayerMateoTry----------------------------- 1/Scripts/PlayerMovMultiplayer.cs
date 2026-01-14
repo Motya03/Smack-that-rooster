@@ -73,6 +73,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
 
     [Header("ClickGame")]
     public PlayerMovMultiplayer lastAttacker;
+    private ulong lastAttackerNetObjId;
+
 
     private float currentVelocity;
     private Coroutine boostCoroutine;
@@ -802,20 +804,36 @@ public class PlayerMovMultiplayer : NetworkBehaviour
         myAnimator.Play("Dead");
         SoundManager.PlaySound(SoundType.Dead);
         StopMove();
-        PlayerIsDeadServerRpc();
+        PlayerIsDeadServerRpc(lastAttackerNetObjId);
+
     }
     [ServerRpc]
-    private void PlayerIsDeadServerRpc()
+    private void PlayerIsDeadServerRpc(ulong attackerNetObjId)
     {
-        // Busamos el Manager
-        var clickMgr = FindFirstObjectByType<GameManageMultiplayer>();
-
-        if (clickMgr != null)
+        // Server/Host: este jugador acaba de morir definitivamente (sin clicker).
+        // Sumamos Death al muerto y Kill al atacante (si existe).
+        var statsApi = FindFirstObjectByType<StatsApi>();
+        if (statsApi != null)
         {
-            // Le pasamos el ID del cliente dueño de este personaje (el que murió)
-            clickMgr.HandlePlayerDeathServer(this.OwnerClientId);
+            int deadUserId = GetComponent<PlayerDbIdentity>()?.DbUserId.Value ?? 0;
+            if (deadUserId > 0)
+                StartCoroutine(statsApi.AddCombatStats(deadUserId, 0, 1, 0));
+
+            if (attackerNetObjId != 0 &&
+                NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerNetObjId, out var attackerNO))
+            {
+                int killerUserId = attackerNO.GetComponent<PlayerDbIdentity>()?.DbUserId.Value ?? 0;
+                if (killerUserId > 0)
+                    StartCoroutine(statsApi.AddCombatStats(killerUserId, 1, 0, 0));
+            }
         }
+
+        // Lógica de fin de partida (la que ya tenías)
+        var gm = FindFirstObjectByType<GameManageMultiplayer>();
+        if (gm != null)
+            gm.HandlePlayerDeathServer(this.OwnerClientId);
     }
+
 
     // --- UTILIDADES ---
     public void SetState(States newState)
@@ -1079,6 +1097,8 @@ public class PlayerMovMultiplayer : NetworkBehaviour
     [ClientRpc]
     private void TakeHitClientRpc(int damage, ulong attackerId)
     {
+        lastAttackerNetObjId = attackerId;
+
         // Buscar al atacante localmente para tener la referencia
         PlayerMovMultiplayer attackerScript = null;
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(attackerId, out NetworkObject attackerObj))
