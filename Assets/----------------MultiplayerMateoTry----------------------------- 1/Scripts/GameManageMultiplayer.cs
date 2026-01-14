@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class GameManageMultiplayer : NetworkBehaviour
 {
@@ -230,10 +231,13 @@ public class GameManageMultiplayer : NetworkBehaviour
 
         if (winnerIndex != -1)
         {
+            // ✅ actualizar stats SOLO en servidor
+            UpdatePlayerStatsServer(winnerIndex);
+
             gameEndedServer = true;
             EndGameClientRpc(winnerIndex);
-
         }
+
     }
 
 
@@ -292,4 +296,69 @@ public class GameManageMultiplayer : NetworkBehaviour
 
         return candidates.Count == 1 ? candidates[0] : 0;
     }
+
+    private void UpdatePlayerStatsServer(int winnerIndex)
+    {
+        Debug.Log($"[STATS] UpdatePlayerStatsServer CALLED. IsServer={IsServer} winnerIndex={winnerIndex}");
+
+        if (!IsServer) return;
+
+        var statsApi = FindFirstObjectByType<StatsApi>();
+        if (statsApi == null)
+        {
+            Debug.LogWarning("StatsApi no encontrado en escena. No se actualizarán player_stats.");
+            return;
+        }
+
+        if (winnerIndex < 0 || winnerIndex >= PlayerSpawnMultiplayer.joinedPlayers.Count)
+        {
+            Debug.LogWarning("UpdatePlayerStatsServer: winnerIndex fuera de rango.");
+            return;
+        }
+
+        var winnerObj = PlayerSpawnMultiplayer.joinedPlayers[winnerIndex];
+        if (winnerObj == null)
+        {
+            Debug.LogWarning("UpdatePlayerStatsServer: winnerObj es null.");
+            return;
+        }
+
+        var winnerIdComp = winnerObj.GetComponent<PlayerDbIdentity>();
+        int winnerUserId = (winnerIdComp != null) ? winnerIdComp.DbUserId.Value : 0;
+
+        Debug.Log($"[STATS] winnerUserId read from PlayerDbIdentity = {winnerUserId}");
+
+
+        if (winnerUserId <= 0)
+        {
+            Debug.LogWarning("UpdatePlayerStatsServer: winnerUserId inválido (DbUserId=0). ¿PlayerDbIdentity está en el prefab? ¿Session.UserId está bien?");
+            return;
+        }
+
+        List<int> playerIds = new List<int>();
+        foreach (var obj in PlayerSpawnMultiplayer.joinedPlayers)
+        {
+            if (obj == null) continue;
+            var idComp = obj.GetComponent<PlayerDbIdentity>();
+            if (idComp == null) continue;
+
+            int uid = idComp.DbUserId.Value;
+            if (uid > 0) playerIds.Add(uid);
+        }
+
+        playerIds = playerIds.Distinct().ToList();
+
+        if (playerIds.Count < 2)
+        {
+            Debug.LogWarning("UpdatePlayerStatsServer: playerIds < 2, no se actualiza.");
+            return;
+        }
+
+        Debug.Log($"[STATS] WinnerUserId={winnerUserId} Players={string.Join(",", playerIds)}");
+        Debug.Log($"[STATS] SENDING -> winnerUserId={winnerUserId} players={string.Join(",", playerIds)}");
+
+        StartCoroutine(statsApi.UpdateStatsForMatch(playerIds, winnerUserId));
+    }
+
+
 }
